@@ -1,0 +1,3597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Upgrade Quote Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --xfinity-purple:#6713D2; --xfinity-purple-dark:#4A0F96; --xfinity-purple-light:#9B59F5;
+    --xfinity-green:#00C853; --surface:#fff; --surface-2:#f8f7ff; --surface-3:#f0eeff;
+    --border:#e0d9f7; --text-primary:#1a1a2e; --text-secondary:#5a5a7a; --text-muted:#9090b0;
+    --shadow-sm:0 2px 8px rgba(103,19,210,0.08); --shadow-md:0 4px 20px rgba(103,19,210,0.12);
+    --radius:16px; --radius-sm:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:#f0eeff;color:var(--text-primary);min-height:100vh;padding:24px;}
+  .screen-wrapper{max-width:900px;margin:0 auto;}
+  .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;margin-bottom:20px;animation:fadeUp 0.4s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+  /* HEADER */
+  .header{background:linear-gradient(135deg,var(--xfinity-purple-dark) 0%,var(--xfinity-purple) 60%,var(--xfinity-purple-light) 100%);padding:28px 36px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;}
+  .header::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%;}
+  .header-left h1{font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:white;letter-spacing:-0.5px;line-height:1.1;}
+  .header-left p{color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px;}
+  .header-badge{background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.35);border-radius:50px;color:white;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;padding:6px 16px;letter-spacing:0.5px;text-transform:uppercase;}
+
+  /* INTAKE LAYOUT */
+  .intake-body{padding:36px;}
+  .intake-section{margin-bottom:36px;}
+  .intake-section-title{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--xfinity-purple);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border);text-align:center;}
+  .intake-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .rep-info-rows{display:flex;flex-direction:column;gap:12px;}
+  .rep-info-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+  /* FIELDS */
+  .intake-field label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+  .intake-field input,.intake-field select,.intake-field textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text-primary);background:var(--surface-2);transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+  .intake-field input:focus,.intake-field select:focus,.intake-field textarea:focus{border-color:var(--xfinity-purple);box-shadow:0 0 0 3px rgba(103,19,210,0.1);background:white;}
+  .intake-field select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236713D2' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:12px;padding-right:36px;cursor:pointer;}
+  .intake-field input.readonly-date{background:var(--surface-3);color:var(--text-secondary);cursor:default;font-weight:600;}
+  input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+  input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+
+  /* REWARD BTNS */
+  .intake-rewards{display:flex;gap:10px;flex-wrap:wrap;}
+  .intake-reward-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:50px;border:2px solid var(--border);background:white;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;transition:all 0.2s;box-shadow:var(--shadow-sm);}
+  .intake-reward-btn .dot{width:12px;height:12px;border-radius:50%;}
+  .intake-reward-btn[data-tier="silver"] .dot{background:#C0C0C0;}
+  .intake-reward-btn[data-tier="gold"] .dot{background:#FFD700;}
+  .intake-reward-btn[data-tier="platinum"] .dot{background:#E5E4E2;box-shadow:0 0 0 1px #aaa;}
+  .intake-reward-btn[data-tier="diamond"] .dot{background:linear-gradient(135deg,#b9f2ff,#6ca0dc);}
+  .intake-reward-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
+  .intake-reward-btn.active[data-tier="silver"]{border-color:#C0C0C0;background:#f0f0f0;color:#555;box-shadow:0 0 0 3px rgba(192,192,192,0.3);}
+  .intake-reward-btn.active[data-tier="gold"]{border-color:#FFD700;background:#fffbdd;color:#7a5c00;box-shadow:0 0 0 3px rgba(255,215,0,0.3);}
+  .intake-reward-btn.active[data-tier="platinum"]{border-color:#999;background:#efefef;color:#444;box-shadow:0 0 0 3px rgba(160,160,160,0.3);}
+  .intake-reward-btn.active[data-tier="diamond"]{border-color:#6ca0dc;background:#e0f0ff;color:#1a5fa0;box-shadow:0 0 0 3px rgba(108,160,220,0.3);}
+
+  /* PLAN PILLS */
+  .intake-plan-pills{display:flex;gap:14px;}
+  .intake-plan-pill{flex:1;padding:16px 20px;border-radius:var(--radius-sm);border:2.5px solid var(--border);background:var(--surface-2);cursor:pointer;text-align:left;transition:all 0.2s;}
+  .intake-plan-pill:hover{border-color:var(--xfinity-purple-light);background:#f5eeff;transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+  .intake-plan-pill.active{border-color:var(--xfinity-purple);background:linear-gradient(135deg,#f0e6ff,#ede0ff);box-shadow:0 4px 16px rgba(103,19,210,0.18);}
+  .ipp-name{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--xfinity-purple);margin-bottom:3px;}
+  .intake-plan-pill:not(.active) .ipp-name{color:var(--text-secondary);}
+  .ipp-sub{font-size:12px;font-weight:500;color:var(--text-muted);}
+  .intake-plan-pill.active .ipp-sub{color:var(--xfinity-purple-light);}
+
+  /* UPGRADE CARD */
+  .upgrade-card{background:linear-gradient(160deg,#f9f5ff,#ede0ff);border:1.5px solid rgba(103,19,210,0.2);border-radius:var(--radius);padding:24px;}
+  .upgrade-card-title{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--xfinity-purple);margin-bottom:18px;text-transform:uppercase;letter-spacing:0.8px;}
+  .two-col-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+  /* AUTOCOMPLETE */
+  .autocomplete-wrap{position:relative;}
+  .autocomplete-wrap input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text-primary);background:white;outline:none;transition:border-color 0.2s;}
+  .autocomplete-wrap input:focus{border-color:var(--xfinity-purple);box-shadow:0 0 0 3px rgba(103,19,210,0.1);}
+  .ac-dropdown{position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--xfinity-purple);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);max-height:260px;overflow-y:auto;z-index:100;display:none;box-shadow:0 8px 24px rgba(103,19,210,0.15);}
+  .ac-dropdown.open{display:block;}
+  .ac-item{padding:11px 16px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .ac-item:last-child{border-bottom:none;}
+  .ac-item:hover{background:var(--surface-3);color:var(--xfinity-purple);}
+  .ac-item .item-price{font-size:12px;color:var(--text-muted);white-space:nowrap;font-weight:600;}
+
+  /* RESULT TILES */
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+  .result-tile{background:white;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;}
+  .result-tile.highlight{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-color:var(--xfinity-green);}
+  .result-tile.highlight .rt-value{color:#1b5e20;}
+  .rt-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:5px;}
+  .rt-value{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:var(--text-primary);line-height:1;}
+
+  /* CALC BOX */
+  .calc-box{background:white;border:2px solid var(--xfinity-purple);border-radius:var(--radius-sm);padding:16px 18px;box-shadow:0 2px 12px rgba(103,19,210,0.1);margin-top:14px;}
+  .calc-box-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--xfinity-purple);margin-bottom:4px;}
+  .calc-box-amount{font-family:'Outfit',sans-serif;font-size:28px;font-weight:800;color:var(--xfinity-purple);line-height:1;}
+  .calc-box-sub{font-size:11px;color:var(--text-muted);margin-top:5px;}
+
+  /* TIPS */
+  .tips-result{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid var(--xfinity-green);border-radius:var(--radius-sm);padding:12px 16px;margin-top:10px;display:none;}
+  .tips-result.visible{display:flex;align-items:flex-start;gap:12px;justify-content:space-between;}
+  .tips-result .tr-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#1b5e20;}
+  .tips-result .tr-value{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#1b5e20;line-height:1.1;}
+  .tips-result .tr-phone{font-size:12px;color:#2e7d32;font-weight:600;margin-top:2px;}
+  .toggle-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+  .toggle-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--xfinity-purple);cursor:pointer;flex-shrink:0;}
+  .toggle-row label{font-size:13px;color:var(--text-secondary);cursor:pointer;font-weight:600;line-height:1.3;}
+
+  /* BILLING */
+  /* ══ BILL COMPARISON CARDS ══ */
+  .bill-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid transparent;
+  }
+  .bill-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    color: white;
+  }
+  .bill-card-icon { font-size: 24px; flex-shrink: 0; }
+  .bill-card-title { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+  .bill-card-sub   { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  .bill-card-red    { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+  .bill-card-purple { background: linear-gradient(135deg, var(--xfinity-purple-dark), var(--xfinity-purple)); }
+  .bill-card-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--surface-2);
+    border: 2px solid transparent;
+  }
+  .bill-card:has(.bill-card-red)    { border-color: #ffcdd2; }
+  .bill-card:has(.bill-card-purple) { border-color: rgba(103,19,210,0.3); }
+  .bill-card-field { display: flex; flex-direction: column; gap: 6px; }
+  .bill-card-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-muted);
+  }
+  .bill-card-arrow {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-align: center; padding: 6px 0;
+    border-top: 1px dashed var(--border);
+    border-bottom: 1px dashed var(--border);
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .billing-total-bar{margin-top:14px;padding:12px 16px;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;transition:background 0.3s;}
+  .billing-side.current .billing-total-bar{background:#c0392b;}
+  .billing-side.new-side .billing-total-bar{background:linear-gradient(135deg,var(--xfinity-purple-dark),var(--xfinity-purple));}
+  .billing-total-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.8);}
+  .billing-total-amount{font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:white;line-height:1;}
+  .dollar-wrap{position:relative;}
+  .dollar-wrap .dollar-sign{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;font-size:15px;color:var(--text-secondary);pointer-events:none;}
+  .dollar-wrap input{padding-left:28px;}
+  /* Bill card inputs match the form field style */
+  .bill-card-body .dollar-wrap input {
+    width:100%;
+    border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:12px 16px 12px 28px;
+    font-family:'DM Sans',sans-serif;
+    font-size:15px;
+    color:var(--text-primary);
+    background:var(--surface);
+    transition:border-color 0.2s,box-shadow 0.2s;
+    outline:none;
+  }
+  .bill-card-body .dollar-wrap input:focus {
+    border-color:var(--xfinity-purple);
+    box-shadow:0 0 0 3px rgba(103,19,210,0.1);
+    background:white;
+  }
+  .bill-card-label {
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.8px;
+    color:var(--text-muted);
+  }
+  .std-upgrade-display{background:var(--surface-3);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;}
+  .sud-value{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:#c0392b;}
+  .no-promo-badge{font-size:10px;font-weight:600;color:var(--text-muted);background:white;border:1px solid var(--border);border-radius:4px;padding:2px 7px;}
+  .auto-display{background:var(--surface-3);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;}
+  .auto-display-row{display:flex;align-items:center;justify-content:space-between;}
+  .auto-display-value{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--xfinity-purple);}
+  .auto-badge{font-size:10px;font-weight:600;color:var(--text-muted);background:white;border:1px solid var(--border);border-radius:4px;padding:2px 7px;}
+  .auto-display-sub{font-size:11px;color:var(--text-muted);margin-top:4px;}
+
+  /* SAVINGS BAR */
+  .savings-bar{margin-top:16px;background:linear-gradient(135deg,#00C853,#00E676);border-radius:var(--radius-sm);padding:14px 20px;display:none;align-items:center;justify-content:space-between;box-shadow:0 4px 16px rgba(0,200,83,0.25);}
+  .savings-bar.visible{display:flex;}
+  .savings-bar-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.9);}
+  .savings-bar-amounts{display:flex;gap:24px;}
+  .sb-item{text-align:center;}
+  .sb-amt{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:white;line-height:1;}
+  .sb-period{font-size:10px;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+
+  /* COLLAPSIBLE */
+  .collapsible-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:linear-gradient(135deg,var(--xfinity-purple-dark),var(--xfinity-purple));border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:white;text-align:left;transition:all 0.2s;}
+  .collapsible-header:hover{box-shadow:0 4px 16px rgba(103,19,210,0.3);}
+  .collapsible-header.open{border-radius:var(--radius-sm) var(--radius-sm) 0 0;}
+  .collapsible-arrow{font-size:16px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+  .collapsible-arrow.open{transform:rotate(180deg);}
+  .collapsible-body{overflow:hidden;max-height:0;transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1),opacity 0.3s ease,padding 0.3s ease;opacity:0;background:var(--surface);border:1.5px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:0 22px;}
+  .collapsible-body.open{max-height:4000px;opacity:1;padding:22px;}
+  .sub-section-label{font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--xfinity-purple);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+  /* MEMBERSHIP TILES */
+  .membership-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
+  .membership-tile{padding:12px 8px;border-radius:var(--radius-sm);border:2px solid var(--border);background:white;cursor:pointer;text-align:center;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text-secondary);transition:all 0.18s;}
+  .membership-tile:hover{border-color:var(--xfinity-purple-light);color:var(--xfinity-purple);}
+  .membership-tile.active{background:var(--xfinity-purple);border-color:var(--xfinity-purple);color:white;box-shadow:0 3px 10px rgba(103,19,210,0.3);}
+  .membership-tile .mt-discount{font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;display:block;margin-bottom:2px;color:var(--xfinity-green);}
+  .membership-tile.active .mt-discount{color:rgba(255,255,255,0.9);}
+
+  /* PROMOS */
+  .promo-banner{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px solid #FFD700;border-radius:var(--radius-sm);padding:14px 18px;}
+  .promo-banner-title{font-family:'Outfit',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#c47a00;margin-bottom:10px;}
+  .promo-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+  .promo-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;}
+  .promo-date{font-size:10px;font-weight:700;white-space:nowrap;background:rgba(0,0,0,0.07);border-radius:50px;padding:2px 8px;color:#555;flex-shrink:0;}
+
+  /* SOLD */
+  .sold-row{display:flex;gap:12px;margin-top:6px;}
+  .sold-btn{flex:1;padding:13px 16px;border-radius:var(--radius-sm);border:2px solid var(--border);background:white;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--text-secondary);transition:all 0.2s;text-align:center;}
+  .sold-btn.active-yes{background:var(--xfinity-green);border-color:var(--xfinity-green);color:white;box-shadow:0 3px 12px rgba(0,200,83,0.35);}
+  .sold-btn.active-no{background:#c0392b;border-color:#c0392b;color:white;box-shadow:0 3px 12px rgba(192,57,43,0.35);}
+
+  /* FOOTER */
+  .intake-footer{padding:24px 36px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+  .footer-disclaimer{font-size:11px;color:var(--text-muted);line-height:1.5;max-width:480px;}
+  .footer-btns{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:50px;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;transition:all 0.2s;white-space:nowrap;}
+  .btn-outline{background:white;color:var(--xfinity-purple);border:2px solid var(--xfinity-purple);}
+  .btn-outline:hover{background:var(--surface-3);transform:translateY(-1px);}
+  .btn-dark{background:linear-gradient(135deg,#5a5a7a,#3a3a5a);color:white;box-shadow:0 4px 12px rgba(58,58,90,0.3);}
+  .btn-dark:hover{transform:translateY(-2px);}
+  .btn-submit{background:linear-gradient(135deg,#00C853,#00E676);color:white;box-shadow:0 4px 12px rgba(0,200,83,0.3);}
+  .btn-submit:hover{transform:translateY(-2px);}
+
+  /* PREVIEW */
+  .preview-section{display:none;border-top:3px solid var(--xfinity-purple);}
+  .preview-section.visible{display:block;}
+  .preview-header{background:linear-gradient(135deg,var(--xfinity-purple-dark),var(--xfinity-purple));padding:18px 36px;display:flex;align-items:center;justify-content:space-between;}
+  .preview-header h2{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:white;}
+  .preview-header p{font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;}
+  .preview-info-bar{display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1fr;border-bottom:1px solid var(--border);}
+  .pib-block{padding:14px 18px;background:var(--surface-2);}
+  .pib-divider{background:var(--border);}
+  .pib-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;}
+  .pib-value{font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .preview-cards-grid{padding:24px 36px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .preview-card{background:linear-gradient(160deg,#f9f5ff,#ede0ff);border:1.5px solid rgba(103,19,210,0.2);border-radius:var(--radius);padding:20px 22px;}
+  .preview-card-title{font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--xfinity-purple);margin-bottom:10px;}
+  .preview-card-device{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--text-primary);margin-bottom:4px;}
+  .preview-card-sub{font-size:12px;color:var(--text-secondary);font-weight:600;margin-bottom:14px;}
+  .preview-tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .pt{background:white;border-radius:var(--radius-sm);padding:10px 12px;border:1.5px solid var(--border);text-align:center;}
+  .pt.green{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-color:var(--xfinity-green);}
+  .pt.gold{background:linear-gradient(135deg,#fff8e1,#fff3cd);border-color:#FFD700;}
+  .pt-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:4px;}
+  .pt-value{font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:var(--xfinity-purple);line-height:1;}
+  .pt.green .pt-value{color:#1b5e20;} .pt.gold .pt-value{color:#b07000;}
+  .bundle-bar{display:none;grid-column:1/-1;background:linear-gradient(135deg,var(--xfinity-purple-dark),var(--xfinity-purple));border-radius:var(--radius-sm);padding:16px 20px;}
+  .bundle-bar.visible{display:block;}
+  .preview-placeholder{grid-column:1/-1;display:flex;align-items:center;justify-content:center;background:var(--surface-2);border-radius:var(--radius);border:2px dashed var(--border);padding:30px;color:var(--text-muted);font-size:13px;font-weight:600;}
+
+  /* BILL COMPARISON PREVIEW */
+  .bill-cmp-wrap{padding:0 36px 24px;}
+  .bill-cmp-header{font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--xfinity-purple);margin-bottom:14px;}
+  .bill-cmp-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch;}
+  .bc-side{border-radius:var(--radius);padding:20px 22px;}
+  .bc-side.before{background:#fff5f5;border:2px solid #ffcdd2;}
+  .bc-side.after{background:linear-gradient(160deg,#f9f5ff,#ede0ff);border:2px solid rgba(103,19,210,0.3);}
+  .bc-vs{display:flex;align-items:center;justify-content:center;padding:0 16px;font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:var(--text-muted);}
+  .bc-header{font-family:'Outfit',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+  .bc-side.before .bc-header{color:#c0392b;} .bc-side.after .bc-header{color:var(--xfinity-purple);}
+  .bc-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:12px;}
+  .bc-row:last-of-type{border-bottom:none;}
+  .bc-row-label{color:var(--text-secondary);}
+  .bc-row-value{font-family:'Outfit',sans-serif;font-weight:700;font-size:13px;color:var(--text-primary);}
+  .bc-row-value.em{color:var(--text-muted);font-size:11px;font-family:'DM Sans',sans-serif;font-weight:400;font-style:italic;}
+  .bc-total{margin-top:12px;padding:12px 14px;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;transition:background 0.3s;}
+  .bc-side.before .bc-total{background:#c0392b;} .bc-side.after .bc-total{background:linear-gradient(135deg,var(--xfinity-purple-dark),var(--xfinity-purple));}
+  .bc-total-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.8);}
+  .bc-total-amt{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:white;line-height:1;}
+  .savings-callout{margin-top:14px;background:linear-gradient(135deg,#00C853,#00E676);border-radius:var(--radius-sm);padding:14px 20px;display:none;align-items:center;justify-content:space-between;box-shadow:0 4px 16px rgba(0,200,83,0.3);}
+  .savings-callout.visible{display:flex;}
+  .sc-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.9);}
+  .sc-amounts{display:flex;gap:24px;}
+  .sc-item{text-align:center;}
+  .sc-amt{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:white;line-height:1;}
+  .sc-period{font-size:10px;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+
+  .notes-print-value{display:none;white-space:pre-wrap;font-size:13px;color:var(--text-primary);line-height:1.5;padding:4px 0;}
+
+  @media print {
+    @page{size:letter portrait;margin:0.25in 0.3in;}
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+    html,body{background:white !important;padding:0 !important;margin:0 !important;}
+    .no-print,.intake-footer{display:none !important;}
+    .screen-wrapper{max-width:100% !important;margin:0 !important;}
+    .card{box-shadow:none !important;border:none !important;border-radius:0 !important;margin-bottom:4px !important;}
+    .intake-body{padding:10px 18px !important;}
+    .intake-section{margin-bottom:14px !important;}
+    .intake-section-title{font-size:13px !important;padding-bottom:4px !important;margin-bottom:10px !important;}
+    .header{padding:10px 18px !important;background:var(--xfinity-purple) !important;}
+    .header-left h1{font-size:18px !important;}
+    .preview-section{display:block !important;}
+    .preview-header{padding:10px 18px !important;background:var(--xfinity-purple) !important;}
+    .collapsible-body{max-height:none !important;opacity:1 !important;padding:16px 20px !important;overflow:visible !important;}
+    .collapsible-header{border-radius:var(--radius-sm) !important;font-size:12px !important;padding:8px 14px !important;}
+    .collapsible-arrow{display:none !important;}
+    .notes-section textarea{display:none !important;}
+    .notes-print-value{display:block !important;font-size:10px !important;min-height:16px !important;}
+    .intake-plan-pill:not(.active){display:none !important;}
+    .intake-reward-btn:not(.active){display:none !important;}
+    .membership-tile:not(.active){display:none !important;}
+    .tips-result{display:flex !important;}
+    .sold-btn:not(.active-yes):not(.active-no){display:none !important;}
+    .savings-callout{display:flex !important;}
+  }
+  @media(max-width:700px){
+    body{padding:12px;} .intake-body{padding:20px;}
+    .intake-grid,.rep-info-row,.two-col-grid,.billing-grid,.preview-cards-grid,.bill-cmp-grid{grid-template-columns:1fr !important;}
+    .intake-plan-pills{flex-direction:column;} .bc-vs{display:none;}
+    .membership-tiles{grid-template-columns:repeat(2,1fr);}
+    .header{padding:18px 20px;} .intake-footer{flex-direction:column;align-items:stretch;text-align:center;}
+    .footer-btns{justify-content:center;} .preview-info-bar{grid-template-columns:1fr !important;}
+    .pib-divider{display:none;}
+  }
+
+  /* FEATURE COMPARISON TABLE */
+  .feat-row{display:flex;flex-direction:column;padding:11px 18px;border-bottom:1px solid var(--border);gap:2px;}
+  .feat-row:last-child{border-bottom:none;}
+  .feat-row.feat-highlight{background:rgba(103,19,210,0.04);}
+  .feat-val{font-family:'Outfit',sans-serif;font-size:14px;font-weight:800;line-height:1.2;}
+  .feat-val.premium{color:var(--xfinity-purple);}
+  .feat-val.intro{color:var(--text-secondary);}
+  .feat-note{font-size:11px;color:var(--text-muted);line-height:1.3;}
+  .bc-row-value-em{color:var(--text-muted);font-size:11px;font-style:italic;font-family:'DM Sans',sans-serif;}
+
+  @media print {
+    #prevDeviceSection{display:block !important;}
+    #prevBillSection{display:block !important;}
+    .feat-row.feat-highlight{background:rgba(103,19,210,0.04) !important;}
+  }
+
+  /* ══ MAIN COMPARISON GRID ══ */
+  .cmp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    align-items: stretch;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .cmp-col {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+  .cmp-col.cmp-left  { border-right: 1.5px solid var(--border); }
+  .cmp-col.cmp-right { }
+
+  /* Column headers */
+  .cmp-col-header { padding: 18px 22px; text-align: center; }
+  .intro-header   { background: var(--surface-2); border-bottom: 2px solid #ffcdd2; }
+  .premium-header { background: linear-gradient(160deg, #f9f5ff, #ede0ff); border-bottom: 2px solid rgba(103,19,210,0.3); }
+  .cmp-plan-badge {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 50px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .intro-header   .cmp-plan-badge { background: var(--text-secondary); color: white; }
+  .premium-header .cmp-plan-badge { background: var(--xfinity-purple); color: white; }
+  .cmp-col-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin-bottom: 3px;
+  }
+  .premium-header .cmp-col-title { color: var(--xfinity-purple); }
+  .cmp-col-sub { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+  /* Item blocks */
+  .cmp-item-block {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .cmp-item-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    line-height: 1.2;
+  }
+  .cmp-item-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+  .cmp-item-promo-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1b5e20;
+    background: rgba(0,200,83,0.12);
+    border-radius: 50px;
+    padding: 2px 10px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .cmp-item-price {
+    font-family: 'Outfit', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    text-align: center;
+    margin-top: 6px;
+  }
+  .cmp-item-price.red   { color: #c0392b; }
+  .cmp-item-price.green { color: #1b5e20; }
+  .strikethrough { text-decoration: line-through; color: var(--text-muted); font-size: 12px; }
+
+  /* Spacer — pushes total to bottom of each column */
+  .cmp-spacer { flex: 1; min-height: 12px; }
+
+  /* Total blocks — pinned to bottom, equal height */
+  .cmp-total-block {
+    padding: 18px 22px;
+    text-align: center;
+  }
+  .intro-total   { background: #c0392b; }
+  .premium-total { background: linear-gradient(135deg, var(--xfinity-purple-dark), var(--xfinity-purple)); }
+  .cmp-total-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 6px;
+  }
+  .cmp-total-price {
+    font-family: 'Outfit', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+  }
+  .cmp-total-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 6px;
+  }
+
+  /* ══ BILL COMPARISON COLUMNS ══ */
+  .bill-col { border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; }
+  .today-col   { background: var(--surface-2); border: 1.5px solid var(--border); }
+  .nopromo-col { background: #fff5f5; border: 2px solid #ffcdd2; }
+  .promo-col   { background: linear-gradient(160deg, #f0fff4, #d4f7e0); border: 2px solid var(--xfinity-green); }
+  .bill-col-head {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  .bill-col-head small { font-size: 10px; font-weight: 600; text-transform: none; letter-spacing: 0; display: block; margin-top: 2px; }
+  .today-head   { color: var(--text-secondary); }
+  .nopromo-head { color: #c0392b; }
+  .promo-head   { color: #1b5e20; }
+  .bill-total { margin-top: auto; padding-top: 12px; border-top: 1.5px solid rgba(0,0,0,0.08); }
+  .bill-total-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 4px; }
+  .bill-total-amt {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .today-col   .bill-total-amt { color: var(--text-secondary); }
+  .nopromo-col .bill-total-amt { color: #c0392b; }
+  .promo-col   .bill-total-amt { color: #1b5e20; }
+
+  /* ── 8-BLOCK INFO BAR ── */
+  .preview-info-bar-8 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-info-bar-8 .pib-block {
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-info-bar-8 .pib-block:nth-child(4),
+  .preview-info-bar-8 .pib-block:nth-child(8) { border-right: none; }
+  .preview-info-bar-8 .pib-block:nth-child(5),
+  .preview-info-bar-8 .pib-block:nth-child(6),
+  .preview-info-bar-8 .pib-block:nth-child(7),
+  .preview-info-bar-8 .pib-block:nth-child(8) { border-bottom: none; background: var(--surface); }
+  @media (max-width: 700px) {
+    .preview-info-bar-8 { grid-template-columns: repeat(2, 1fr); }
+    .preview-info-bar-8 .pib-block:nth-child(2n) { border-right: none; }
+    .preview-info-bar-8 .pib-block:nth-child(n+7) { border-bottom: none; }
+  }
+  @media print {
+    .preview-info-bar-8 { grid-template-columns: repeat(4, 1fr); }
+  }
+  .preview-section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--xfinity-purple);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    text-align: center;
+  }
+
+  .feat-col-premium { background: linear-gradient(160deg, #f9f5ff, #ede0ff); }
+  .feat-col-intro   { background: var(--surface-2); border-right: 1px solid var(--border); }
+
+  /* ══ DEVICE COUNT PICKERS ══ */
+  .wt-toggle-row { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:8px; }
+  .wt-toggle-block { flex:1; min-width:180px; }
+  .wt-toggle-label { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:10px; }
+  .wt-count-btns { display:flex; gap:6px; flex-wrap:wrap; }
+  .wt-count-btn { padding:7px 14px; border-radius:50px; border:2px solid var(--border); background:white; color:var(--text-secondary); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.18s; }
+  .wt-count-btn:hover { border-color:var(--xfinity-purple-light); color:var(--xfinity-purple); }
+  .wt-count-btn.active { background:var(--xfinity-purple); border-color:var(--xfinity-purple); color:white; }
+
+  /* ══ T-SHEET STYLE DEVICE ROWS ══ */
+  .df-group-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--xfinity-purple); margin:14px 0 8px; padding-bottom:6px; border-bottom:1.5px solid var(--border); }
+  .df-row { display:flex; flex-direction:column; gap:0; margin-bottom:12px; background:var(--surface-2); border:1.5px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; }
+  .df-row-header { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--surface-3); border-bottom:1px solid var(--border); }
+  .df-line-num { font-family:'Outfit',sans-serif; font-size:12px; font-weight:700; color:white; background:var(--xfinity-purple); border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .df-row-header-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-secondary); }
+  .df-monthly-inline { margin-left:auto; font-family:'Outfit',sans-serif; font-size:15px; font-weight:800; color:var(--xfinity-purple); text-align:right; }
+  .df-monthly-inline .df-mo-promo { font-size:10px; color:var(--xfinity-green); font-weight:600; display:block; }
+  .df-monthly-inline .df-mo-promo.upgrade { color:#b07000; }
+  .df-row-body { padding:12px 14px; display:flex; flex-direction:column; gap:12px; }
+  .df-field-group { display:flex; flex-direction:column; gap:5px; }
+  .df-field-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); }
+  .df-autocomplete-wrap { position:relative; }
+  .df-autocomplete-wrap input { width:100%; border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text-primary); background:white; outline:none; transition:border-color 0.2s; }
+  .df-autocomplete-wrap input:focus { border-color:var(--xfinity-purple); box-shadow:0 0 0 3px rgba(103,19,210,0.1); }
+  .df-dropdown-list { position:absolute; top:100%; left:0; right:0; background:white; border:1.5px solid var(--xfinity-purple); border-top:none; border-radius:0 0 var(--radius-sm) var(--radius-sm); max-height:240px; overflow-y:auto; z-index:100; display:none; box-shadow:0 8px 24px rgba(103,19,210,0.15); }
+  .df-dropdown-list.open { display:block; }
+  .df-dropdown-item { padding:10px 14px; font-size:13px; cursor:pointer; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .df-dropdown-item:last-child { border-bottom:none; }
+  .df-dropdown-item:hover { background:var(--surface-3); color:var(--xfinity-purple); }
+  .df-dropdown-item .item-price { font-size:12px; color:var(--text-muted); white-space:nowrap; font-weight:600; }
+  .df-no-trade-wrap { display:flex; align-items:center; gap:8px; margin-top:4px; }
+  .df-no-trade-wrap input[type="checkbox"] { width:16px; height:16px; accent-color:var(--xfinity-purple); cursor:pointer; flex-shrink:0; }
+  .df-no-trade-wrap label { font-size:13px; color:var(--text-secondary); cursor:pointer; }
+  .df-storage-picker { display:flex; flex-wrap:wrap; gap:7px; margin-top:6px; }
+  .df-storage-btn { display:flex; align-items:center; gap:5px; padding:6px 12px; border-radius:50px; border:2px solid var(--border); background:white; color:var(--text-secondary); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+  .df-storage-btn:hover { border-color:var(--xfinity-purple-light); color:var(--xfinity-purple); }
+  .df-storage-btn.active { background:var(--xfinity-purple); border-color:var(--xfinity-purple); color:white; box-shadow:0 2px 8px rgba(103,19,210,0.3); }
+  .df-storage-btn .storage-check { font-size:11px; display:none; }
+  .df-storage-btn.active .storage-check { display:inline; }
+  .df-storage-price { font-size:10px; opacity:0.75; font-weight:500; }
+  .df-storage-btn.active .df-storage-price { opacity:0.9; }
+  @media print {
+    #prevMainComparison { display: block !important; }
+    #prevBillSection    { display: block !important; }
+    .cmp-grid           { break-inside: avoid; }
+    #bill-dealWins      { display: flex !important; }
+    .bill-col           { break-inside: avoid; }
+    .intro-total, .premium-total, .today-col, .nopromo-col, .promo-col { -webkit-print-color-adjust: exact; }
+  }
+  @media (max-width: 700px) {
+    .cmp-grid { grid-template-columns: 1fr !important; }
+    .cmp-col.cmp-left { border-right: none; border-bottom: 1.5px solid var(--border); }
+    #prevBillSection > div { grid-template-columns: 1fr !important; }
+  }
+
+  /* ══ TWO PAGE LAYOUT ══ */
+  #intakePage   { display: block; }
+  #previewPage  { display: none; }
+
+  /* ══ PREVIEW PAGE FOOTER ══ */
+  .preview-footer {
+    padding: 20px 36px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 2px solid var(--border);
+    gap: 12px;
+  }
+  .preview-footer-disclaimer { font-size:11px; color:var(--text-muted); }
+
+  /* ══ FEATURE TABLE ══ */
+  .feat-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .feat-col { display: flex; flex-direction: column; }
+  .feat-col-intro   { background: var(--surface-2); border-right: 1px solid var(--border); }
+  .feat-col-premium { background: linear-gradient(160deg, #f9f5ff, #ede0ff); }
+  .feat-col-hd { padding: 20px 18px; text-align: center; }
+  .feat-hd-premium { background: linear-gradient(135deg, var(--xfinity-purple-dark), var(--xfinity-purple)); }
+  .feat-hd-intro   { background: var(--text-secondary); }
+  .feat-cell {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .feat-cell:last-child { border-bottom: none; }
+  .feat-cell.feat-alt { background: rgba(103,19,210,0.03); }
+  .feat-col-intro .feat-cell.feat-alt { background: rgba(0,0,0,0.025); }
+  .feat-emoji { font-size: 20px; margin-bottom: 2px; }
+  .feat-big {
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .feat-big.premium { color: var(--xfinity-purple); }
+  .feat-big.intro   { color: var(--text-secondary); }
+  .feat-desc { font-size: 11px; color: var(--text-muted); line-height: 1.35; }
+
+  @media (max-width: 700px) {
+    .feat-table { grid-template-columns: 1fr; }
+    .feat-col-intro   { border-right: none; border-bottom: 1.5px solid var(--border); }
+    .feat-col-premium { }
+  }
+  @media print {
+    #intakePage  { display: none !important; }
+    #previewPage { display: block !important; }
+    .preview-footer { display: none !important; }
+    .feat-table { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="screen-wrapper">
+<div class="card">
+
+<!-- ══ PAGE 1: REP INTAKE ══ -->
+<div id="intakePage">
+
+<div class="header">
+  <div class="header-left">
+    <h1>📋 Upgrade Quote Sheet</h1>
+    <p>Xfinity Mobile · Greater Chicago Region</p>
+  </div>
+  <div class="header-badge">Elite Upgrade</div>
+</div>
+
+<div class="intake-body">
+
+<!-- CUSTOMER INFORMATION -->
+<div class="intake-section" id="sec-customer">
+  <div class="intake-section-title">Customer Information</div>
+  <div class="intake-grid">
+    <div class="intake-field">
+      <label>Customer's First Name <span style="color:#e53935;">*</span></label>
+      <input type="text" id="customerFirstName" placeholder="First name" autocomplete="off" oninput="updatePreview()">
+    </div>
+    <div class="intake-field">
+      <label>Customer Phone Number</label>
+      <input type="tel" id="customerPhone" placeholder="(XXX) XXX-XXXX" autocomplete="off" oninput="updatePreview()">
+    </div>
+    <div class="intake-field">
+      <label>Today's Date</label>
+      <input type="text" id="todayDate" class="readonly-date" readonly>
+    </div>
+  </div>
+</div>
+
+<!-- REP INFORMATION -->
+<div class="intake-section" id="sec-rep">
+  <div class="intake-section-title">👤 Rep Information</div>
+  <div class="rep-info-rows">
+    <div class="rep-info-row">
+      <div class="intake-field">
+        <label>Your Name <span style="color:#e53935;">*</span></label>
+        <input type="text" id="repName" autocomplete="off" placeholder="Your name">
+      </div>
+      <div class="intake-field">
+        <label>Your Store <span style="color:#e53935;">*</span></label>
+        <select id="storeName">
+          <option value="">— Select your store —</option>
+          <option>Bourbonnais Xfinity Store</option><option>Burbank Xfinity Store</option>
+          <option>Cicero Xfinity Store</option><option>Dekalb Xfinity Store</option>
+          <option>Elkhart Xfinity Store</option><option>Evanston Xfinity Store</option>
+          <option>Evergreen Park Xfinity Store</option><option>Frankfort Xfinity Store</option>
+          <option>Glenview Xfinity Store</option><option>Greeneville Xfinity Store</option>
+          <option>Hammond Xfinity Store</option><option>Johnson City Xfinity Store</option>
+          <option>Kildeer Xfinity Store</option><option>Michigan City Xfinity Store</option>
+          <option>Oak Ridge Xfinity Store</option><option>Round Lake Beach Xfinity Store</option>
+          <option>Schererville Xfinity Store</option><option>Skokie Xfinity Store</option>
+          <option>South Bend Xfinity Store</option><option>South Knoxville Xfinity Store</option>
+          <option>Tinley Park Xfinity Store</option><option>Uptown Xfinity Store</option>
+          <option>Valparaiso Xfinity Store</option><option>DM Submission</option>
+        </select>
+      </div>
+    </div>
+    <div class="rep-info-row">
+      <div class="intake-field">
+        <label>Rep Email <span style="font-size:10px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <input type="email" id="repEmail" autocomplete="email" placeholder="name@blufoxmobile.com" value="@blufoxmobile.com">
+      </div>
+      <div class="intake-field">
+        <label>Rep Phone <span style="font-size:10px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <input type="tel" id="repPhone" autocomplete="tel" placeholder="(555) 000-0000">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBERSHIP TIER -->
+<div class="intake-section" id="sec-tier">
+  <div class="intake-section-title">Xfinity Membership Tier</div>
+  <div class="intake-rewards">
+    <button class="intake-reward-btn" data-tier="silver"   onclick="selectReward(this)"><span class="dot"></span> Silver</button>
+    <button class="intake-reward-btn" data-tier="gold"     onclick="selectReward(this)"><span class="dot"></span> Gold</button>
+    <button class="intake-reward-btn" data-tier="platinum" onclick="selectReward(this)"><span class="dot"></span> Platinum</button>
+    <button class="intake-reward-btn" data-tier="diamond"  onclick="selectReward(this)"><span class="dot"></span> Diamond</button>
+  </div>
+</div>
+
+<!-- Plan selection moved to per-line checkbox in phone rows -->
+
+<!-- BILL COMPARISON INPUTS -->
+<div class="intake-section" id="sec-billing">
+  <div class="intake-section-title">💰 Bill Comparison</div>
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;text-align:center;">Enter current and rebundled bills to power the side-by-side customer comparison.</p>
+
+  <!-- Two clean cards: Core Services | Mobile Services -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+    <!-- Card 1: Core Services -->
+    <div class="bill-card">
+      <div class="bill-card-header bill-card-red">
+        <div class="bill-card-icon">🏠</div>
+        <div>
+          <div class="bill-card-title">Core Services</div>
+          <div class="bill-card-sub">Home Services With Xfinity</div>
+        </div>
+      </div>
+      <div class="bill-card-body">
+        <div class="bill-card-field">
+          <label class="bill-card-label">Current Core Bill</label>
+          <div class="dollar-wrap"><span class="dollar-sign">$</span><input type="number" id="currentCoreBill" placeholder="0.00" min="0" step="0.01" oninput="calcBillingComparison()"></div>
+        </div>
+        <div class="bill-card-arrow">↓ After Xfinity Rebundle</div>
+        <div class="bill-card-field">
+          <label class="bill-card-label">Rebundled Core Bill</label>
+          <div class="dollar-wrap"><span class="dollar-sign">$</span><input type="number" id="newCoreBill" placeholder="0.00" min="0" step="0.01" oninput="calcBillingComparison()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Mobile Services -->
+    <div class="bill-card">
+      <div class="bill-card-header bill-card-purple">
+        <div class="bill-card-icon">📱</div>
+        <div>
+          <div class="bill-card-title">Mobile Services</div>
+          <div class="bill-card-sub">Xfinity Mobile Lines</div>
+        </div>
+      </div>
+      <div class="bill-card-body">
+        <div class="bill-card-field">
+          <label class="bill-card-label">Current Mobile Bill</label>
+          <div class="dollar-wrap"><span class="dollar-sign">$</span><input type="number" id="currentMobileBill" placeholder="0.00" min="0" step="0.01" oninput="calcBillingComparison()"></div>
+        </div>
+        <div class="bill-card-arrow">↓ After Upgrade &amp; Bundle</div>
+        <div class="bill-card-field">
+          <label class="bill-card-label">New Mobile Bill <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(auto)</span></label>
+          <div class="auto-display" id="newMobileAutoDisplay">
+            <div class="auto-display-row"><span class="auto-display-value" id="newMobileAutoValue">$— (add upgrade above)</span><span class="auto-badge">AUTO</span></div>
+            <div class="auto-display-sub" id="newMobileAutoSub"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Current total only — new total is shown in the recap section below -->
+  <div style="margin-top:4px;">
+    <div class="billing-total-bar" style="background:#c0392b;">
+      <div class="billing-total-label">Current Total / mo</div>
+      <div class="billing-total-amount" id="currentTotalDisplay">$—</div>
+    </div>
+    <!-- newTotalDisplay kept hidden for JS compat -->
+    <div id="newTotalDisplay" style="display:none;"></div>
+  </div>
+  <div class="savings-bar" id="billingSavingsBar" style="display:none;">
+    <div class="savings-bar-label">🎉 Customer Saves</div>
+    <div class="savings-bar-amounts">
+      <div class="sb-item"><div class="sb-amt" id="savingsMonthlyDisplay">$—</div><div class="sb-period">Per Month</div></div>
+    </div>
+  </div>
+  <!-- savingsYearlyDisplay kept hidden for JS compat -->
+  <div id="savingsYearlyDisplay" style="display:none;"></div>
+</div>
+
+<!-- ══ PHONE UPGRADES — standalone section ══ -->
+<div class="intake-section" id="sec-phones">
+  <div class="intake-section-title">📱 Phone Upgrades</div>
+  <p style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:18px;">How many phones are being upgraded today?</p>
+  <div class="wt-count-btns" id="phone-count-btns" style="justify-content:center;gap:10px;margin-bottom:22px;">
+    <button class="wt-count-btn active" data-val="1" onclick="setDeviceCount('phone',1,this)">1</button>
+    <button class="wt-count-btn" data-val="2" onclick="setDeviceCount('phone',2,this)">2</button>
+    <button class="wt-count-btn" data-val="3" onclick="setDeviceCount('phone',3,this)">3</button>
+    <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('phone',4,this)">4</button>
+    <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('phone',5,this)">5</button>
+  </div>
+  <div id="phone-rows-container"></div>
+</div>
+
+<!-- ══ WATCHES — standalone section ══ -->
+<div class="intake-section" id="sec-watches">
+  <div class="intake-section-title">⌚ Add Watches</div>
+  <p style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:18px;">Adding a watch? Each watch adds a <strong>+$10/mo</strong> line fee.</p>
+  <div class="wt-count-btns" id="watch-count-btns" style="justify-content:center;gap:10px;margin-bottom:22px;">
+    <button class="wt-count-btn active" data-val="0" onclick="setDeviceCount('watch',0,this)">None</button>
+    <button class="wt-count-btn" data-val="1" onclick="setDeviceCount('watch',1,this)">1</button>
+    <button class="wt-count-btn" data-val="2" onclick="setDeviceCount('watch',2,this)">2</button>
+    <button class="wt-count-btn" data-val="3" onclick="setDeviceCount('watch',3,this)">3</button>
+    <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('watch',4,this)">4</button>
+    <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('watch',5,this)">5</button>
+  </div>
+  <div id="accessory-brand-hint" style="display:none;border-radius:var(--radius-sm);border:1.5px solid;padding:10px 16px;font-size:13px;font-weight:600;margin-bottom:16px;"></div>
+  <div id="watch-rows-container"></div>
+</div>
+
+<!-- ══ TABLETS — standalone section ══ -->
+<div class="intake-section" id="sec-tablets">
+  <div class="intake-section-title">📋 Add Tablets</div>
+  <p style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:18px;">Adding a tablet? Each tablet adds a <strong>+$20/mo</strong> line fee.</p>
+  <div class="wt-count-btns" id="tablet-count-btns" style="justify-content:center;gap:10px;margin-bottom:22px;">
+    <button class="wt-count-btn active" data-val="0" onclick="setDeviceCount('tablet',0,this)">None</button>
+    <button class="wt-count-btn" data-val="1" onclick="setDeviceCount('tablet',1,this)">1</button>
+    <button class="wt-count-btn" data-val="2" onclick="setDeviceCount('tablet',2,this)">2</button>
+    <button class="wt-count-btn" data-val="3" onclick="setDeviceCount('tablet',3,this)">3</button>
+    <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('tablet',4,this)">4</button>
+    <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('tablet',5,this)">5</button>
+  </div>
+  <div id="tablet-rows-container"></div>
+</div>
+<!-- ACTIVE PROMOTIONS -->
+<div class="intake-section" id="sec-promos" style="display:none;">
+  <div class="intake-section-title">🏷️ Active Promotions</div>
+  <div class="promo-banner"><ul class="promo-list" id="promoBannerList"></ul></div>
+</div>
+
+<!-- NOTES -->
+<div class="intake-section notes-section" id="sec-notes">
+  <div class="intake-section-title">📝 Additional Notes</div>
+  <div class="intake-field" style="margin-bottom:0;">
+    <textarea id="additionalNotes" rows="3" style="resize:vertical;" placeholder="Enter any additional notes for this customer..." oninput="updateNotesPrint()"></textarea>
+    <div class="notes-print-value" id="notesPrintValue"></div>
+  </div>
+</div>
+
+
+
+<!-- ══ REP SAVINGS SUMMARY — visible to rep before clicking preview ══ -->
+<div id="repSavingsSummary" style="display:none;margin:0 0 8px;padding:20px 28px;background:linear-gradient(135deg,#00C853,#00E676);border-radius:var(--radius);box-shadow:var(--shadow-md);">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(0,0,0,0.55);margin-bottom:4px;">🎉 Customer Saves Per Month</div>
+      <div style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;color:white;line-height:1;" id="repSavingsAmt">$—</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:rgba(0,0,0,0.5);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Before</div>
+      <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:white;" id="repBeforeAmt">$—/mo</div>
+      <div style="font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:rgba(0,0,0,0.5);text-transform:uppercase;letter-spacing:0.8px;margin-top:6px;margin-bottom:3px;">After</div>
+      <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:white;" id="repAfterAmt">$—/mo</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end intake-body -->
+
+
+</div><!-- end intakePage -->
+
+<!-- ══ PAGE 2: CUSTOMER PREVIEW ══ -->
+<div id="previewPage">
+<div class="preview-section visible" id="previewSection">
+
+  <!-- ── HEADER ── -->
+  <div class="preview-header">
+    <div><h2>👋 Your Personalized Quote</h2></div>
+    <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:white;" id="previewCustomerName"></div>
+  </div>
+
+  <!-- ── INFO BAR (8 blocks: customer info + rep info) ── -->
+  <div class="preview-info-bar-8">
+    <div class="pib-block"><div class="pib-label">👤 Customer</div><div class="pib-value" id="pib-customer">—</div></div>
+    <div class="pib-block"><div class="pib-label">📞 Phone</div><div class="pib-value" id="pib-phone">—</div></div>
+    <div class="pib-block"><div class="pib-label">⭐ Reward Tier</div><div class="pib-value" id="pib-tier">—</div></div>
+    <div class="pib-block"><div class="pib-label">📶 Current Plan</div><div class="pib-value" id="pib-plan">—</div></div>
+    <div class="pib-block"><div class="pib-label">🏷️ Rep Name</div><div class="pib-value" id="pib-repName">—</div></div>
+    <div class="pib-block"><div class="pib-label">🏪 Store</div><div class="pib-value" id="pib-store">—</div></div>
+    <div class="pib-block"><div class="pib-label">✉️ Rep Email</div><div class="pib-value" id="pib-repEmail">—</div></div>
+    <div class="pib-block"><div class="pib-label">📱 Rep Phone</div><div class="pib-value" id="pib-repPhone">—</div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MAIN COMPARISON — equal two-column layout
+       LEFT  = Unlimited Intro  (no deal, full price)
+       RIGHT = [Brand] Bundle   (Premium + TIPS + accessories)
+  ══════════════════════════════════════════════ -->
+  <div id="prevMainComparison" style="display:none;padding:24px 36px;">
+
+    <div class="cmp-grid">
+
+      <!-- ════ LEFT COLUMN — UNLIMITED INTRO (no deal) ════ -->
+      <div class="cmp-col cmp-left">
+
+        <!-- Column header -->
+        <div class="cmp-col-header intro-header">
+          <div class="cmp-plan-badge">Unlimited Intro</div>
+          <div class="cmp-col-title" id="cmp-left-title">Phone Upgrade</div>
+          <div class="cmp-col-sub">Full retail price · No promotions applied</div>
+        </div>
+
+        <!-- Phone row -->
+        <div class="cmp-item-block" id="cmp-left-phone" style="display:none;">
+          <div class="cmp-item-name" id="cmp-left-phoneName">—</div>
+          <div class="cmp-item-sub">Full Retail Price</div>
+          <div class="cmp-item-price red" id="cmp-left-phonePrice">$—</div>
+        </div>
+
+        <!-- Watch row (at full price) -->
+
+        <!-- Tablet row (at full price) -->
+
+        <!-- Spacer to push totals to bottom (grows to fill) -->
+        <div class="cmp-spacer"></div>
+
+        <!-- Total block -->
+        <div class="cmp-total-block intro-total">
+          <div class="cmp-total-label">Total Device Cost — No Deal</div>
+          <div class="cmp-total-price" id="cmp-left-total">$—</div>
+        </div>
+
+      </div><!-- end left col -->
+
+      <!-- ════ RIGHT COLUMN — BRAND BUNDLE (Premium + TIPS) ════ -->
+      <div class="cmp-col cmp-right">
+
+        <!-- Column header -->
+        <div class="cmp-col-header premium-header">
+          <div class="cmp-plan-badge">Unlimited Premium</div>
+          <div class="cmp-col-title" id="cmp-right-title">Bundle</div>
+          <div class="cmp-col-sub">With applicable discounts · Best deal</div>
+        </div>
+
+        <!-- Phone row with TIPS promo -->
+        <div class="cmp-item-block" id="cmp-right-phone" style="display:none;">
+          <div class="cmp-item-name" id="cmp-right-phoneName">—</div>
+          <div class="cmp-item-promo-tag" id="cmp-right-promoTag">—</div>
+          <div>
+            <div class="cmp-item-sub">Price After TIPS</div>
+            <div class="cmp-item-sub strikethrough" id="cmp-right-phoneStrike"></div>
+            <div class="cmp-item-price green" id="cmp-right-phonePrice">$—</div>
+          </div>
+          <!-- Plan upgrade line (only if Intro → Premium) -->
+          <div id="cmp-right-planUpgrade" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(0,0,0,0.1);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--text-secondary);">Plan: Intro → Premium</span>
+              <span style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:#b07000;">+$10/mo</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Watch row (with discount if applicable) -->
+        <div class="cmp-item-block" id="cmp-right-watch" style="display:none;">
+          <div class="cmp-item-name" id="cmp-right-watchName">—</div>
+          <div class="cmp-item-promo-tag" id="cmp-right-watchPromoTag" style="display:none;">—</div>
+          <div>
+            <div class="cmp-item-sub" id="cmp-right-watchSub">Watch · +$10/mo line fee</div>
+            <div class="cmp-item-price" id="cmp-right-watchPrice">$—</div>
+          </div>
+        </div>
+
+        <!-- Tablet row (with discount if applicable) -->
+        <div class="cmp-item-block" id="cmp-right-tablet" style="display:none;">
+          <div class="cmp-item-name" id="cmp-right-tabletName">—</div>
+          <div class="cmp-item-promo-tag" id="cmp-right-tabletPromoTag" style="display:none;">—</div>
+          <div>
+            <div class="cmp-item-sub" id="cmp-right-tabletSub">Tablet · +$20/mo line fee</div>
+            <div class="cmp-item-price" id="cmp-right-tabletPrice">$—</div>
+          </div>
+        </div>
+
+        <!-- Spacer -->
+        <div class="cmp-spacer"></div>
+
+        <!-- Total block -->
+        <div class="cmp-total-block premium-total">
+          <div class="cmp-total-label">Total Bundle Cost</div>
+          <div class="cmp-total-price" id="cmp-right-total">$—</div>
+        </div>
+
+      </div><!-- end right col -->
+
+    </div><!-- end cmp-grid -->
+
+  </div><!-- end prevMainComparison -->
+
+  <!-- ══ FULL MONTHLY BILL COMPARISON (2-column, same structure as top) ══ -->
+  <div id="prevBillSection" style="display:none;padding:0 36px 28px;">
+    <div class="preview-section-title">📊 Full Monthly Bill Comparison</div>
+
+    <div class="cmp-grid">
+
+      <!-- ════ LEFT — Current Services With Unlimited Intro ════ -->
+      <div class="cmp-col cmp-left">
+
+        <div class="cmp-col-header intro-header">
+          <div class="cmp-plan-badge">Unlimited Intro</div>
+          <div class="cmp-col-title">Current Services</div>
+          <div class="cmp-col-sub">What you're paying today</div>
+        </div>
+
+        <!-- Core bill -->
+        <div class="cmp-item-block">
+          <div class="cmp-item-name">Core Services</div>
+          <div class="cmp-item-sub">Home Services With Xfinity</div>
+          <div class="cmp-item-price red" id="bill-currentCore">$—</div>
+        </div>
+
+        <!-- Current mobile -->
+        <div class="cmp-item-block">
+          <div class="cmp-item-name">Xfinity Mobile</div>
+          <div class="cmp-item-sub">Current mobile bill · Unlimited Intro</div>
+          <div class="cmp-item-price red" id="bill-currentMobile">$—</div>
+        </div>
+
+        <!-- Phone upgrade at full price -->
+        <div class="cmp-item-block" id="bill-left-phoneBlock">
+          <div class="cmp-item-name" id="bill-left-phoneName">Phone Upgrade</div>
+          <div class="cmp-item-sub">Full retail price ÷ 36 · No TIPS discount</div>
+          <div class="cmp-item-price red" id="bill-noPromoUpgrade">$—</div>
+        </div>
+
+        <div class="cmp-spacer"></div>
+
+        <div class="cmp-total-block intro-total">
+          <div class="cmp-total-label">Current Monthly Total</div>
+          <div class="cmp-total-price" id="bill-noPromoTotal">$—</div>
+          <div class="cmp-total-sub" id="bill-left-sub">Core + Mobile + Phone</div>
+        </div>
+
+      </div><!-- end left -->
+
+      <!-- ════ RIGHT — Upgraded Services With Unlimited Premium ════ -->
+      <div class="cmp-col cmp-right">
+
+        <div class="cmp-col-header premium-header">
+          <div class="cmp-plan-badge">Unlimited Premium</div>
+          <div class="cmp-col-title">Upgraded Services</div>
+          <div class="cmp-col-sub">Full breakdown after upgrade</div>
+        </div>
+
+        <!-- Rebundled core -->
+        <div class="cmp-item-block">
+          <div class="cmp-item-name">Core Services (Rebundled)</div>
+          <div class="cmp-item-sub">New rate after Xfinity Mobile rebundle</div>
+          <div class="cmp-item-price green" id="bill-promoCore">$—</div>
+        </div>
+
+        <!-- Xfinity Mobile line (includes plan upgrade if Intro→Premium) -->
+        <div class="cmp-item-block">
+          <div class="cmp-item-name">Xfinity Mobile</div>
+          <div class="cmp-item-sub" id="bill-right-mobileSub">Unlimited Premium plan</div>
+          <div class="cmp-item-price green" id="bill-promoMobile">$—</div>
+        </div>
+
+        <!-- Phone financing at TIPS price -->
+        <div class="cmp-item-block" id="bill-right-phoneBlock" style="display:none;">
+          <div class="cmp-item-name" id="bill-right-phoneName">Phone Upgrade</div>
+          <div class="cmp-item-sub" id="bill-right-phoneSub">TIPS price ÷ 36 months</div>
+          <div class="cmp-item-price green" id="bill-promoUpgrade">$—</div>
+        </div>
+
+        <!-- Watch financing -->
+        <div class="cmp-item-block" id="bill-promoWatchRow" style="display:none;">
+          <div class="cmp-item-name" id="bill-promoWatchLabel">Watch</div>
+          <div class="cmp-item-sub">Watch financing ÷36 + $10/mo line fee</div>
+          <div class="cmp-item-price green" id="bill-promoWatchAmt">$—</div>
+        </div>
+
+        <!-- Tablet financing -->
+        <div class="cmp-item-block" id="bill-promoTabletRow" style="display:none;">
+          <div class="cmp-item-name" id="bill-promoTabletLabel">Tablet</div>
+          <div class="cmp-item-sub">Tablet financing ÷36 + $20/mo line fee</div>
+          <div class="cmp-item-price green" id="bill-promoTabletAmt">$—</div>
+        </div>
+
+        <div class="cmp-spacer"></div>
+
+        <div class="cmp-total-block premium-total">
+          <div class="cmp-total-label">New Monthly Total</div>
+          <div class="cmp-total-price" id="bill-promoTotal">$—</div>
+          <div class="cmp-total-sub" id="bill-right-sub">Full breakdown included</div>
+        </div>
+
+      </div><!-- end right -->
+
+    </div><!-- end cmp-grid -->
+
+  </div>
+
+  <!-- ══ PLAN FEATURE COMPARISON ══ -->
+  <div style="padding:0 36px 28px;">
+    <div class="preview-section-title">⚡ Why Unlimited Premium Is the Best Choice</div>
+
+    <div class="feat-table">
+      <!-- Intro LEFT, Premium RIGHT — mirrors every other section -->
+      <div class="feat-col feat-col-intro">
+        <div class="feat-col-hd feat-hd-intro">
+          <div style="font-size:22px;margin-bottom:4px;">📱</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:white;">Unlimited Intro</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:3px;">Upgrade to Premium for TIPS savings</div>
+        </div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">📶</div><div class="feat-big intro">30 GB</div><div class="feat-desc">Priority data — then reduced speeds</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">🎬</div><div class="feat-big intro">480p SD</div><div class="feat-desc">Standard definition only</div></div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">📡</div><div class="feat-big intro">Unlimited</div><div class="feat-desc">Hotspot — reduced speeds after 30 GB</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">🌎</div><div class="feat-big intro">Basic Pass</div><div class="feat-desc">Mexico &amp; Canada — no roaming data</div></div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">🛡️</div><div class="feat-big intro">❌</div><div class="feat-desc">No Call Guard protection</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">💰</div><div class="feat-big intro">❌ Not Eligible</div><div class="feat-desc">Cannot use TIPS trade-in promotions</div></div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">🛜</div><div class="feat-big intro">✅</div><div class="feat-desc">Auto-connects to 20M+ Xfinity WiFi hotspots</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">📋</div><div class="feat-big intro">No Contract</div><div class="feat-desc">Cancel anytime — no commitment</div></div>
+      </div>
+
+      <div class="feat-col feat-col-premium">
+        <div class="feat-col-hd feat-hd-premium">
+          <div style="font-size:22px;margin-bottom:4px;">✨</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:white;">Unlimited Premium</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px;">Recommended — TIPS eligible</div>
+        </div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">📶</div><div class="feat-big premium">100 GB</div><div class="feat-desc">Full-speed priority data</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">🎬</div><div class="feat-big premium">4K Ultra HD</div><div class="feat-desc">Crystal-clear video streaming</div></div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">📡</div><div class="feat-big premium">30 GB</div><div class="feat-desc">5G mobile hotspot</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">🌎</div><div class="feat-big premium">✅ Plus Pass</div><div class="feat-desc">Mexico &amp; Canada — talk, text &amp; data</div></div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">🛡️</div><div class="feat-big premium">✅</div><div class="feat-desc">Xfinity Call Guard — auto-blocks spam &amp; robocalls</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">💰</div><div class="feat-big premium">✅ TIPS Eligible</div><div class="feat-desc">Up to $830–$1,100 off with trade-in</div></div>
+        <div class="feat-cell feat-alt"><div class="feat-emoji">🛜</div><div class="feat-big premium">✅</div><div class="feat-desc">Auto-connects to 20M+ Xfinity WiFi hotspots</div></div>
+        <div class="feat-cell">      <div class="feat-emoji">📋</div><div class="feat-big premium">No Contract</div><div class="feat-desc">Cancel anytime — no commitment</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;font-size:10px;color:var(--text-muted);text-align:center;">Pricing is estimated. All prices subject to change. Taxes &amp; fees not included. Visit xfinity.com/mobile for current pricing.</div>
+  </div>
+
+</div>  <!-- ── PREVIEW FOOTER ── -->
+  <div class="preview-footer no-print">
+    <div class="preview-footer-disclaimer">Pricing is estimated. All prices subject to change. Taxes &amp; fees not included.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-outline" onclick="showIntakePage()">← Back to Form</button>
+      <button class="btn btn-submit"  onclick="handleSubmit()">✅ Submit Quote</button>
+    </div>
+  </div>
+</div><!-- end preview-section -->
+</div><!-- end previewPage -->
+
+<div class="intake-footer no-print">
+  <div class="footer-disclaimer">Fields marked <strong>*</strong> are required to build the comparison.</div>
+  <div class="footer-btns">
+    <button class="btn btn-primary" onclick="showPreviewPage()">View Customer Preview →</button>
+  </div>
+</div>
+
+</div>
+</div>
+
+<input type="hidden" id="selectedPlan" value="intro">
+
+<input type="hidden" id="selectedTier" value="">
+<input type="hidden" id="selectedPromo" value="0">
+<input type="hidden" id="selectedWatchPrice" value="0">
+<input type="hidden" id="selectedWatchName" value="">
+<input type="hidden" id="selectedMembershipDiscount" value="0">
+<input type="hidden" id="selectedTabletPrice" value="0">
+<input type="hidden" id="selectedTabletName" value="">
+<input type="hidden" id="soldOnSpot" value="">
+
+<script>
+// ══════════════════════════════════════════════════
+//  PHONE DATA — Current Xfinity Inventory (March 2026)
+//  Storage variants included; base price = lowest tier
+// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  PHONES — grouped by model, storage as variants
+//  Search shows model name only; storage pills appear after selection
+// ══════════════════════════════════════════════════
+const PHONES = [
+  // Apple
+  { name:"Apple iPhone 17 Pro Max", price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1399.99},{gb:"1TB",price:1599.99},{gb:"2TB",price:1999.99}] },
+  { name:"Apple iPhone 17 Pro",     price:1099.99, storage:[{gb:"256GB",price:1099.99},{gb:"512GB",price:1299.99},{gb:"1TB",price:1499.99}] },
+  { name:"Apple iPhone 17",         price: 829.99, storage:[{gb:"128GB",price:829.99},{gb:"256GB",price:929.99},{gb:"512GB",price:1129.99}] },
+  { name:"Apple iPhone 17e",        price: 599.99, storage:[{gb:"256GB",price:599.99},{gb:"512GB",price:799.99}] },
+  { name:"Apple iPhone Air",        price: 999.99, storage:[{gb:"128GB",price:999.99}] },
+  { name:"Apple iPhone 16 Plus",    price: 829.99, storage:[{gb:"128GB",price:829.99}] },
+  { name:"Apple iPhone 16",         price: 729.99, storage:[{gb:"128GB",price:729.99}] },
+  { name:"Apple iPhone 16e",        price: 499.99, storage:[{gb:"128GB",price:499.99}] },
+  // Samsung
+  { name:"Samsung Galaxy S26 Ultra",price:1299.99, storage:[{gb:"256GB",price:1299.99},{gb:"512GB",price:1499.99},{gb:"1TB",price:1799.99}] },
+  { name:"Samsung Galaxy S26+",     price:1099.99, storage:[{gb:"256GB",price:1099.99},{gb:"512GB",price:1299.99}] },
+  { name:"Samsung Galaxy S26",      price: 899.99, storage:[{gb:"256GB",price:899.99},{gb:"512GB",price:1099.99}] },
+  { name:"Samsung Galaxy Z Fold7",  price:1999.99, storage:[{gb:"256GB",price:1999.99}] },
+  { name:"Samsung Galaxy Z Flip7",  price:1099.99, storage:[{gb:"256GB",price:1099.99}] },
+  { name:"Samsung Galaxy Z Flip7 FE",price:899.99, storage:[{gb:"128GB",price:899.99}] },
+  { name:"Samsung Galaxy S25 Ultra",price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1419.99}] },
+  { name:"Samsung Galaxy S25+",     price: 999.99, storage:[{gb:"256GB",price:999.99}] },
+  { name:"Samsung Galaxy S25 Edge", price: 899.99, storage:[{gb:"128GB",price:899.99}] },
+  { name:"Samsung Galaxy S25 FE",   price: 649.99, storage:[{gb:"128GB",price:649.99}] },
+  { name:"Samsung Galaxy A17 5G",   price: 199.99, storage:[{gb:"128GB",price:199.99}] },
+  // Google
+  { name:"Google Pixel 10 Pro Fold",price:1799.99, storage:[{gb:"256GB",price:1799.99},{gb:"512GB",price:1919.99}] },
+  { name:"Google Pixel 10 Pro XL",  price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1319.99}] },
+  { name:"Google Pixel 10 Pro",     price: 999.99, storage:[{gb:"128GB",price:999.99},{gb:"256GB",price:1099.99},{gb:"512GB",price:1219.99}] },
+  { name:"Google Pixel 10",         price: 799.99, storage:[{gb:"128GB",price:799.99},{gb:"256GB",price:929.99}] },
+  { name:"Google Pixel 10a",        price: 499.99, storage:[{gb:"128GB",price:499.99}] },
+  { name:"Google Pixel 9a",         price: 108.00, storage:[{gb:"128GB",price:108.00}] },
+  // Motorola
+  { name:"Motorola razr - 2025",    price: 599.99, storage:[{gb:"256GB",price:599.99}] },
+  { name:"moto g stylus 5G - 2024", price: 239.99, storage:[{gb:"128GB",price:239.99}] },
+  { name:"moto g - 2026",           price: 199.99, storage:[{gb:"128GB",price:199.99}] },
+  { name:"moto g - 2025",           price: 179.99, storage:[{gb:"128GB",price:179.99}] },
+];
+
+// ══════════════════════════════════════════════════
+//  PROMO LOGIC CONSTANTS
+//  These drive the smart Samsung vs. non-Samsung
+//  discount calculation — update monthly as needed
+// ══════════════════════════════════════════════════
+
+// Samsung TIPS max (Premium Unlimited + trade): up to $1,100
+const SAMSUNG_TIPS_PREMIUM_MAX = 1100;
+// Samsung TIPS (Unlimited + trade): up to $500
+const SAMSUNG_TIPS_UNLIMITED_MAX = 500;
+// Samsung no-trade-in (Premium Unlimited): $500
+const SAMSUNG_NO_TRADE_PREMIUM = 500;
+// Samsung no-trade-in (Unlimited): $200
+const SAMSUNG_NO_TRADE_UNLIMITED = 200;
+// Non-Samsung TIPS (Apple/Google/Motorola, Premium Unlimited + trade): up to $830
+const NONSAM_TIPS_PREMIUM_MAX = 830;
+// Non-Samsung no-trade / Premium Unlimited fallback: $400
+const NONSAM_PREMIUM_NO_TRADE = 400;
+// iPhone 17e on-us (= full price): triggers if trade-in + Premium
+const IPHONE17E_PRICE_599  = 599.99;
+const IPHONE17E_PRICE_799  = 799.99;
+
+// ══════════════════════════════════════════════════
+//  SMART PROMO CALCULATOR
+//  Only Samsung devices get $1,100. All others cap at $830.
+// ══════════════════════════════════════════════════
+function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
+  var name      = (phoneName || '').toLowerCase();
+  var isSamsung = name.indexOf('samsung') !== -1 || name.indexOf('galaxy') !== -1;
+  var is17e     = name.indexOf('17e') !== -1;
+  var isPremium = plan === 'premium';
+  var tradeRaw  = noTrade ? 0 : (parseFloat(tradeValue) || 0);
+  var hasTrade  = tradeRaw > 0;
+
+  var promoAmt   = 0;
+  var promoLabel = '';
+
+  if (phonePrice <= 0) return { promoAmt: 0, promoLabel: '' };
+
+  // ── Samsung purchases ──────────────────────────────────────────────────
+  // Trade-in value is looked up from TRADE_INS. Samsung TIPS-eligible phones show $1,100.
+  // Non-Samsung-TIPS trade-ins use their actual value (up to their listed amount).
+  // No trade-in = automatic $500 (Premium) or $200 (Unlimited) minimum.
+  if (isSamsung) {
+    if (hasTrade && isPremium) {
+      // Use the trade-in's actual value — Samsung TIPS phones are already stored at $1,100
+      // Non-TIPS Samsung trades use their actual value (e.g. $700, $600, $450)
+      promoAmt   = Math.min(tradeRaw, 1100); // max $1,100 for Samsung
+      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Premium)';
+    } else if (hasTrade) {
+      // Unlimited with trade: up to $500
+      promoAmt   = Math.min(tradeRaw, 500);
+      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Unlimited)';
+    } else if (isPremium) {
+      // No trade-in on Samsung Premium → automatic $500 off
+      promoAmt   = 500;
+      promoLabel = 'No Trade-In — $500 off (Premium)';
+    } else {
+      // No trade-in on Samsung Intro → automatic $200 off
+      promoAmt   = 200;
+      promoLabel = 'No Trade-In — $200 off (Unlimited)';
+    }
+
+  // ── iPhone 17e special "On Us" deal ───────────────────────────────────
+  } else if (is17e && hasTrade && isPremium) {
+    promoAmt   = phonePrice;
+    promoLabel = 'TIPS Trade-In — On Us!';
+
+  // ── Apple / Google / Motorola / LG / OnePlus ─────────────────────────
+  // Strictly capped at $830 — NEVER $1,100
+  } else {
+    var trade = Math.min(tradeRaw, 830); // hard cap at $830
+    if (hasTrade && isPremium) {
+      promoAmt   = trade; // uses the actual value from TRADE_INS, max $830
+      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Premium)';
+    } else if (isPremium) {
+      // No trade-in selected on Premium → automatic $400 off (Apple/Google/Moto)
+      promoAmt   = 400;
+      promoLabel = 'No Trade-In — $400 off (Premium)';
+    }
+    // Intro + no trade-in = no discount
+  }
+
+  promoAmt = Math.min(promoAmt, phonePrice); // never exceed full price
+  return { promoAmt: promoAmt, promoLabel: promoLabel };
+}
+
+// ══════════════════════════════════════════════════
+//  TRADE-IN PHONES (TIPS values)
+// ══════════════════════════════════════════════════
+const TRADE_INS = [
+  { name:"Apple iPhone 11", condition:"Good", value:450 },
+  { name:"Apple iPhone 11", condition:"Fair", value:450 },
+  { name:"Apple iPhone 11", condition:"Poor", value:450 },
+  { name:"Apple iPhone 11 Pro", condition:"Good", value:450 },
+  { name:"Apple iPhone 11 Pro", condition:"Fair", value:450 },
+  { name:"Apple iPhone 11 Pro", condition:"Poor", value:450 },
+  { name:"Apple iPhone 11 Pro Max", condition:"Good", value:500 },
+  { name:"Apple iPhone 11 Pro Max", condition:"Fair", value:450 },
+  { name:"Apple iPhone 11 Pro Max", condition:"Poor", value:450 },
+  { name:"Apple iPhone 12", condition:"Good", value:500 },
+  { name:"Apple iPhone 12", condition:"Fair", value:450 },
+  { name:"Apple iPhone 12", condition:"Poor", value:450 },
+  { name:"Apple iPhone 12 Mini", condition:"Good", value:450 },
+  { name:"Apple iPhone 12 Mini", condition:"Fair", value:450 },
+  { name:"Apple iPhone 12 Mini", condition:"Poor", value:450 },
+  { name:"Apple iPhone 12 Pro", condition:"Good", value:500 },
+  { name:"Apple iPhone 12 Pro", condition:"Fair", value:450 },
+  { name:"Apple iPhone 12 Pro", condition:"Poor", value:450 },
+  { name:"Apple iPhone 12 Pro Max", condition:"Good", value:700 },
+  { name:"Apple iPhone 12 Pro Max", condition:"Fair", value:450 },
+  { name:"Apple iPhone 12 Pro Max", condition:"Poor", value:450 },
+  { name:"Apple iPhone 13", condition:"Good", value:500 },
+  { name:"Apple iPhone 13", condition:"Fair", value:450 },
+  { name:"Apple iPhone 13", condition:"Poor", value:450 },
+  { name:"Apple iPhone 13 Mini", condition:"Good", value:500 },
+  { name:"Apple iPhone 13 Mini", condition:"Fair", value:450 },
+  { name:"Apple iPhone 13 Mini", condition:"Poor", value:450 },
+  { name:"Apple iPhone 13 Pro", condition:"Good", value:700 },
+  { name:"Apple iPhone 13 Pro", condition:"Fair", value:450 },
+  { name:"Apple iPhone 13 Pro", condition:"Poor", value:450 },
+  { name:"Apple iPhone 13 Pro Max", condition:"Good", value:700 },
+  { name:"Apple iPhone 13 Pro Max", condition:"Fair", value:500 },
+  { name:"Apple iPhone 13 Pro Max", condition:"Poor", value:450 },
+  { name:"Apple iPhone 14", condition:"Good", value:600 },
+  { name:"Apple iPhone 14", condition:"Fair", value:450 },
+  { name:"Apple iPhone 14", condition:"Poor", value:450 },
+  { name:"Apple iPhone 14 Plus", condition:"Good", value:700 },
+  { name:"Apple iPhone 14 Plus", condition:"Fair", value:450 },
+  { name:"Apple iPhone 14 Plus", condition:"Poor", value:450 },
+  { name:"Apple iPhone 14 Pro", condition:"Good", value:700 },
+  { name:"Apple iPhone 14 Pro", condition:"Fair", value:500 },
+  { name:"Apple iPhone 14 Pro", condition:"Poor", value:450 },
+  { name:"Apple iPhone 14 Pro Max", condition:"Good", value:700 },
+  { name:"Apple iPhone 14 Pro Max", condition:"Fair", value:600 },
+  { name:"Apple iPhone 14 Pro Max", condition:"Poor", value:450 },
+  { name:"Apple iPhone 15", condition:"Good", value:700 },
+  { name:"Apple iPhone 15", condition:"Fair", value:500 },
+  { name:"Apple iPhone 15", condition:"Poor", value:450 },
+  { name:"Apple iPhone 15 Plus", condition:"Good", value:700 },
+  { name:"Apple iPhone 15 Plus", condition:"Fair", value:600 },
+  { name:"Apple iPhone 15 Plus", condition:"Poor", value:450 },
+  { name:"Apple iPhone 15 Pro", condition:"Good", value:830 },
+  { name:"Apple iPhone 15 Pro", condition:"Fair", value:600 },
+  { name:"Apple iPhone 15 Pro Max", condition:"Good", value:830 },
+  { name:"Apple iPhone 15 Pro Max", condition:"Fair", value:700 },
+  { name:"Apple iPhone 15 Pro Max", condition:"Poor", value:450 },
+  { name:"Apple iPhone 15 Pro", condition:"Poor", value:450 },
+  { name:"Apple iPhone 16", condition:"Good", value:830 },
+  { name:"Apple iPhone 16", condition:"Fair", value:700 },
+  { name:"Apple iPhone 16", condition:"Poor", value:450 },
+  { name:"Apple iPhone 16 Plus", condition:"Good", value:830 },
+  { name:"Apple iPhone 16 Plus", condition:"Fair", value:700 },
+  { name:"Apple iPhone 16 Plus", condition:"Poor", value:450 },
+  { name:"Apple iPhone 16 Pro", condition:"Good", value:830 },
+  { name:"Apple iPhone 16 Pro", condition:"Fair", value:700 },
+  { name:"Apple iPhone 16 Pro", condition:"Poor", value:450 },
+  { name:"Apple iPhone 16 Pro Max", condition:"Good", value:830 },
+  { name:"Apple iPhone 16 Pro Max", condition:"Fair", value:830 },
+  { name:"Apple iPhone 16 Pro Max", condition:"Poor", value:450 },
+  { name:"Apple iPhone 16e", condition:"Good", value:830 },
+  { name:"Apple iPhone 16e", condition:"Fair", value:600 },
+  { name:"Apple iPhone 16e", condition:"Poor", value:450 },
+  { name:"Apple iPhone 17", condition:"Good", value:830 },
+  { name:"Apple iPhone 17", condition:"Fair", value:830 },
+  { name:"Apple iPhone 17", condition:"Poor", value:450 },
+  { name:"Apple iPhone 17 Pro", condition:"Good", value:830 },
+  { name:"Apple iPhone 17 Pro", condition:"Fair", value:830 },
+  { name:"Apple iPhone 17 Pro", condition:"Poor", value:450 },
+  { name:"Apple iPhone 17 Pro Max", condition:"Good", value:830 },
+  { name:"Apple iPhone 17 Pro Max", condition:"Fair", value:830 },
+  { name:"Apple iPhone 17 Pro Max", condition:"Poor", value:450 },
+  { name:"Apple iPhone Air", condition:"Good", value:830 },
+  { name:"Apple iPhone Air", condition:"Fair", value:830 },
+  { name:"Apple iPhone Air", condition:"Poor", value:450 },
+  { name:"Apple iPhone 7", condition:"Good", value:450 },
+  { name:"Apple iPhone 7", condition:"Fair", value:450 },
+  { name:"Apple iPhone 7", condition:"Poor", value:450 },
+  { name:"Apple iPhone 7 PLUS", condition:"Good", value:450 },
+  { name:"Apple iPhone 7 PLUS", condition:"Fair", value:450 },
+  { name:"Apple iPhone 7 PLUS", condition:"Poor", value:450 },
+  { name:"Apple iPhone 8", condition:"Good", value:450 },
+  { name:"Apple iPhone 8", condition:"Fair", value:450 },
+  { name:"Apple iPhone 8", condition:"Poor", value:450 },
+  { name:"Apple iPhone 8 PLUS", condition:"Good", value:450 },
+  { name:"Apple iPhone 8 PLUS", condition:"Fair", value:450 },
+  { name:"Apple iPhone 8 PLUS", condition:"Poor", value:450 },
+  { name:"Apple iPhone SE 2", condition:"Good", value:450 },
+  { name:"Apple iPhone SE 2", condition:"Fair", value:450 },
+  { name:"Apple iPhone SE 2", condition:"Poor", value:450 },
+  { name:"Apple iPhone SE 3", condition:"Good", value:450 },
+  { name:"Apple iPhone SE 3", condition:"Fair", value:450 },
+  { name:"Apple iPhone SE 3", condition:"Poor", value:450 },
+  { name:"Apple iPhone X", condition:"Good", value:450 },
+  { name:"Apple iPhone X", condition:"Fair", value:450 },
+  { name:"Apple iPhone X", condition:"Poor", value:450 },
+  { name:"Apple iPhone XR", condition:"Good", value:450 },
+  { name:"Apple iPhone XR", condition:"Fair", value:450 },
+  { name:"Apple iPhone XR", condition:"Poor", value:450 },
+  { name:"Apple iPhone XS", condition:"Good", value:450 },
+  { name:"Apple iPhone XS", condition:"Fair", value:450 },
+  { name:"Apple iPhone XS", condition:"Poor", value:450 },
+  { name:"Apple iPhone XS Max", condition:"Good", value:450 },
+  { name:"Apple iPhone XS Max", condition:"Fair", value:450 },
+  { name:"Apple iPhone XS Max", condition:"Poor", value:450 },
+  { name:"Google Pixel 10 5G", condition:"Good", value:830 },
+  { name:"Google Pixel 10 5G", condition:"Fair", value:700 },
+  { name:"Google Pixel 10 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 10 Pro 5G", condition:"Good", value:830 },
+  { name:"Google Pixel 10 Pro 5G", condition:"Fair", value:700 },
+  { name:"Google Pixel 10 Pro 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 10 Pro Fold", condition:"Good", value:830 },
+  { name:"Google Pixel 10 Pro Fold", condition:"Fair", value:830 },
+  { name:"Google Pixel 10 Pro Fold", condition:"Poor", value:450 },
+  { name:"Google Pixel 10 Pro XL 5G", condition:"Good", value:830 },
+  { name:"Google Pixel 10 Pro XL 5G", condition:"Fair", value:830 },
+  { name:"Google Pixel 10 Pro XL 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 4", condition:"Good", value:450 },
+  { name:"Google Pixel 4", condition:"Fair", value:450 },
+  { name:"Google Pixel 4", condition:"Poor", value:450 },
+  { name:"Google Pixel 4 XL", condition:"Good", value:450 },
+  { name:"Google Pixel 4 XL", condition:"Fair", value:450 },
+  { name:"Google Pixel 4 XL", condition:"Poor", value:450 },
+  { name:"Google Pixel 4A", condition:"Good", value:450 },
+  { name:"Google Pixel 4A", condition:"Fair", value:450 },
+  { name:"Google Pixel 4A", condition:"Poor", value:450 },
+  { name:"Google Pixel 4A 5G", condition:"Good", value:450 },
+  { name:"Google Pixel 4A 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 4A 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 5 5G", condition:"Good", value:450 },
+  { name:"Google Pixel 5 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 5 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 5A 5G", condition:"Good", value:450 },
+  { name:"Google Pixel 5A 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 5A 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 6", condition:"Good", value:450 },
+  { name:"Google Pixel 6", condition:"Fair", value:450 },
+  { name:"Google Pixel 6", condition:"Poor", value:450 },
+  { name:"Google Pixel 6 Pro", condition:"Good", value:450 },
+  { name:"Google Pixel 6 Pro", condition:"Fair", value:450 },
+  { name:"Google Pixel 6 Pro", condition:"Poor", value:450 },
+  { name:"Google Pixel 6A", condition:"Good", value:450 },
+  { name:"Google Pixel 6A", condition:"Fair", value:450 },
+  { name:"Google Pixel 6A", condition:"Poor", value:450 },
+  { name:"Google Pixel 7 5G", condition:"Good", value:450 },
+  { name:"Google Pixel 7 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 7 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 7 Pro 5G", condition:"Good", value:450 },
+  { name:"Google Pixel 7 Pro 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 7 Pro 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 7A 5G", condition:"Good", value:450 },
+  { name:"Google Pixel 7A 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 7A 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 8 5G", condition:"Good", value:450 },
+  { name:"Google Pixel 8 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 8 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 8 Pro 5G", condition:"Good", value:700 },
+  { name:"Google Pixel 8 Pro 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 8 Pro 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 8A 5G", condition:"Good", value:500 },
+  { name:"Google Pixel 8A 5G", condition:"Fair", value:450 },
+  { name:"Google Pixel 8A 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 9 5G", condition:"Good", value:700 },
+  { name:"Google Pixel 9 5G", condition:"Fair", value:500 },
+  { name:"Google Pixel 9 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 9 Pro 5G", condition:"Good", value:700 },
+  { name:"Google Pixel 9 Pro 5G", condition:"Fair", value:600 },
+  { name:"Google Pixel 9 Pro 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 9 Pro Fold 5G", condition:"Good", value:830 },
+  { name:"Google Pixel 9 Pro Fold 5G", condition:"Fair", value:700 },
+  { name:"Google Pixel 9 Pro Fold 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 9 Pro XL 5G", condition:"Good", value:700 },
+  { name:"Google Pixel 9 Pro XL 5G", condition:"Fair", value:600 },
+  { name:"Google Pixel 9 Pro XL 5G", condition:"Poor", value:450 },
+  { name:"Google Pixel 9A 5G", condition:"Good", value:830 },
+  { name:"Google Pixel 9A 5G", condition:"Fair", value:500 },
+  { name:"Google Pixel 9A 5G", condition:"Poor", value:450 },
+  { name:"LGIC Stylo 6", condition:"Good", value:450 },
+  { name:"LGIC Stylo 6", condition:"Fair", value:450 },
+  { name:"LGIC Stylo 6", condition:"Poor", value:450 },
+  { name:"LGIC V50 ThinQ 5G", condition:"Good", value:450 },
+  { name:"LGIC V50 ThinQ 5G", condition:"Fair", value:450 },
+  { name:"LGIC V50 ThinQ 5G", condition:"Poor", value:450 },
+  { name:"LGIC V60 ThinQ 5G", condition:"Good", value:450 },
+  { name:"LGIC V60 ThinQ 5G", condition:"Fair", value:450 },
+  { name:"LGIC V60 ThinQ 5G", condition:"Poor", value:450 },
+  { name:"Motorola Edge 5G 2025", condition:"Good", value:450 },
+  { name:"Motorola Edge 5G 2025", condition:"Fair", value:450 },
+  { name:"Motorola Edge 5G 2025", condition:"Poor", value:450 },
+  { name:"Motorola Moto G Play 2023", condition:"Good", value:450 },
+  { name:"Motorola Moto G Play 2023", condition:"Fair", value:450 },
+  { name:"Motorola Moto G Play 2023", condition:"Poor", value:450 },
+  { name:"Motorola Moto G Stylus 5G", condition:"Good", value:450 },
+  { name:"Motorola Moto G Stylus 5G", condition:"Fair", value:450 },
+  { name:"Motorola Moto G Stylus 5G", condition:"Poor", value:450 },
+  { name:"Motorola RAZR", condition:"Good", value:450 },
+  { name:"Motorola RAZR", condition:"Fair", value:450 },
+  { name:"Motorola RAZR", condition:"Poor", value:450 },
+  { name:"Motorola Razr 5G", condition:"Good", value:450 },
+  { name:"Motorola Razr 5G", condition:"Fair", value:450 },
+  { name:"Motorola Razr 5G", condition:"Poor", value:450 },
+  { name:"Motorola Razr 5G 2023", condition:"Good", value:450 },
+  { name:"Motorola Razr 5G 2023", condition:"Fair", value:450 },
+  { name:"Motorola Razr 5G 2023", condition:"Poor", value:450 },
+  { name:"Motorola Razr 5G 2024", condition:"Good", value:450 },
+  { name:"Motorola Razr 5G 2024", condition:"Fair", value:450 },
+  { name:"Motorola Razr 5G 2024", condition:"Poor", value:450 },
+  { name:"Motorola Razr 5G 2025", condition:"Good", value:450 },
+  { name:"Motorola Razr 5G 2025", condition:"Fair", value:450 },
+  { name:"Motorola Razr 5G 2025", condition:"Poor", value:450 },
+  { name:"Motorola Razr Plus 5G 2023", condition:"Good", value:450 },
+  { name:"Motorola Razr Plus 5G 2023", condition:"Fair", value:450 },
+  { name:"Motorola Razr Plus 5G 2023", condition:"Poor", value:450 },
+  { name:"ONEPLUS 8 5G", condition:"Good", value:450 },
+  { name:"ONEPLUS 8 5G", condition:"Fair", value:450 },
+  { name:"ONEPLUS 8 5G", condition:"Poor", value:450 },
+  { name:"ONEPLUS 8 PRO 5G", condition:"Good", value:450 },
+  { name:"ONEPLUS 8 PRO 5G", condition:"Fair", value:450 },
+  { name:"ONEPLUS 8 PRO 5G", condition:"Poor", value:450 },
+  { name:"ONEPLUS 8T", condition:"Good", value:450 },
+  { name:"ONEPLUS 8T", condition:"Fair", value:450 },
+  { name:"ONEPLUS 8T", condition:"Poor", value:450 },
+  { name:"ONEPLUS 8T PLUS 5G", condition:"Good", value:450 },
+  { name:"ONEPLUS 8T PLUS 5G", condition:"Fair", value:450 },
+  { name:"ONEPLUS 8T PLUS 5G", condition:"Poor", value:450 },
+  { name:"ONEPLUS 9 5G", condition:"Good", value:450 },
+  { name:"ONEPLUS 9 5G", condition:"Fair", value:450 },
+  { name:"ONEPLUS 9 5G", condition:"Poor", value:450 },
+  { name:"ONEPLUS 9 PRO 5G", condition:"Good", value:450 },
+  { name:"ONEPLUS 9 PRO 5G", condition:"Fair", value:450 },
+  { name:"ONEPLUS 9 PRO 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A13 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A13 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A13 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A14 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A14 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A14 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A16 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A16 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A16 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A25 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A25 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A25 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A26 5G", condition:"Good", value:700 },
+  { name:"Samsung Galaxy A26 5G", condition:"Fair", value:600 },
+  { name:"Samsung Galaxy A26 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A32 4G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A32 4G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A32 4G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A32 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A32 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A32 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A35 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A35 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A35 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A36 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A36 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A36 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A42 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A42 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A42 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A50", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A50", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A50", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A51", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A51", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A51", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A51 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A51 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A51 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A52 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A52 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A52 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A53 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A53 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A53 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A54 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A54 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A54 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A70", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A70", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A70", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A71", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A71", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A71", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A71 5G UW", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A71 5G UW", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A71 5G UW", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy A72", condition:"Good", value:450 },
+  { name:"Samsung Galaxy A72", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy A72", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Fold 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Fold 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Fold 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 10", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 10", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 10", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 10 Lite (6GB)", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 10 Lite (6GB)", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 10 Lite (6GB)", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 20 4G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 20 4G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 20 4G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 20 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 20 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 20 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 20 Ultra 4G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 20 Ultra 4G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 20 Ultra 4G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 20 Ultra 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 20 Ultra 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 20 Ultra 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 8", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 8", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 8", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Note 9", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Note 9", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Note 9", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S10", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S10", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S10", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S10E", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S10E", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S10E", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S10 Lite", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S10 Lite", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S10 Lite", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S10 Plus", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S10 Plus", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S10 Plus", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S20 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S20 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S20 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S20 5G UW", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S20 5G UW", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S20 5G UW", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S20 Fan Edition 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S20 Fan Edition 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S20 Fan Edition 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S20 Plus", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S20 Plus", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S20 Plus", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S20 Plus 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S20 Plus 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S20 Plus 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S20 Ultra 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S20 Ultra 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S20 Ultra 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S21 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S21 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S21 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S21 Fan Edition 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S21 Fan Edition 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S21 Fan Edition 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S21 Plus 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S21 Plus 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S21 Plus 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S21 Ultra 5G", condition:"Good", value:500 },
+  { name:"Samsung Galaxy S21 Ultra 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S21 Ultra 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S22 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S22 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S22 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S22 Plus 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S22 Plus 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S22 Plus 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S22 Ultra 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S22 Ultra 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S22 Ultra 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S23 5G", condition:"Good", value:600 },
+  { name:"Samsung Galaxy S23 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S23 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S23 Fan Edition 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S23 Fan Edition 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S23 Fan Edition 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S23 Plus 5G", condition:"Good", value:600 },
+  { name:"Samsung Galaxy S23 Plus 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S23 Plus 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S23 Ultra 5G", condition:"Good", value:700 },
+  { name:"Samsung Galaxy S23 Ultra 5G", condition:"Fair", value:600 },
+  { name:"Samsung Galaxy S23 Ultra 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S24 5G", condition:"Good", value:600 },
+  { name:"Samsung Galaxy S24 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S24 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S24 FE 5G", condition:"Good", value:600 },
+  { name:"Samsung Galaxy S24 FE 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S24 FE 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S24 Plus 5G", condition:"Good", value:700 },
+  { name:"Samsung Galaxy S24 Plus 5G", condition:"Fair", value:600 },
+  { name:"Samsung Galaxy S24 Plus 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S24 Ultra 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy S24 Ultra 5G", condition:"Fair", value:600 },
+  { name:"Samsung Galaxy S24 Ultra 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S25 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy S25 5G", condition:"Fair", value:600 },
+  { name:"Samsung Galaxy S25 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S25 Edge 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy S25 Edge 5G", condition:"Fair", value:700 },
+  { name:"Samsung Galaxy S25 Edge 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S25 FE 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy S25 FE 5G", condition:"Fair", value:700 },
+  { name:"Samsung Galaxy S25 FE 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S25 Plus 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy S25 Plus 5G", condition:"Fair", value:700 },
+  { name:"Samsung Galaxy S25 Plus 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S25 Ultra 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy S25 Ultra 5G", condition:"Fair", value:700 },
+  { name:"Samsung Galaxy S25 Ultra 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S8", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S8", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S8", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S8 PLUS", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S8 PLUS", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S8 PLUS", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S9", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S9", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S9", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy S9 Plus", condition:"Good", value:450 },
+  { name:"Samsung Galaxy S9 Plus", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy S9 Plus", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 5G Thom Browne", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 5G Thom Browne", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 5G Thom Browne", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 Bespoke", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 Bespoke", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 3 Bespoke", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 4 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip 4 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 4 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 4 Bespoke", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip 4 Bespoke", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 4 Bespoke", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 5 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip 5 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 5 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Flip 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 6 5G", condition:"Good", value:700 },
+  { name:"Samsung Galaxy Z Flip 6 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Flip 6 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 7 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy Z Flip 7 5G", condition:"Fair", value:700 },
+  { name:"Samsung Galaxy Z Flip 7 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Flip 7 FE 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy Z Flip 7 FE 5G", condition:"Fair", value:700 },
+  { name:"Samsung Galaxy Z Flip 7 FE 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Fold 3 5G", condition:"Good", value:500 },
+  { name:"Samsung Galaxy Z Fold 3 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Fold 3 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Fold 4 5G", condition:"Good", value:500 },
+  { name:"Samsung Galaxy Z Fold 4 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Fold 4 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Fold 5 5G", condition:"Good", value:700 },
+  { name:"Samsung Galaxy Z Fold 5 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Fold 5 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Fold 6 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy Z Fold 6 5G", condition:"Fair", value:700 },
+  { name:"Samsung Galaxy Z Fold 6 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Fold 7 5G", condition:"Good", value:1100 },
+  { name:"Samsung Galaxy Z Fold 7 5G", condition:"Fair", value:1100 },
+  { name:"Samsung Galaxy Z Fold 7 5G", condition:"Poor", value:450 },
+  { name:"Samsung Galaxy Z Fold2 5G", condition:"Good", value:450 },
+  { name:"Samsung Galaxy Z Fold2 5G", condition:"Fair", value:450 },
+  { name:"Samsung Galaxy Z Fold2 5G", condition:"Poor", value:450 },
+  { name:"Samsung Note 10 Plus", condition:"Good", value:450 },
+  { name:"Samsung Note 10 Plus", condition:"Fair", value:450 },
+  { name:"Samsung Note 10 Plus", condition:"Poor", value:450 },
+  { name:"Samsung Note 10 Plus 5G", condition:"Good", value:450 },
+  { name:"Samsung Note 10 Plus 5G", condition:"Fair", value:450 },
+  { name:"Samsung Note 10 Plus 5G", condition:"Poor", value:450 }
+];
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let state = {
+  plan: 'intro',
+  tier: '',
+  phonePrice: 0,
+  phoneName: '',
+  promoAmt: 0,
+  tradeValue: 0,
+  tradeName: '',
+  tradeCondition: '',
+  watchPrice: 0,
+  watchName: '',
+  membershipDiscount: 0,
+  tabletPrice: 0,
+  tabletName: '',
+  soldOnSpot: '',
+  currentCoreBill: 0,
+  currentMobileBill: 0,
+  newCoreBill: 0,
+  newMobileBillOverride: 0,   // manual override; 0 means use auto
+};
+
+// ══════════════════════════════════════════════════
+//  AUTO DATE
+// ══════════════════════════════════════════════════
+// date init moved to consolidated DOMContentLoaded below
+
+// ══════════════════════════════════════════════════
+//  PLAN TOGGLE
+// ══════════════════════════════════════════════════
+function selectPlan(btn) {
+  document.querySelectorAll('.intake-plan-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.plan = btn.dataset.plan;
+  document.getElementById('selectedPlan').value = state.plan;
+  recalcPhoneRow();
+  renderActivePromos();
+  updatePreview();
+}
+
+// ══════════════════════════════════════════════════
+//  REWARD TIER
+// ══════════════════════════════════════════════════
+function selectReward(btn) {
+  document.querySelectorAll('.intake-reward-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.tier = btn.dataset.tier;
+  document.getElementById('selectedTier').value = state.tier;
+
+  // Auto-apply $300 Diamond watch discount — no separate button needed
+  const isDiamond = state.tier === 'diamond';
+  state.membershipDiscount = isDiamond ? 300 : 0;
+  document.getElementById('selectedMembershipDiscount').value = state.membershipDiscount;
+
+  // Re-run watch row with new discount (diamond note is inside the row)
+  recalcWatchRow();
+  renderActivePromos();
+  updatePreview();
+}
+
+// ══════════════════════════════════════════════════
+//  XMC TIERS (based on full retail price)
+// ══════════════════════════════════════════════════
+const XMC_TIERS = [
+  { maxPrice: 300.99,   monthly: 9  },
+  { maxPrice: 949.99,   monthly: 15 },
+  { maxPrice: 1194.99,  monthly: 17 },
+  { maxPrice: Infinity, monthly: 19 },
+];
+function getXmcRate(price) {
+  for (const t of XMC_TIERS) { if (price <= t.maxPrice) return t.monthly; }
+  return 19;
+}
+
+// ══════════════════════════════════════════════════
+//  DEVICE ROW AUTOCOMPLETE (T-Sheet style)
+// ══════════════════════════════════════════════════
+function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
+  var _selected = false; // tracks whether a selection is in progress
+
+  function closeList() {
+    listEl.classList.remove('open');
+    listEl.innerHTML = '';
+  }
+
+  function renderList(q) {
+    var query = (q || '').trim().toLowerCase();
+    var matches = query.length === 0
+      ? dataset.slice(0, 60)
+      : dataset.filter(function(d) { return d.name.toLowerCase().indexOf(query) !== -1; }).slice(0, 60);
+    listEl.innerHTML = '';
+    if (!matches.length) { listEl.classList.remove('open'); return; }
+
+    matches.forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 'df-dropdown-item';
+      var priceStr = (item.condition && item.value != null)
+        ? (item.condition + ' \u00b7 $' + item.value)
+        : (item.price != null ? ('$' + Number(item.price).toFixed(2)) : '');
+      var label = item.name + (item.condition ? ' \u2014 ' + item.condition : '');
+      div.innerHTML = '<span>' + label + '</span><span class="item-price">' + priceStr + '</span>';
+
+      // mousedown fires before blur — use it to set the flag
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault(); // prevent input losing focus
+        _selected = true;
+      });
+
+      // click fires after mousedown+mouseup — reliable on all platforms
+      div.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        _selected = true;
+        // 1. Set the input value immediately and visibly
+        inputEl.value = label;
+        // 2. Close the dropdown right away
+        closeList();
+        // 3. Call onSelect (may trigger recalcs — value is already set so it won't clear)
+        try { onSelect(item); } catch(err) {}
+        // 4. Keep focus on input so keyboard doesn't pop back on mobile
+        inputEl.focus();
+        setTimeout(function() { _selected = false; }, 500);
+      });
+
+      // Touch devices: touchstart sets flag, touchend triggers selection
+      div.addEventListener('touchstart', function(e) {
+        _selected = true;
+      }, { passive: true });
+
+      div.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        _selected = true;
+        inputEl.value = label;
+        closeList();
+        try { onSelect(item); } catch(err) {}
+        setTimeout(function() { _selected = false; }, 500);
+      });
+
+      listEl.appendChild(div);
+    });
+    listEl.classList.add('open');
+  }
+
+  inputEl.addEventListener('input', function() { renderList(inputEl.value); });
+  inputEl.addEventListener('focus', function() { renderList(inputEl.value); });
+  inputEl.addEventListener('blur',  function() {
+    // Only close if user didn't just click a list item
+    setTimeout(function() {
+      if (!_selected) closeList();
+    }, 250);
+  });
+
+  // Close if clicking anywhere outside
+  document.addEventListener('mousedown', function(e) {
+    if (!listEl.contains(e.target) && e.target !== inputEl) {
+      if (!_selected) closeList();
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  DEVICE COUNT STATE
+// ══════════════════════════════════════════════════
+let phoneCounts = 1, watchCounts = 0, tabletCounts = 0;
+
+// ── Watch and tablet data sorted by brand then price low→high ──
+// Apple watches for Apple phones, Samsung/Android watches for Samsung/Google/Motorola
+const WATCHES_APPLE = [
+  { name:"Apple Watch SE 40mm",       price:299.99 },
+  { name:"Apple Watch SE 3 40mm",     price:299.99 },
+  { name:"Apple Watch SE 44mm",       price:329.99 },
+  { name:"Apple Watch SE 3 44mm",     price:329.99 },
+  { name:"Apple Watch Series 10 42mm",price:499.99 },
+  { name:"Apple Watch Series 11 42mm",price:499.99 },
+  { name:"Apple Watch Series 10 46mm",price:529.99 },
+  { name:"Apple Watch Series 11 46mm",price:529.99 },
+  { name:"Apple Watch Ultra 2 49mm",  price:799.99 },
+  { name:"Apple Watch Ultra 3 49mm",  price:799.99 },
+  // Android watches follow for mixed households
+  { name:"Galaxy Watch8 40mm",        price:399.99 },
+  { name:"Galaxy Watch8 44mm",        price:429.99 },
+  { name:"Pixel Watch 4 41mm",        price:449.99 },
+  { name:"Pixel Watch 4 45mm",        price:499.99 },
+  { name:"Galaxy Watch8 Classic",     price:549.99 },
+  { name:"Galaxy Watch Ultra 47mm",   price:649.99 },
+];
+const WATCHES_ANDROID = [
+  // Samsung/Google/Motorola → lead with Samsung/Pixel watches
+  { name:"Galaxy Watch8 40mm",        price:399.99 },
+  { name:"Galaxy Watch8 44mm",        price:429.99 },
+  { name:"Pixel Watch 4 41mm",        price:449.99 },
+  { name:"Pixel Watch 4 45mm",        price:499.99 },
+  { name:"Galaxy Watch8 Classic",     price:549.99 },
+  { name:"Galaxy Watch Ultra 47mm",   price:649.99 },
+  // Apple watches follow for mixed households
+  { name:"Apple Watch SE 40mm",       price:299.99 },
+  { name:"Apple Watch SE 3 40mm",     price:299.99 },
+  { name:"Apple Watch SE 44mm",       price:329.99 },
+  { name:"Apple Watch SE 3 44mm",     price:329.99 },
+  { name:"Apple Watch Series 10 42mm",price:499.99 },
+  { name:"Apple Watch Series 11 42mm",price:499.99 },
+  { name:"Apple Watch Series 10 46mm",price:529.99 },
+  { name:"Apple Watch Series 11 46mm",price:529.99 },
+  { name:"Apple Watch Ultra 2 49mm",  price:799.99 },
+  { name:"Apple Watch Ultra 3 49mm",  price:799.99 },
+];
+const TABLETS_APPLE = [
+  { name:"iPad (A16) 64GB",              price: 499.99 },
+  { name:"iPad mini 7th Gen 128GB",      price: 649.99 },
+  { name:"iPad Air 11-inch (M3) 128GB",  price: 749.99 },
+  { name:"iPad Air 11-inch (M4) 128GB",  price: 749.99 },
+  { name:"iPad Air 11-inch (M4) 256GB",  price: 849.99 },
+  { name:"iPad Air 13-inch (M3) 128GB",  price: 949.99 },
+  { name:"iPad Air 13-inch (M4) 128GB",  price: 949.99 },
+  { name:"iPad Air 13-inch (M4) 256GB",  price:1049.99 },
+  { name:"iPad Pro 11-inch (M5) 256GB",  price:1199.99 },
+  { name:"iPad Pro 11-inch (M5) 512GB",  price:1399.99 },
+  { name:"iPad Pro 13-inch (M5) 256GB",  price:1499.99 },
+  { name:"iPad Pro 13-inch (M5) 512GB",  price:1699.99 },
+  // Samsung tablets follow
+  { name:"Galaxy Tab A9+ 64GB",          price: 269.99 },
+  { name:"Galaxy Tab A11+ 5G 128GB",     price: 279.99 },
+  { name:"Galaxy Tab S10 FE 5G 128GB",   price: 599.99 },
+];
+const TABLETS_ANDROID = [
+  // Samsung/Android → lead with Samsung tablets
+  { name:"Galaxy Tab A9+ 64GB",          price: 269.99 },
+  { name:"Galaxy Tab A11+ 5G 128GB",     price: 279.99 },
+  { name:"Galaxy Tab S10 FE 5G 128GB",   price: 599.99 },
+  // Apple tablets follow
+  { name:"iPad (A16) 64GB",              price: 499.99 },
+  { name:"iPad mini 7th Gen 128GB",      price: 649.99 },
+  { name:"iPad Air 11-inch (M3) 128GB",  price: 749.99 },
+  { name:"iPad Air 11-inch (M4) 128GB",  price: 749.99 },
+  { name:"iPad Air 11-inch (M4) 256GB",  price: 849.99 },
+  { name:"iPad Air 13-inch (M3) 128GB",  price: 949.99 },
+  { name:"iPad Air 13-inch (M4) 128GB",  price: 949.99 },
+  { name:"iPad Air 13-inch (M4) 256GB",  price:1049.99 },
+  { name:"iPad Pro 11-inch (M5) 256GB",  price:1199.99 },
+  { name:"iPad Pro 11-inch (M5) 512GB",  price:1399.99 },
+  { name:"iPad Pro 13-inch (M5) 256GB",  price:1499.99 },
+  { name:"iPad Pro 13-inch (M5) 512GB",  price:1699.99 },
+];
+
+// Returns watch/tablet list sorted to match the customer's phone brand
+function getWatchData()  {
+  const n = (state.phoneName || '').toLowerCase();
+  return (n.startsWith('apple') || n.startsWith('iphone')) ? WATCHES_APPLE : WATCHES_ANDROID;
+}
+function getTabletData() {
+  const n = (state.phoneName || '').toLowerCase();
+  return (n.startsWith('apple') || n.startsWith('iphone')) ? TABLETS_APPLE : TABLETS_ANDROID;
+}
+
+// Default fallback (no phone selected yet) — show Apple first alphabetically
+const WATCHES_DATA = WATCHES_APPLE;
+const TABLETS_DATA = TABLETS_APPLE;
+
+// ── Row data store ──
+const rowData = {}; // key: "phone-1", "watch-2", etc.
+function getRowData(type, num) {
+  const key = `${type}-${num}`;
+  if (!rowData[key]) rowData[key] = { price:0, name:'', tradeValue:0, tradeName:'', tradeCondition:'', noTrade:false, xmcEnabled:false, xmcRate:0, promoAmt:0, premium:false };
+  return rowData[key];
+}
+
+// ══════════════════════════════════════════════════
+//  COUNT PICKER — rebuild rows when count changes
+// ══════════════════════════════════════════════════
+function setDeviceCount(type, val, btn) {
+  document.querySelectorAll(`#${type}-count-btns .wt-count-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (type === 'phone')  { phoneCounts  = val; rebuildRows('phone',  val, 'phone-rows-container'); }
+  if (type === 'watch')  { watchCounts  = val; rebuildRows('watch',  val, 'watch-rows-container'); }
+  if (type === 'tablet') { tabletCounts = val; rebuildRows('tablet', val, 'tablet-rows-container'); }
+  try { syncStateFromAllRows(); } catch(e) {}
+}
+
+// ── Build / rebuild device rows for a type ──
+function rebuildRows(type, count, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    container.appendChild(buildRow(type, i));
+  }
+  // Wire up autocompletes after DOM insertion
+  for (let i = 1; i <= count; i++) wireRowAutocomplete(type, i);
+  // Show diamond note on all watch rows if diamond tier selected
+  if (type === 'watch') refreshWatchDiamondNotes();
+}
+
+// ── Build a single row DOM element ──
+function buildRow(type, num) {
+  const rowId = `${type}-row-${num}`;
+  const row = document.createElement('div');
+  row.className = 'df-row';
+  row.id = rowId;
+
+  const emoji = type === 'phone' ? num : (type === 'watch' ? '⌚' : '📋');
+  const lineLabel = type === 'phone' ? `Line ${num}` : (type === 'watch' ? `Watch ${num} · +$10/mo line fee` : `Tablet ${num} · +$20/mo line fee`);
+  const placeholder = type === 'phone' ? 'Search phones...' : (type === 'watch' ? 'Search watches...' : 'Search tablets...');
+
+  let extraFields = '';
+  if (type === 'phone') {
+    extraFields = `
+      <div class="df-field-group">
+        <div class="df-field-label">TIPS Trade-In Promotion</div>
+        <div class="df-autocomplete-wrap">
+          <input type="text" id="${rowId}-trade" placeholder="Search trade-in phones..." autocomplete="off">
+          <div class="df-dropdown-list" id="${rowId}-trade-list"></div>
+        </div>
+        <div class="df-no-trade-wrap">
+          <input type="checkbox" id="${rowId}-notrade">
+          <label for="${rowId}-notrade">No trade-in</label>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#f3e8ff,#e8d5ff);border:2px solid var(--xfinity-purple);border-radius:8px;padding:11px 14px;display:flex;align-items:center;gap:12px;">
+        <input type="checkbox" id="${rowId}-premium" style="width:17px;height:17px;accent-color:var(--xfinity-purple);cursor:pointer;flex-shrink:0;">
+        <label for="${rowId}-premium" style="font-size:12px;font-weight:700;color:var(--xfinity-purple);cursor:pointer;line-height:1.3;flex:1;min-width:0;">
+          Upgrade to Premium
+          <span style="font-weight:500;font-size:11px;display:block;color:var(--xfinity-purple-dark);margin-top:1px;">+$10/mo · Required for TIPS</span>
+        </label>
+        <div style="width:1px;background:rgba(103,19,210,0.25);align-self:stretch;flex-shrink:0;"></div>
+        <input type="checkbox" id="${rowId}-xmc" style="width:17px;height:17px;accent-color:var(--xfinity-purple);cursor:pointer;flex-shrink:0;">
+        <label id="${rowId}-xmc-lbl" for="${rowId}-xmc" style="font-size:12px;font-weight:700;color:var(--xfinity-purple);cursor:pointer;line-height:1.3;flex:1;min-width:0;">
+          Add XMC Insurance
+          <span style="font-weight:500;font-size:11px;display:block;color:var(--xfinity-purple-dark);margin-top:1px;">Select device first</span>
+        </label>
+      </div>`;
+  }
+  if (type === 'watch') {
+    extraFields = `<div id="${rowId}-diamond-note" style="display:none;background:linear-gradient(135deg,#e0f0ff,#b9d4f5);border:1.5px solid #6ca0dc;border-radius:var(--radius-sm);padding:8px 12px;"><div style="font-size:12px;font-weight:700;color:#1a5fa0;">💎 Diamond — $300 Off Applied Automatically</div></div>`;
+  }
+
+  row.innerHTML = `
+    <div class="df-row-header">
+      <div class="df-line-num">${emoji}</div>
+      <div class="df-row-header-label">${lineLabel}</div>
+      <div class="df-monthly-inline" id="${rowId}-monthly"><span style="color:var(--text-muted);font-size:12px;">—</span></div>
+    </div>
+    <div class="df-row-body">
+      <div class="df-field-group">
+        <div class="df-field-label">${type === 'phone' ? 'Device' : (type === 'watch' ? 'Watch' : 'Tablet')}</div>
+        <div class="df-autocomplete-wrap">
+          <input type="text" id="${rowId}-device" placeholder="${placeholder}" autocomplete="off">
+          <div class="df-dropdown-list" id="${rowId}-device-list"></div>
+        </div>
+        <div class="df-storage-picker" id="${rowId}-storage" style="display:none;flex-wrap:wrap;gap:7px;margin-top:6px;"></div>
+      </div>
+      ${extraFields}
+      <div class="df-no-trade-wrap" style="background:var(--surface-3);border-radius:8px;padding:10px 12px;border:1.5px solid var(--border);${type === 'phone' ? 'display:none;' : ''}" id="${rowId}-xmc-wrap">
+        <input type="checkbox" id="${type !== 'phone' ? rowId+'-xmc' : rowId+'-xmc-hidden'}" style="width:16px;height:16px;accent-color:var(--xfinity-purple);cursor:pointer;flex-shrink:0;">
+        <label id="${type !== 'phone' ? rowId+'-xmc-lbl' : ''}" for="${type !== 'phone' ? rowId+'-xmc' : rowId+'-xmc-hidden'}" style="font-size:13px;font-weight:600;color:var(--xfinity-purple);cursor:pointer;">Add XMC Insurance (select device first)</label>
+      </div>
+    </div>`;
+  return row;
+}
+
+// ── Wire autocomplete for a single row ──
+function wireRowAutocomplete(type, num) {
+  const rowId     = `${type}-row-${num}`;
+  const deviceInp = document.getElementById(`${rowId}-device`);
+  const deviceList= document.getElementById(`${rowId}-device-list`);
+  const storagePkr= document.getElementById(`${rowId}-storage`);
+  const xmcChk    = document.getElementById(`${rowId}-xmc`);
+  const xmcLbl    = document.getElementById(`${rowId}-xmc-lbl`);
+  const monthlyEl = document.getElementById(`${rowId}-monthly`);
+  if (!deviceInp) return;
+
+  const dataset = type === 'phone' ? PHONES : (type === 'watch' ? getWatchData() : getTabletData());
+
+  makeDfAutocomplete(deviceInp, deviceList, dataset, (item) => {
+    const d = getRowData(type, num);
+    // Reset all fields when a new device is selected — prevents stale data
+    d.price = item.price;
+    d.name  = item.name;
+    d.promoAmt = 0;
+    d.tradeValue = 0;
+    d.tradeName = '';
+    d.tradeCondition = '';
+    d.noTrade = false;
+    // Clear trade-in input and re-enable it
+    const tradeInpEl = document.getElementById(`${type}-row-${num}-trade`);
+    const noTradeEl  = document.getElementById(`${type}-row-${num}-notrade`);
+    if (tradeInpEl) { tradeInpEl.value = ''; tradeInpEl.disabled = false; tradeInpEl.style.opacity = '1'; }
+    if (noTradeEl)  { noTradeEl.checked = false; }
+
+    // Storage picker (phones with variants)
+    storagePkr.innerHTML = '';
+    if (item.storage && item.storage.length > 0) {
+      const lbl = document.createElement('div');
+      lbl.className = 'df-field-label';
+      lbl.style.cssText = 'width:100%;margin-bottom:4px;';
+      lbl.textContent = 'Storage';
+      storagePkr.appendChild(lbl);
+      item.storage.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'df-storage-btn' + (idx === 0 ? ' active' : '');
+        btn.innerHTML = `<span class="storage-check">✓</span>${opt.gb}<span class="df-storage-price"> $${opt.price.toFixed(2)}</span>`;
+        btn.addEventListener('click', () => {
+          storagePkr.querySelectorAll('.df-storage-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          d.price = opt.price;
+          const rate = getXmcRate(opt.price);
+          d.xmcRate = rate;
+          if (xmcLbl) xmcLbl.textContent = `Add XMC Insurance ($${rate}/mo)`;
+          recalcRow(type, num);
+        });
+        storagePkr.appendChild(btn);
+      });
+      storagePkr.style.display = 'flex';
+      // Default to first storage option
+      d.price = item.storage[0].price;
+    } else {
+      storagePkr.style.display = 'none';
+    }
+
+    const rate = getXmcRate(d.price);
+    d.xmcRate = rate;
+    if (xmcLbl) xmcLbl.textContent = `Add XMC Insurance ($${rate}/mo)`;
+    recalcRow(type, num);
+
+    // When a phone is selected, re-wire watch/tablet dropdowns + auto-populate accessories
+    if (type === 'phone') {
+      setTimeout(function() {
+        rewireAccessoryDropdowns();
+        autoPopulateAccessories(item.name);
+      }, 30);
+    }
+  });
+
+  // Trade-in (phones only)
+  if (type === 'phone') {
+    const tradeInp  = document.getElementById(`${rowId}-trade`);
+    const tradeList = document.getElementById(`${rowId}-trade-list`);
+    const noTrade   = document.getElementById(`${rowId}-notrade`);
+    if (tradeInp) {
+      makeDfAutocomplete(tradeInp, tradeList, TRADE_INS, (item) => {
+        const d = getRowData('phone', num);
+        d.tradeValue = item.value;
+        d.tradeName  = item.name;
+        d.tradeCondition = item.condition || '';
+        d.noTrade = false;
+        noTrade.checked = false;
+        tradeInp.value = `${item.name} — ${item.condition} · $${item.value}`;
+        recalcRow('phone', num);
+      });
+      noTrade.addEventListener('change', () => {
+        const d = getRowData('phone', num);
+        d.noTrade = noTrade.checked;
+        if (noTrade.checked) {
+          d.tradeValue = 0; d.tradeName = '';
+          tradeInp.value = '';
+          tradeInp.disabled = true; tradeInp.style.opacity = '0.4';
+        } else {
+          tradeInp.disabled = false; tradeInp.style.opacity = '1';
+        }
+        recalcRow('phone', num);
+      });
+    }
+  }
+
+  // XMC
+  if (xmcChk) {
+    xmcChk.addEventListener('change', () => {
+      const d = getRowData(type, num);
+      d.xmcEnabled = xmcChk.checked;
+      recalcRow(type, num);
+    });
+  }
+
+  // Per-line Premium upgrade checkbox (phones only)
+  if (type === 'phone') {
+    const premChk = document.getElementById(`${rowId}-premium`);
+    if (premChk) {
+      premChk.addEventListener('change', () => {
+        const d = getRowData('phone', num);
+        d.premium = premChk.checked;
+        recalcRow('phone', num);
+      });
+    }
+  }
+}
+
+// ── Recalculate a single row ──
+function recalcRow(type, num) {
+  const rowId     = `${type}-row-${num}`;
+  const monthlyEl = document.getElementById(`${rowId}-monthly`);
+  if (!monthlyEl) return;
+
+  const d = getRowData(type, num);
+  if (!d.price) {
+    monthlyEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">—</span>';
+    syncStateFromAllRows();
+    return;
+  }
+
+  const xmcAdd = d.xmcEnabled ? d.xmcRate : 0;
+
+  if (type === 'phone') {
+    // Use per-row premium state; fall back to global state.plan for legacy compat
+    const isPremium = d.premium || state.plan === 'premium';
+    const plan = isPremium ? 'premium' : 'intro';
+    const { promoAmt, promoLabel } = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, plan);
+    d.promoAmt = promoAmt;
+    const netCost = Math.max(0, d.price - promoAmt);
+    const monthly = netCost / 36 + xmcAdd;
+    // $10/mo plan upgrade only if this line is being upgraded to Premium
+    const planExtra = isPremium && promoAmt > 0 ? 10 : 0;
+    const promoLine   = promoAmt   > 0 ? `<span class="df-mo-promo">${promoLabel}</span>` : '';
+    const upgradeLine = planExtra  > 0 ? `<span class="df-mo-promo upgrade">+$10/mo plan upgrade</span>` : '';
+    const xmcLine     = xmcAdd     > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
+    monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${promoLine}${upgradeLine}${xmcLine}`;
+  } else if (type === 'watch') {
+    const discount = state.membershipDiscount;
+    const netPrice = Math.max(0, d.price - discount);
+    const monthly  = netPrice / 36 + 10 + xmcAdd;
+    const note = document.getElementById(`${rowId}-diamond-note`);
+    if (note) note.style.display = discount > 0 ? 'block' : 'none';
+    const discLine = discount > 0 ? `<span class="df-mo-promo">−$${discount} Diamond</span>` : '';
+    const xmcLine  = xmcAdd   > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
+    monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${discLine}${xmcLine}`;
+  } else {
+    const monthly = d.price / 36 + 20 + xmcAdd;
+    const xmcLine = xmcAdd > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
+    monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${xmcLine}`;
+  }
+
+  syncStateFromAllRows();
+}
+
+// ── Show/hide diamond notes on all watch rows ──
+function refreshWatchDiamondNotes() {
+  for (let i = 1; i <= watchCounts; i++) {
+    const note = document.getElementById(`watch-row-${i}-diamond-note`);
+    if (note) note.style.display = state.membershipDiscount > 0 ? 'block' : 'none';
+    recalcRow('watch', i);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  AUTO-PAIR cheapest watch/tablet when phone selected
+//  Apple  → cheapest Apple Watch + cheapest iPad
+//  Samsung→ cheapest Galaxy Watch + cheapest Galaxy Tab
+//  Google → cheapest Pixel Watch + cheapest Galaxy Tab
+//  Moto   → no watch + cheapest Galaxy Tab
+// ══════════════════════════════════════════════════
+function autoPopulateCheapestAccessories() {
+  var n = (state.phoneName || '').toLowerCase();
+  var isApple   = n.indexOf('apple') !== -1 || n.indexOf('iphone') !== -1;
+  var isSamsung = n.indexOf('samsung') !== -1 || n.indexOf('galaxy') !== -1;
+  var isGoogle  = n.indexOf('google') !== -1 || n.indexOf('pixel') !== -1;
+  var isMoto    = n.indexOf('motorola') !== -1 || n.indexOf('moto') !== -1;
+
+  // Cheapest watch per brand
+  var cheapestWatch = null;
+  if (isApple) {
+    cheapestWatch = { name: 'Apple Watch SE 40mm', price: 299.99 };
+  } else if (isSamsung) {
+    cheapestWatch = { name: 'Galaxy Watch8 40mm', price: 399.99 };
+  } else if (isGoogle) {
+    cheapestWatch = { name: 'Pixel Watch 4 41mm', price: 449.99 };
+  }
+  // Moto: no watch
+
+  // Cheapest tablet per brand
+  var cheapestTablet = null;
+  if (isApple) {
+    cheapestTablet = { name: 'iPad (A16) 64GB', price: 499.99 };
+  } else {
+    // Samsung, Google, Motorola all get Samsung tab
+    cheapestTablet = { name: 'Galaxy Tab A9+ 64GB', price: 269.99 };
+  }
+
+  // Auto-fill watch row 1 if watches count > 0, otherwise bump to 1
+  if (cheapestWatch && watchCounts === 0) {
+    // Don't force add if none selected — only auto-fill existing rows
+  }
+  if (cheapestWatch && watchCounts >= 1) {
+    autoFillRow('watch', 1, cheapestWatch);
+  }
+
+  // Auto-fill tablet row 1 if tablets count > 0
+  if (cheapestTablet && tabletCounts >= 1) {
+    autoFillRow('tablet', 1, cheapestTablet);
+  }
+
+  // If watches/tablets are at 0 and we have a recommendation, nudge the row
+  // but only suggest — don't force counts
+}
+
+function autoFillRow(type, num, item) {
+  var rowId = type + '-row-' + num;
+  var inp = document.getElementById(rowId + '-device');
+  if (!inp) return; // removed "|| inp.value" guard — always update when phone brand changes
+
+  inp.value = item.name;
+  var d = getRowData(type, num);
+  d.price = item.price;
+  d.name  = item.name;
+  var rate = getXmcRate(item.price);
+  d.xmcRate = rate;
+  var xmcLbl = document.getElementById(rowId + '-xmc-lbl');
+  if (xmcLbl) xmcLbl.textContent = 'Add XMC Insurance ($' + rate + '/mo)';
+  recalcRow(type, num);
+}
+
+// ── Re-wire watch/tablet dropdowns with brand-sorted lists when phone changes ──
+function rewireAccessoryDropdowns() {
+  for (let i = 1; i <= watchCounts;  i++) {
+    const inp  = document.getElementById(`watch-row-${i}-device`);
+    const list = document.getElementById(`watch-row-${i}-device-list`);
+    if (inp && list) {
+      list.innerHTML = '';
+      list.classList.remove('open');
+      makeDfAutocomplete(inp, list, getWatchData(), (item) => {
+        const d = getRowData('watch', i);
+        d.price = item.price; d.name = item.name;
+        const rate = getXmcRate(item.price);
+        d.xmcRate = rate;
+        const lbl = document.getElementById(`watch-row-${i}-xmc-lbl`);
+        if (lbl) lbl.textContent = `Add XMC Insurance ($${rate}/mo)`;
+        recalcRow('watch', i);
+      });
+    }
+  }
+  for (let i = 1; i <= tabletCounts; i++) {
+    const inp  = document.getElementById(`tablet-row-${i}-device`);
+    const list = document.getElementById(`tablet-row-${i}-device-list`);
+    if (inp && list) {
+      list.innerHTML = '';
+      list.classList.remove('open');
+      makeDfAutocomplete(inp, list, getTabletData(), (item) => {
+        const d = getRowData('tablet', i);
+        d.price = item.price; d.name = item.name;
+        const rate = getXmcRate(item.price);
+        d.xmcRate = rate;
+        const lbl = document.getElementById(`tablet-row-${i}-xmc-lbl`);
+        if (lbl) lbl.textContent = `Add XMC Insurance ($${rate}/mo)`;
+        recalcRow('tablet', i);
+      });
+    }
+  }
+  // Also update the brand hint labels
+  updateBrandHints();
+}
+
+// ── Auto-populate cheapest matching accessory when phone brand is selected ──
+function autoPopulateAccessories(phoneName) {
+  var n = (phoneName || '').toLowerCase();
+  var isApple   = n.indexOf('apple') !== -1 || n.indexOf('iphone') !== -1;
+  var isSamsung = n.indexOf('samsung') !== -1 || n.indexOf('galaxy') !== -1;
+  var isGoogle  = n.indexOf('google') !== -1 || n.indexOf('pixel') !== -1;
+  var isMoto    = n.indexOf('motorola') !== -1 || n.indexOf('moto') !== -1;
+
+  // Pick cheapest watch for this brand
+  var watchDefault = null;
+  var tabletDefault = null;
+
+  if (isApple) {
+    // Cheapest Apple watch
+    watchDefault  = WATCHES_APPLE[0];   // Apple Watch SE 40mm $299.99
+    tabletDefault = TABLETS_APPLE[0];   // iPad (A16) 64GB $499.99
+  } else if (isSamsung) {
+    // Cheapest Samsung watch + Samsung tablet
+    watchDefault  = WATCHES_ANDROID[0]; // Galaxy Watch8 40mm $399.99
+    tabletDefault = TABLETS_ANDROID[0]; // Galaxy Tab A9+ $269.99
+  } else if (isGoogle) {
+    // Pixel watch + Samsung tablet
+    watchDefault  = { name: 'Pixel Watch 4 41mm', price: 449.99 };
+    tabletDefault = TABLETS_ANDROID[0]; // Galaxy Tab A9+ $269.99
+  } else if (isMoto) {
+    // No Motorola watches — just Samsung tablet
+    watchDefault  = null;
+    tabletDefault = TABLETS_ANDROID[0]; // Galaxy Tab A9+ $269.99
+  }
+
+  // Only auto-populate if watch rows exist and have no selection yet
+  if (watchDefault && watchCounts > 0) {
+    var wd = getRowData('watch', 1);
+    if (!wd.price) {
+      wd.price = watchDefault.price;
+      wd.name  = watchDefault.name;
+      var wInp = document.getElementById('watch-row-1-device');
+      if (wInp) wInp.value = watchDefault.name;
+      var wLbl = document.getElementById('watch-row-1-xmc-lbl');
+      var wRate = getXmcRate(watchDefault.price);
+      wd.xmcRate = wRate;
+      if (wLbl) wLbl.textContent = 'Add XMC Insurance ($' + wRate + '/mo)';
+      recalcRow('watch', 1);
+    }
+  }
+
+  // Only auto-populate if tablet rows exist and have no selection yet
+  if (tabletDefault && tabletCounts > 0) {
+    var td = getRowData('tablet', 1);
+    if (!td.price) {
+      td.price = tabletDefault.price;
+      td.name  = tabletDefault.name;
+      var tInp = document.getElementById('tablet-row-1-device');
+      if (tInp) tInp.value = tabletDefault.name;
+      var tLbl = document.getElementById('tablet-row-1-xmc-lbl');
+      var tRate = getXmcRate(tabletDefault.price);
+      td.xmcRate = tRate;
+      if (tLbl) tLbl.textContent = 'Add XMC Insurance ($' + tRate + '/mo)';
+      recalcRow('tablet', 1);
+    }
+  }
+}
+
+// ── Show brand hint below watch/tablet section labels ──
+function updateBrandHints() {
+  const n = (state.phoneName || '').toLowerCase();
+  const isApple   = n.startsWith('apple') || n.includes('iphone');
+  const isSamsung = n.startsWith('samsung') || n.includes('galaxy');
+  const isAndroid = isSamsung || n.startsWith('google') || n.startsWith('moto');
+  const hint = document.getElementById('accessory-brand-hint');
+  if (!hint) return;
+  if (!state.phoneName) { hint.style.display = 'none'; return; }
+  hint.style.display = 'block';
+  if (isApple) {
+    hint.innerHTML = '🍎 Apple phone selected — showing <strong>Apple Watch &amp; iPad</strong> options first';
+    hint.style.color = '#1b5e20';
+    hint.style.background = 'linear-gradient(135deg,#e8f5e9,#c8e6c9)';
+    hint.style.borderColor = '#00C853';
+  } else {
+    hint.innerHTML = '🤖 Android phone selected — showing <strong>Samsung Galaxy Watch &amp; Tab</strong> options first (same ecosystem)';
+    hint.style.color = '#1a5fa0';
+    hint.style.background = 'linear-gradient(135deg,#e0f0ff,#b9d4f5)';
+    hint.style.borderColor = '#6ca0dc';
+  }
+}
+
+// ── Aggregate all row data into state and trigger downstream ──
+function syncStateFromAllRows() {
+  // Use first phone row for main state (legacy preview compat)
+  const p1 = getRowData('phone', 1);
+  state.phoneName  = p1.name  || '';
+  state.phonePrice = p1.price || 0;
+  state.promoAmt   = p1.promoAmt || 0;
+  state.tradeValue = p1.tradeValue || 0;
+  state.tradeName  = p1.tradeName || '';
+  state.tradeCondition = p1.tradeCondition || '';
+  // Derive global plan from first phone row's premium checkbox
+  state.plan = (p1.premium) ? 'premium' : 'intro';
+
+  // First watch and tablet for preview
+  const w1 = getRowData('watch', 1);
+  state.watchName  = w1.name  || '';
+  state.watchPrice = w1.price || 0;
+  const t1 = getRowData('tablet', 1);
+  state.tabletName  = t1.name  || '';
+  state.tabletPrice = t1.price || 0;
+
+  try { calcBillingComparison(); } catch(e) {}
+  try { renderActivePromos(); }    catch(e) {}
+  try { updatePreview(); }         catch(e) {}
+}
+
+// Legacy aliases for functions called from selectReward/selectPlan
+function recalcPhoneRow()  { for (let i=1;i<=phoneCounts; i++) recalcRow('phone', i); }
+function recalcWatchRow()  { refreshWatchDiamondNotes(); }
+function recalcTabletRow() { for (let i=1;i<=tabletCounts;i++) recalcRow('tablet',i); }
+function updateStateFromRows() { syncStateFromAllRows(); }
+
+// ── Init: build default rows on page load ──
+// row init moved to consolidated DOMContentLoaded below
+
+// ══════════════════════════════════════════════════
+//  BILLING COMPARISON CALC (input section)
+// ══════════════════════════════════════════════════
+
+function calcBillingComparison() {
+  try {
+  const _cce = document.getElementById('currentCoreBill');
+  const _cme = document.getElementById('currentMobileBill');
+  const _nce = document.getElementById('newCoreBill');
+  state.currentCoreBill   = _cce ? parseFloat(_cce.value)  || 0 : 0;
+  state.currentMobileBill = _cme ? parseFloat(_cme.value) || 0 : 0;
+  state.newCoreBill       = _nce ? parseFloat(_nce.value)       || 0 : 0;
+
+  const isOverride = false; // manual override removed — always use auto calculation
+  state.newMobileBillOverride = 0;
+
+  const standardUpgrade = getStandardUpgradeMonthly(); // full price ÷ 36, no discount
+  const autoNewMobile   = getAutoNewMobile();          // current mobile + discounted upgrade + accessories
+
+  // Update standard upgrade chip on before side
+  const stdEl = document.getElementById('standardUpgradeDisplay');
+  if (stdEl && stdEl.textContent !== undefined) {
+    stdEl.textContent = standardUpgrade > 0
+      ? `$${standardUpgrade.toFixed(2)}/mo`
+      : '$— (select phone above)';
+  }
+  const autoDisplay = document.getElementById('newMobileAutoValue');
+  if (autoDisplay) {
+    if (autoNewMobile > state.currentMobileBill) {
+      // Build a breakdown hint
+      const phonePart  = state.phonePrice > 0
+        ? ` + $${(Math.max(0, state.phonePrice - state.promoAmt) / 36).toFixed(2)} phone` : '';
+      const watchPart  = state.watchPrice > 0
+        ? ` + $${(Math.max(0, state.watchPrice - state.membershipDiscount) / 36 + 10).toFixed(2)} watch` : '';
+      const tabletPart = state.tabletPrice > 0
+        ? ` + $${(state.tabletPrice / 36 + 20).toFixed(2)} tablet` : '';
+      autoDisplay.textContent = `$${autoNewMobile.toFixed(2)}/mo`;
+      const subEl = document.getElementById('newMobileAutoSub');
+      if (subEl) subEl.textContent = `Current mobile $${state.currentMobileBill.toFixed(2)}${phonePart}${watchPart}${tabletPart}`;
+    } else {
+      autoDisplay.textContent = state.currentMobileBill > 0
+        ? `$${state.currentMobileBill.toFixed(2)}/mo (no upgrade selected)`
+        : '$— (enter current mobile bill above)';
+      const subEl = document.getElementById('newMobileAutoSub');
+      if (subEl) subEl.textContent = '';
+    }
+  }
+
+  const effectiveNewMobile = isOverride && state.newMobileBillOverride > 0
+    ? state.newMobileBillOverride
+    : autoNewMobile;
+
+  // BEFORE: current core + current mobile + full upgrade (no discount)
+  const beforeTotal = state.currentCoreBill + state.currentMobileBill + standardUpgrade;
+  // AFTER:  new core + new mobile (already includes current mobile + discounted upgrade + accessories)
+  const afterTotal  = state.newCoreBill + effectiveNewMobile;
+
+  const savings    = beforeTotal - afterTotal;
+  const hasSavings = beforeTotal > 0 && afterTotal > 0 && savings > 0;
+
+  // Update running totals in input section
+  const cTotEl = document.getElementById('currentTotalDisplay'); if (cTotEl) cTotEl.textContent = beforeTotal > 0 ? `$${beforeTotal.toFixed(2)}` : '$—';
+  const nTotEl = document.getElementById('newTotalDisplay'); if (nTotEl) nTotEl.textContent = afterTotal > 0 ? `$${afterTotal.toFixed(2)}` : '$—';
+
+  // Highlight the winning side
+  const _nTD = document.querySelector('#newTotalDisplay');
+  const newSideBar  = _nTD ? _nTD.closest('.billing-total-bar') : null;
+  const _cTD = document.querySelector('#currentTotalDisplay');
+  const currSideBar = _cTD ? _cTD.closest('.billing-total-bar') : null;
+  if (newSideBar && currSideBar) {
+    newSideBar.style.background  = hasSavings ? 'linear-gradient(135deg,#00C853,#00E676)' : '';
+    currSideBar.style.background = '';
+  }
+
+  // Savings bar in input section
+  const savingsBar = document.getElementById('billingSavingsBar');
+  if (hasSavings) {
+    const smd = document.getElementById('savingsMonthlyDisplay'); if (smd) smd.textContent = `$${savings.toFixed(2)}`;
+    // yearly element kept in DOM but hidden — no update needed
+    if (savingsBar) savingsBar.style.display = 'flex';
+  } else {
+    if (savingsBar) savingsBar.style.display = 'none';
+  }
+
+  // ── Rep-facing savings summary above the footer ──
+  const repSummary  = document.getElementById('repSavingsSummary');
+  const repSavAmt   = document.getElementById('repSavingsAmt');
+  const repBefore   = document.getElementById('repBeforeAmt');
+  const repAfter    = document.getElementById('repAfterAmt');
+  if (repSummary) {
+    if (hasSavings && beforeTotal > 0 && afterTotal > 0) {
+      repSummary.style.display = 'block';
+      if (repSavAmt) repSavAmt.textContent = `$${savings.toFixed(2)}`;
+      if (repBefore) repBefore.textContent = `$${beforeTotal.toFixed(2)}/mo`;
+      if (repAfter)  repAfter.textContent  = `$${afterTotal.toFixed(2)}/mo`;
+    } else {
+      repSummary.style.display = 'none';
+    }
+  }
+
+  updatePreview();
+  } catch(e) { console.warn('calcBillingComparison error:', e); }
+}
+
+// Helper: new Xfinity mobile bill — sums all phone rows with per-row premium
+function getAutoNewMobile() {
+  var phoneTotalMon    = 0;
+  var planUpgradeTotal = 0;
+  for (var i = 1; i <= phoneCounts; i++) {
+    var d = getRowData('phone', i);
+    if (d.price > 0) {
+      var isPrem = d.premium || state.plan === 'premium';
+      var planKey = isPrem ? 'premium' : 'intro';
+      var res = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, planKey);
+      phoneTotalMon += Math.max(0, d.price - res.promoAmt) / 36;
+      if (isPrem && res.promoAmt > 0) planUpgradeTotal += 10;
+    }
+  }
+  // Sum all watch rows
+  var watchTotalMon = 0;
+  for (var wi = 1; wi <= watchCounts; wi++) {
+    var wd = getRowData('watch', wi);
+    if (wd.price > 0) watchTotalMon += Math.max(0, wd.price - state.membershipDiscount) / 36 + 10;
+  }
+  // Sum all tablet rows
+  var tabletTotalMon = 0;
+  for (var ti = 1; ti <= tabletCounts; ti++) {
+    var td = getRowData('tablet', ti);
+    if (td.price > 0) tabletTotalMon += td.price / 36 + 20;
+  }
+
+  return state.currentMobileBill + planUpgradeTotal + phoneTotalMon + watchTotalMon + tabletTotalMon;
+}
+
+// Helper: before-side upgrade — full price ÷ 36 for ALL phones (no discount)
+function getStandardUpgradeMonthly() {
+  var total = 0;
+  for (var i = 1; i <= phoneCounts; i++) {
+    var d = getRowData('phone', i);
+    if (d.price > 0) total += d.price / 36;
+  }
+  return total;
+}
+
+// ══════════════════════════════════════════════════
+//  RENDER ACTIVE PROMOTIONS BANNER
+//  Builds a contextual list of which promos apply
+//  based on: phone brand, plan, trade-in, tier,
+//  watch, tablet selections
+// ══════════════════════════════════════════════════
+function renderActivePromos() {
+  const promos = [];
+  const name     = (state.phoneName || '').toLowerCase();
+  const isPremium = state.plan === 'premium';
+  const noTradeEl = document.getElementById('phone-row-1-notrade');
+  const noTrade   = noTradeEl ? noTradeEl.checked : false;
+  const hasTrade  = state.tradeValue > 0 && !noTrade;
+  const isSamsung = name.startsWith('samsung');
+  const isApple   = name.startsWith('apple');
+  const isGoogle  = name.startsWith('google');
+  const isMoto    = name.includes('motorola') || name.includes('moto');
+  const isNonSam  = isApple || isGoogle || isMoto;
+  const is17e     = name.includes('iphone 17e');
+  const isDiamond = state.tier === 'diamond';
+  const hasWatch  = state.watchPrice > 0;
+  const hasTablet = state.tabletPrice > 0;
+  const isA11     = (state.tabletName || '').toLowerCase().includes('a11');
+
+  // Always-on
+  promos.push({ text: '🚫 One-time waived line activation fee', note: 'Jan 15–Apr 21, 2026', type: 'always' });
+
+  // Phone-specific promos
+  if (state.phoneName) {
+    if (isSamsung) {
+      if (hasTrade && isPremium)
+        promos.push({ text: 'TIPS — Get up to $1,100 off select Samsung devices with trade-in (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'tips' });
+      else if (hasTrade && !isPremium)
+        promos.push({ text: 'TIPS — Get up to $500 off select Samsung devices with trade-in (Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'tips' });
+      if (!hasTrade && isPremium)
+        promos.push({ text: 'Get $500 off select Samsung devices (Premium Unlimited, no trade-in)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
+      else if (!hasTrade && !isPremium)
+        promos.push({ text: 'Get $200 off select Samsung devices (Unlimited, no trade-in)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
+      // $400 off applies to Samsung too (no trade required)
+      promos.push({ text: 'Get $400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
+    } else if (isNonSam) {
+      if (is17e) {
+        if (hasTrade && isPremium)
+          promos.push({ text: 'TIPS — iPhone 17e "On Us" with trade-in (Premium Unlimited)', note: 'Mar 4–Apr 21, 2026', type: 'tips' });
+        if (hasTrade && !isPremium)
+          promos.push({ text: 'TIPS — Up to $300 off iPhone 17e with trade-in (Unlimited)', note: 'Mar 4–Mar 23, 2026', type: 'tips' });
+        promos.push({ text: 'Get up to $400 off iPhone 17e (Premium Unlimited)', note: 'Mar 4–Apr 21, 2026', type: 'discount' });
+      } else {
+        if (hasTrade && isPremium)
+          promos.push({ text: 'TIPS — Get up to $830 off select Apple, Google, or Motorola devices with trade-in (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'tips' });
+        promos.push({ text: 'Get $400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
+      }
+    }
+  }
+
+  // Watch promos
+  if (hasWatch) {
+    if (isDiamond)
+      promos.push({ text: 'Diamond members can get $300 off select smartwatches', note: 'Mar 6–Apr 19, 2026', type: 'watch' });
+  }
+
+  // Tablet promos
+  if (hasTablet) {
+    if (isA11)
+      promos.push({ text: 'Get 50% off Samsung Galaxy Tab A11+', note: 'Mar 11–Mar 31, 2026', type: 'tablet' });
+  }
+
+  const typeColors = {
+    always:   '#5a5a7a',
+    tips:     '#00843D',
+    discount: '#6713D2',
+    watch:    '#0066CC',
+    tablet:   '#c47a00',
+  };
+
+  const renderItem = (p) => `
+    <li style="display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;color:${typeColors[p.type] || '#333'};">
+      <span style="flex:1;">${p.text}</span>
+      ${p.note ? `<span style="font-size:10px;font-weight:700;white-space:nowrap;background:rgba(0,0,0,0.07);border-radius:50px;padding:2px 8px;color:#555;">${p.note}</span>` : ''}
+    </li>`;
+
+  const html = promos.map(renderItem).join('');
+
+  // Form banner
+  const section = document.getElementById('sec-promos');
+  const list    = document.getElementById('promoBannerList');
+  if (section && list) {
+    list.innerHTML = html;
+    section.style.display = promos.length ? 'block' : 'none';
+  }
+
+}
+function selectSold(val) {
+  state.soldOnSpot = val;
+  document.getElementById('soldOnSpot').value = val;
+  const yesBtn = document.getElementById('soldYes');
+  const noBtn  = document.getElementById('soldNo');
+  yesBtn.className = 'sold-btn' + (val === 'yes' ? ' active-yes' : '');
+  noBtn.className  = 'sold-btn' + (val === 'no'  ? ' active-no'  : '');
+}
+
+// ══════════════════════════════════════════════════
+//  UPDATE PREVIEW
+// ══════════════════════════════════════════════════
+function safeEl(id) { return document.getElementById(id); }
+function safeText(id, val) { const e = safeEl(id); if (e) e.textContent = val; }
+function safeHTML(id, val) { const e = safeEl(id); if (e) e.innerHTML = val; }
+function safeDisplay(id, val) { const e = safeEl(id); if (e) e.style.display = val; }
+
+function updatePreview() {
+  const customerName = document.getElementById('customerFirstName').value.trim();
+  const repName      = document.getElementById('repName').value.trim();
+  const storeName    = document.getElementById('storeName').value;
+  const isPremium    = state.plan === 'premium';
+  const isIntro      = !isPremium;
+
+  // ── Info bar ──
+  safeText('pib-customer', customerName || '—');
+  safeText('pib-phone', document.getElementById('customerFirstName') ? (document.getElementById('customerPhone') ? document.getElementById('customerPhone').value || '—' : '—') : '—');
+  // Customer phone — read directly
+  const custPhoneEl = document.getElementById('customerPhone');
+  if (custPhoneEl) safeText('pib-phone', custPhoneEl.value || '—');
+  safeText('pib-plan', isPremium ? 'Unlimited Premium' : 'Unlimited Intro');
+  safeText('pib-tier', state.tier
+    ? state.tier.charAt(0).toUpperCase() + state.tier.slice(1) : '—');
+  safeText('pib-repName', repName || '—');
+  safeText('pib-store', storeName ? storeName.replace(' Xfinity Store', '') : '—');
+  const repEmailEl = document.getElementById('repEmail');
+  const repPhoneEl = document.getElementById('repPhone');
+  safeText('pib-repEmail', repEmailEl ? (repEmailEl.value || '—') : '—');
+  safeText('pib-repPhone', repPhoneEl ? (repPhoneEl.value || '—') : '—');
+  safeText('previewCustomerName', customerName ? `Hi, ${customerName}!` : '');
+
+  // ── Determine how many phones are actually filled ──
+  const allPhoneData = [];
+  for (var pi = 1; pi <= phoneCounts; pi++) {
+    const pd = getRowData('phone', pi);
+    if (pd.price > 0) allPhoneData.push({ num: pi, d: pd });
+  }
+  const hasAnyPhone = allPhoneData.length > 0;
+  const hasWatch  = !!(state.watchName  && state.watchPrice  > 0);
+  const hasTablet = !!(state.tabletName && state.tabletPrice > 0);
+
+  // For legacy single-phone preview elements, use first phone
+  const firstPhone = allPhoneData.length > 0 ? allPhoneData[0] : null;
+  const phoneFullPrice   = firstPhone ? firstPhone.d.price : 0;
+  const promoAmt         = firstPhone ? firstPhone.d.promoAmt : 0;
+  const phoneTIPSPrice   = Math.max(0, phoneFullPrice - promoAmt);
+  const phoneFullMonthly = phoneFullPrice / 36;
+  const phoneTIPSMonthly = phoneTIPSPrice / 36;
+
+  const watchFullPrice   = state.watchPrice;
+  const watchDiscount    = state.membershipDiscount;
+  const watchNetPrice    = Math.max(0, watchFullPrice - watchDiscount);
+  const watchMonthly     = watchNetPrice / 36 + 10;
+
+  const tabletFullPrice  = state.tabletPrice;
+  const isA11Tab         = (state.tabletName || '').toLowerCase().includes('a11');
+  const tabletMonthly    = tabletFullPrice / 36 + 20;
+
+  // Per-line plan upgrade cost (summed across all lines)
+  var totalPlanUpgradeCost = 0;
+  allPhoneData.forEach(function(p) {
+    const isPrem = p.d.premium || state.plan === 'premium';
+    if (isPrem && p.d.promoAmt > 0) totalPlanUpgradeCost += 10;
+  });
+
+  // Brand label for right column title (based on first phone)
+  function getBrandLabel(name) {
+    if (!name) return 'Device Bundle';
+    const n = name.toLowerCase();
+    if (n.includes('apple') || n.includes('iphone')) return 'Apple Bundle';
+    if (n.includes('samsung') || n.includes('galaxy')) return 'Samsung Bundle';
+    if (n.includes('google') || n.includes('pixel'))  return 'Google Bundle';
+    if (n.includes('moto') || n.includes('motorola')) return 'Motorola Bundle';
+    return 'Device Bundle';
+  }
+
+  // ══ MAIN TWO-COLUMN COMPARISON ══
+  const mainCmp = document.getElementById('prevMainComparison');
+  if (hasAnyPhone || hasWatch || hasTablet) {
+    mainCmp.style.display = 'block';
+
+    const brandLabel = getBrandLabel(firstPhone ? firstPhone.d.name : '');
+    // Left title: list all phone names
+    const leftTitleText = allPhoneData.length > 1
+      ? `${allPhoneData.length} Phone Upgrades`
+      : (firstPhone ? firstPhone.d.name : 'Device Upgrade');
+    safeText('cmp-left-title', leftTitleText);
+    safeText('cmp-right-title', brandLabel);
+
+    // ── LEFT COLUMN: build one block per phone at full retail ──
+    const leftPhoneContainer = document.getElementById('cmp-left-phones-multi');
+    const leftSingleBlock    = document.getElementById('cmp-left-phone');
+
+    if (allPhoneData.length <= 1) {
+      // Single phone — use existing static elements
+      if (leftSingleBlock) leftSingleBlock.style.display = firstPhone ? 'block' : 'none';
+      if (leftPhoneContainer) leftPhoneContainer.style.display = 'none';
+      if (firstPhone) {
+        safeText('cmp-left-phoneName', firstPhone.d.name);
+        safeText('cmp-left-phonePrice', `$${firstPhone.d.price.toFixed(2)}`);
+      }
+    } else {
+      // Multi-phone — hide single block, build multi container
+      if (leftSingleBlock) leftSingleBlock.style.display = 'none';
+      if (!leftPhoneContainer) {
+        // Create container if it doesn't exist
+        const container = document.createElement('div');
+        container.id = 'cmp-left-phones-multi';
+        const anchor = document.getElementById('cmp-left-phone');
+        if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(container, anchor.nextSibling);
+      }
+      const lc = document.getElementById('cmp-left-phones-multi');
+      if (lc) {
+        lc.style.display = 'block';
+        lc.innerHTML = allPhoneData.map(function(p) {
+          return `<div class="cmp-item-block">
+            <div class="cmp-item-name">Line ${p.num}: ${p.d.name}</div>
+            <div class="cmp-item-sub">Full Retail Price</div>
+            <div class="cmp-item-price red">$${p.d.price.toFixed(2)}</div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // Left total = sum of all phones at full price
+    const leftTotalDevices = allPhoneData.reduce(function(s, p) { return s + p.d.price; }, 0);
+    safeText('cmp-left-total', leftTotalDevices > 0 ? `$${leftTotalDevices.toFixed(2)}` : '$—');
+
+    // ── RIGHT COLUMN: build one block per phone at TIPS price ──
+    const rightSingleBlock    = document.getElementById('cmp-right-phone');
+    const rightPhoneContainer = document.getElementById('cmp-right-phones-multi');
+
+    if (allPhoneData.length <= 1) {
+      if (rightSingleBlock) rightSingleBlock.style.display = firstPhone ? 'block' : 'none';
+      if (rightPhoneContainer) rightPhoneContainer.style.display = 'none';
+      if (firstPhone) {
+        const pd = firstPhone.d;
+        const isPrem = pd.premium || state.plan === 'premium';
+        const planStr = isPrem ? 'premium' : 'intro';
+        const { promoLabel: pLabel } = calcSmartPromo(pd.name, pd.price, pd.tradeValue, pd.noTrade, planStr);
+        const tipsPrice = Math.max(0, pd.price - pd.promoAmt);
+        safeText('cmp-right-phoneName', pd.name);
+        safeText('cmp-right-promoTag', pd.promoAmt > 0 ? pLabel : 'No trade-in applied');
+        safeText('cmp-right-phonePrice', `$${tipsPrice.toFixed(2)}`);
+        safeText('cmp-right-phoneStrike', pd.promoAmt > 0 ? `Was $${pd.price.toFixed(2)}` : '');
+        safeDisplay('cmp-right-planUpgrade', (isPrem && pd.promoAmt > 0) ? 'block' : 'none');
+      }
+    } else {
+      if (rightSingleBlock) rightSingleBlock.style.display = 'none';
+      if (!rightPhoneContainer) {
+        const container = document.createElement('div');
+        container.id = 'cmp-right-phones-multi';
+        const anchor = document.getElementById('cmp-right-phone');
+        if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(container, anchor.nextSibling);
+      }
+      const rc = document.getElementById('cmp-right-phones-multi');
+      if (rc) {
+        rc.style.display = 'block';
+        rc.innerHTML = allPhoneData.map(function(p) {
+          const pd = p.d;
+          const isPrem = pd.premium || state.plan === 'premium';
+          const planStr = isPrem ? 'premium' : 'intro';
+          const { promoLabel: pLabel } = calcSmartPromo(pd.name, pd.price, pd.tradeValue, pd.noTrade, planStr);
+          const tipsPrice = Math.max(0, pd.price - pd.promoAmt);
+          const planUpgLine = (isPrem && pd.promoAmt > 0)
+            ? `<div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(0,0,0,0.1)"><span style="font-size:12px;color:var(--text-secondary);">Plan: Intro → Premium</span><span style="font-size:13px;font-weight:700;color:#b07000;">+$10/mo</span></div>`
+            : '';
+          return `<div class="cmp-item-block">
+            <div class="cmp-item-name">Line ${p.num}: ${pd.name}</div>
+            ${pd.promoAmt > 0 ? `<div class="cmp-item-promo-tag">${pLabel}</div>` : ''}
+            <div class="cmp-item-sub">Price After TIPS</div>
+            ${pd.promoAmt > 0 ? `<div class="cmp-item-sub strikethrough">Was $${pd.price.toFixed(2)}</div>` : ''}
+            <div class="cmp-item-price green">$${tipsPrice.toFixed(2)}</div>
+            ${planUpgLine}
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // ── ALL WATCH ROWS — dynamic, one block per watch ──
+    // Hide the old static single-watch element
+    safeDisplay('cmp-right-watch', 'none');
+
+    // Build or reuse a multi-watch container, inserted after the static watch block
+    var watchContainer = document.getElementById('cmp-right-watches-multi');
+    if (!watchContainer) {
+      watchContainer = document.createElement('div');
+      watchContainer.id = 'cmp-right-watches-multi';
+      const anchor = document.getElementById('cmp-right-watch');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(watchContainer, anchor.nextSibling);
+    }
+    if (watchContainer) {
+      var allWatchBlocks = '';
+      for (var wi = 1; wi <= watchCounts; wi++) {
+        var wd = getRowData('watch', wi);
+        if (!wd.price) continue;
+        var wDisc    = state.membershipDiscount;
+        var wNet     = Math.max(0, wd.price - wDisc);
+        var wSub     = wDisc > 0 ? `After discount · +$10/mo line fee` : `Watch · +$10/mo line fee`;
+        var wPromo   = wDisc > 0 ? `<div class="cmp-item-promo-tag">$${wDisc} Diamond Membership discount</div>` : '';
+        allWatchBlocks += `<div class="cmp-item-block">
+          <div class="cmp-item-name">${watchCounts > 1 ? 'Watch ' + wi + ': ' : ''}${wd.name}</div>
+          ${wPromo}
+          <div class="cmp-item-sub">${wSub}</div>
+          <div class="cmp-item-price">$${wNet.toFixed(2)}</div>
+        </div>`;
+      }
+      watchContainer.innerHTML = allWatchBlocks;
+      watchContainer.style.display = allWatchBlocks ? 'block' : 'none';
+    }
+
+    // ── ALL TABLET ROWS — dynamic, one block per tablet ──
+    safeDisplay('cmp-right-tablet', 'none');
+
+    var tabletContainer = document.getElementById('cmp-right-tablets-multi');
+    if (!tabletContainer) {
+      tabletContainer = document.createElement('div');
+      tabletContainer.id = 'cmp-right-tablets-multi';
+      const anchor = document.getElementById('cmp-right-tablet');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(tabletContainer, anchor.nextSibling);
+    }
+    if (tabletContainer) {
+      var allTabletBlocks = '';
+      for (var ti = 1; ti <= tabletCounts; ti++) {
+        var td = getRowData('tablet', ti);
+        if (!td.price) continue;
+        var tIsA11 = (td.name || '').toLowerCase().includes('a11');
+        var tPromo = tIsA11 ? `<div class="cmp-item-promo-tag">50% off Galaxy Tab A11+ (Mar 11–31)</div>` : '';
+        allTabletBlocks += `<div class="cmp-item-block">
+          <div class="cmp-item-name">${tabletCounts > 1 ? 'Tablet ' + ti + ': ' : ''}${td.name}</div>
+          ${tPromo}
+          <div class="cmp-item-sub">Tablet · +$20/mo line fee</div>
+          <div class="cmp-item-price">$${td.price.toFixed(2)}</div>
+        </div>`;
+      }
+      tabletContainer.innerHTML = allTabletBlocks;
+      tabletContainer.style.display = allTabletBlocks ? 'block' : 'none';
+    }
+
+    // Totals — sum ALL phones, watches, tablets
+    const allPhonesTIPSTotal = allPhoneData.reduce(function(s, p) { return s + Math.max(0, p.d.price - p.d.promoAmt); }, 0);
+    var allWatchesNet = 0;
+    for (var wi2 = 1; wi2 <= watchCounts; wi2++) { var wd2 = getRowData('watch', wi2); if (wd2.price) allWatchesNet += Math.max(0, wd2.price - state.membershipDiscount); }
+    var allTabletsTotal = 0;
+    for (var ti2 = 1; ti2 <= tabletCounts; ti2++) { var td2 = getRowData('tablet', ti2); if (td2.price) allTabletsTotal += td2.price; }
+    const rightTotal = allPhonesTIPSTotal + allWatchesNet + allTabletsTotal;
+    safeText('cmp-right-total', `$${rightTotal.toFixed(2)}`);
+
+  } else {
+    mainCmp.style.display = 'none';
+  }
+
+  // ══ FULL MONTHLY BILL COMPARISON ══
+  const billSec       = document.getElementById('prevBillSection');
+  const currentCore   = state.currentCoreBill;
+  const currentMobile = state.currentMobileBill;
+  const newCore       = state.newCoreBill;
+  const hasBillData   = currentCore > 0 || currentMobile > 0 || newCore > 0 || hasAnyPhone;
+
+  if (hasBillData) {
+    billSec.style.display = 'block';
+
+    // Left side: current bills
+    safeText('bill-currentCore',   currentCore   > 0 ? `$${currentCore.toFixed(2)}/mo`   : '—');
+    safeText('bill-currentMobile', currentMobile > 0 ? `$${currentMobile.toFixed(2)}/mo` : '—');
+
+    // Phone at full price ÷ 36 (all lines, no discount)
+    if (hasAnyPhone) {
+      safeDisplay('bill-left-phoneBlock', 'block');
+      const allFullMonthly = allPhoneData.reduce(function(s, p) { return s + p.d.price / 36; }, 0);
+      safeText('bill-left-phoneName', allPhoneData.length > 1 ? `${allPhoneData.length} Phone Upgrades (full price)` : (firstPhone ? firstPhone.d.name : ''));
+      safeText('bill-noPromoUpgrade', `$${allFullMonthly.toFixed(2)}/mo`);
+      safeText('bill-right-phoneSub', `TIPS price ÷ 36 months`);
+    } else {
+      safeDisplay('bill-left-phoneBlock', 'none');
+    }
+
+    const leftBillTotal = currentCore + currentMobile + (hasAnyPhone ? allPhoneData.reduce(function(s, p) { return s + p.d.price / 36; }, 0) : 0);
+    safeText('bill-noPromoTotal', leftBillTotal > 0 ? `$${leftBillTotal.toFixed(2)}` : '$—');
+    safeText('bill-left-sub', [
+      currentCore   > 0 ? 'Core'   : null,
+      currentMobile > 0 ? 'Mobile' : null,
+      hasAnyPhone        ? 'Phone'  : null,
+    ].filter(Boolean).join(' + ') || 'Enter bills above');
+
+    // Right side: upgraded
+    const promoCore = newCore > 0 ? newCore : currentCore;
+    safeText('bill-promoCore', promoCore > 0 ? `$${promoCore.toFixed(2)}/mo` : '—');
+
+    safeText('bill-promoMobile', currentMobile > 0 ? `$${(currentMobile + totalPlanUpgradeCost).toFixed(2)}/mo` : '—');
+    safeText('bill-right-mobileSub', totalPlanUpgradeCost > 0
+      ? `Unlimited Premium · +$${totalPlanUpgradeCost}/mo upgrade(s)`
+      : `Unlimited Premium`);
+
+    if (hasAnyPhone) {
+      safeDisplay('bill-right-phoneBlock', 'block');
+      const allTIPSMonthly = allPhoneData.reduce(function(s, p) {
+        return s + Math.max(0, p.d.price - p.d.promoAmt) / 36;
+      }, 0);
+      safeText('bill-right-phoneName', allPhoneData.length > 1 ? `${allPhoneData.length} Phone Upgrades (after TIPS)` : (firstPhone ? firstPhone.d.name : ''));
+      safeText('bill-promoUpgrade', `$${allTIPSMonthly.toFixed(2)}/mo`);
+    } else {
+      safeDisplay('bill-right-phoneBlock', 'none');
+    }
+
+    // ── Watch financing — one row per watch ──
+    var watchBillContainer = document.getElementById('bill-watches-multi');
+    if (!watchBillContainer) {
+      watchBillContainer = document.createElement('div');
+      watchBillContainer.id = 'bill-watches-multi';
+      const anchor = document.getElementById('bill-promoWatchRow');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(watchBillContainer, anchor.nextSibling);
+    }
+    const pWRow = document.getElementById('bill-promoWatchRow');
+    if (pWRow) pWRow.style.display = 'none'; // hide old static element
+
+    if (watchBillContainer) {
+      var watchBillHTML = '';
+      for (var wbi = 1; wbi <= watchCounts; wbi++) {
+        var wbd = getRowData('watch', wbi);
+        if (!wbd.price) continue;
+        var wbDisc  = state.membershipDiscount;
+        var wbNet   = Math.max(0, wbd.price - wbDisc);
+        var wbLabel = (watchCounts > 1 ? 'Watch ' + wbi + ': ' : '') + wbd.name + (wbDisc > 0 ? ` (−$${wbDisc} Diamond)` : '');
+        var wbAmt   = (wbNet / 36 + 10).toFixed(2);
+        watchBillHTML += `<div class="cmp-item-block" id="bill-promoWatchRow-${wbi}">
+          <div class="cmp-item-name">${wbLabel}</div>
+          <div class="cmp-item-sub">Watch financing ÷36 + $10/mo line fee</div>
+          <div class="cmp-item-price green">$${wbAmt}/mo</div>
+        </div>`;
+      }
+      watchBillContainer.innerHTML = watchBillHTML;
+      watchBillContainer.style.display = watchBillHTML ? 'block' : 'none';
+    }
+
+    // ── Tablet financing — one row per tablet ──
+    var tabletBillContainer = document.getElementById('bill-tablets-multi');
+    if (!tabletBillContainer) {
+      tabletBillContainer = document.createElement('div');
+      tabletBillContainer.id = 'bill-tablets-multi';
+      const anchor = document.getElementById('bill-promoTabletRow');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(tabletBillContainer, anchor.nextSibling);
+    }
+    const pTRow = document.getElementById('bill-promoTabletRow');
+    if (pTRow) pTRow.style.display = 'none'; // hide old static element
+
+    if (tabletBillContainer) {
+      var tabletBillHTML = '';
+      for (var tbi = 1; tbi <= tabletCounts; tbi++) {
+        var tbd = getRowData('tablet', tbi);
+        if (!tbd.price) continue;
+        var tbLabel = (tabletCounts > 1 ? 'Tablet ' + tbi + ': ' : '') + tbd.name;
+        var tbAmt   = (tbd.price / 36 + 20).toFixed(2);
+        tabletBillHTML += `<div class="cmp-item-block" id="bill-promoTabletRow-${tbi}">
+          <div class="cmp-item-name">${tbLabel}</div>
+          <div class="cmp-item-sub">Tablet financing ÷36 + $20/mo line fee</div>
+          <div class="cmp-item-price green">$${tbAmt}/mo</div>
+        </div>`;
+      }
+      tabletBillContainer.innerHTML = tabletBillHTML;
+      tabletBillContainer.style.display = tabletBillHTML ? 'block' : 'none';
+    }
+
+    // Right total = rebundled core + new mobile line (with plan upgrades) + all phones TIPS monthly + all watches + all tablets
+    const newMobileLineAmt = currentMobile + totalPlanUpgradeCost;
+    const allTIPSMonthlyForTotal = allPhoneData.reduce(function(s, p) {
+      return s + Math.max(0, p.d.price - p.d.promoAmt) / 36;
+    }, 0);
+    var allWatchesMonthly = 0;
+    for (var wt = 1; wt <= watchCounts; wt++) { var wtd = getRowData('watch', wt); if (wtd.price) allWatchesMonthly += Math.max(0, wtd.price - state.membershipDiscount) / 36 + 10; }
+    var allTabletsMonthly = 0;
+    for (var tt = 1; tt <= tabletCounts; tt++) { var ttd = getRowData('tablet', tt); if (ttd.price) allTabletsMonthly += ttd.price / 36 + 20; }
+    const rightTotal = promoCore + newMobileLineAmt
+                     + allTIPSMonthlyForTotal
+                     + allWatchesMonthly
+                     + allTabletsMonthly;
+    safeText('bill-promoTotal', rightTotal > 0 ? `$${rightTotal.toFixed(2)}` : '$—');
+    const rightParts = ['Core', 'Mobile'];
+    if (hasPhone)  rightParts.push('Phone');
+    if (hasWatch)  rightParts.push('Watch');
+    if (hasTablet) rightParts.push('Tablet');
+    safeText('bill-right-sub', rightParts.join(' + '));
+
+  } else {
+    billSec.style.display = 'none';
+  }
+}
+// ══════════════════════════════════════════════════
+//  NOTES PRINT SYNC
+// ══════════════════════════════════════════════════
+function updateNotesPrint() {
+  const val = document.getElementById('additionalNotes').value.trim();
+  safeText('notesPrintValue', val || '(none)');
+}
+
+// ══════════════════════════════════════════════════
+//  TWO-PAGE NAVIGATION
+// ══════════════════════════════════════════════════
+function showPreviewPage() {
+  try { updatePreview(); }      catch(e) {}
+  try { renderActivePromos(); } catch(e) {}
+  var ip = document.getElementById('intakePage');
+  var pp = document.getElementById('previewPage');
+  if (ip) ip.style.cssText = 'display:none !important';
+  if (pp) pp.style.cssText = 'display:block !important';
+  try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch(e) {}
+}
+
+function showIntakePage() {
+  var ip = document.getElementById('intakePage');
+  var pp = document.getElementById('previewPage');
+  if (ip) ip.style.cssText = 'display:block !important';
+  if (pp) pp.style.cssText = 'display:none !important';
+  try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch(e) {}
+}
+
+// Legacy — keep for any internal calls
+function handlePreview() { showPreviewPage(); }
+
+// ══════════════════════════════════════════════════
+//  PRINT
+// ══════════════════════════════════════════════════
+function handlePrint() {
+  const repName   = document.getElementById('repName').value.trim();
+  const storeName = document.getElementById('storeName').value;
+  if (!repName || !storeName) {
+    alert('Please fill in Your Name and Your Store before printing.');
+    if (!repName) { document.getElementById('repName').style.border = '2px solid #e53935'; document.getElementById('repName').focus(); }
+    if (!storeName) document.getElementById('storeName').style.border = '2px solid #e53935';
+    return;
+  }
+  document.getElementById('repName').style.border = '';
+  document.getElementById('storeName').style.border = '';
+  // Make sure preview is visible for print
+  document.getElementById('previewSection').classList.add('visible');
+  updatePreview();
+  renderActivePromos();
+  updateNotesPrint();
+  window.print();
+}
+
+// ══════════════════════════════════════════════════
+//  SUBMIT TO ZAPIER
+// ══════════════════════════════════════════════════
+const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20441079/up242h1/';
+
+async function handleSubmit() {
+  const repName   = document.getElementById('repName').value.trim();
+  const storeName = document.getElementById('storeName').value;
+  const customerName = document.getElementById('customerFirstName').value.trim();
+
+  if (!repName || !storeName) {
+    alert('Please fill in Your Name and Your Store before submitting.');
+    if (!repName) { document.getElementById('repName').style.border = '2px solid #e53935'; document.getElementById('repName').focus(); }
+    if (!storeName) document.getElementById('storeName').style.border = '2px solid #e53935';
+    return;
+  }
+
+  const phoneMonthly = state.phoneName && state.phonePrice > 0
+    ? (state.promoAmt > 0 ? (Math.max(0, state.phonePrice - state.promoAmt) / 36).toFixed(2) : (state.phonePrice / 36).toFixed(2))
+    : '0';
+  const watchMonthly = state.watchName && state.watchPrice > 0
+    ? ((Math.max(0, state.watchPrice - state.membershipDiscount) / 36) + 10).toFixed(2)
+    : '0';
+  const tabletMonthly = state.tabletName && state.tabletPrice > 0
+    ? ((state.tabletPrice / 36) + 20).toFixed(2)
+    : '0';
+  const bundleTotal = (parseFloat(phoneMonthly) + parseFloat(watchMonthly) + parseFloat(tabletMonthly)).toFixed(2);
+
+  const payload = {
+    customerFirstName:    customerName,
+    customerPhone:        (document.getElementById('customerPhone') || {}).value || '',
+    date:                 document.getElementById('todayDate').value,
+    currentPlan:          state.plan === 'premium' ? 'Unlimited Premium' : 'Unlimited Intro',
+    rewardTier:           state.tier,
+    repName,
+    storeName,
+    phoneName:            state.phoneName,
+    phonePrice:           state.phonePrice,
+    promoApplied:         state.promoAmt,
+    promoLabel:           state.promoAmt > 0
+      ? calcSmartPromo(state.phoneName, state.phonePrice, state.tradeValue,
+          (document.getElementById('phone-row-1-notrade') ? document.getElementById('phone-row-1-notrade').checked : false), state.plan).promoLabel
+      : 'None',
+    phoneNetCost:         Math.max(0, state.phonePrice - state.promoAmt),
+    phoneMonthlyPayment:  phoneMonthly,
+    tradeName:            state.tradeName,
+    tradeCondition:       state.tradeCondition,
+    tradeValue:           state.tradeValue,
+    watchName:            state.watchName,
+    watchPrice:           state.watchPrice,
+    membershipDiscount:   state.membershipDiscount,
+    watchMonthlyPayment:  watchMonthly,
+    tabletName:           state.tabletName,
+    tabletPrice:          state.tabletPrice,
+    tabletMonthlyPayment: tabletMonthly,
+    bundleTotalMonthly:   bundleTotal,
+    currentCoreBill:      state.currentCoreBill,
+    currentMobileBill:    state.currentMobileBill,
+    currentTotalBill:     (state.currentCoreBill + state.currentMobileBill).toFixed(2),
+    newCoreBill:          state.newCoreBill,
+    newMobileBill:        (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()).toFixed(2),
+    newTotalBill:         (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile())).toFixed(2),
+    monthlySavings:       Math.max(0, (state.currentCoreBill + state.currentMobileBill) - (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()))).toFixed(2),
+    soldOnSpot:           state.soldOnSpot,
+    notes:                document.getElementById('additionalNotes').value,
+    submittedAt:          new Date().toISOString(),
+  };
+
+  const btn = document.querySelector('.btn-submit');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '⏳ Submitting...';
+  btn.disabled = true;
+
+  try {
+    await fetch(ZAPIER_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    btn.innerHTML = '✅ Submitted!';
+    btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.disabled = false; }, 3000);
+  } catch(err) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    alert('Submission failed. Please check the Zapier webhook URL.\n\nError: ' + err.message);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  CLOSE DROPDOWNS ON OUTSIDE CLICK
+// ══════════════════════════════════════════════════
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.autocomplete-wrap')) {
+    document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// Initial render — deferred until DOM is ready (fixes iOS Safari crash)
+// preview init moved to consolidated DOMContentLoaded below
+// ══════════════════════════════════════════════════
+//  REP MEMORY — safeStorage (works on Safari/iOS file://)
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  const _mem = {};
+  const safeStorage = {
+    getItem(k)    { try { return localStorage.getItem(k); }   catch(e) { return _mem[k] !== undefined ? _mem[k] : null; } },
+    setItem(k, v) { try { localStorage.setItem(k, v); }       catch(e) { _mem[k] = v; } },
+    removeItem(k) { try { localStorage.removeItem(k); }       catch(e) { delete _mem[k]; } },
+  };
+
+  const KEY_STORE  = 'whs_repStore';
+  const KEY_PHONE  = 'whs_repPhone';
+  const KEY_EMAIL  = 'whs_repEmail';
+  const KEY_NAMES  = 'whs_repNames';
+  const KEY_LAST   = 'whs_repLast';
+
+  function getSavedNames() {
+    try { return JSON.parse(safeStorage.getItem(KEY_NAMES)) || []; } catch(e) { return []; }
+  }
+  function saveRepName(name) {
+    if (!name) return;
+    const names = getSavedNames();
+    if (!names.includes(name)) { names.push(name); safeStorage.setItem(KEY_NAMES, JSON.stringify(names)); }
+    safeStorage.setItem(KEY_LAST, name);
+  }
+  function getRepData(name) {
+    try { return JSON.parse(safeStorage.getItem('whs_rep_' + name)) || {}; } catch(e) { return {}; }
+  }
+  function saveRepData(name, store, phone, email) {
+    if (!name) return;
+    safeStorage.setItem('whs_rep_' + name, JSON.stringify({ store, phone, email }));
+    saveRepName(name);
+  }
+  function loadRepFields(name) {
+    const d = getRepData(name);
+    const storeEl = document.getElementById('storeName');
+    const phoneEl = document.getElementById('repPhone');
+    const emailEl = document.getElementById('repEmail');
+    if (storeEl && d.store) storeEl.value = d.store;
+    if (phoneEl && d.phone) phoneEl.value = d.phone;
+    if (emailEl && d.email) emailEl.value = d.email;
+    updatePreview();
+  }
+
+  // ── Rep Name autocomplete dropdown ──
+  const repNameEl = document.getElementById('repName');
+  if (repNameEl) {
+    const lastRep = safeStorage.getItem(KEY_LAST);
+    if (lastRep) { repNameEl.value = lastRep; loadRepFields(lastRep); }
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:relative;';
+    repNameEl.parentNode.insertBefore(wrapper, repNameEl);
+    wrapper.appendChild(repNameEl);
+
+    const dropdown = document.createElement('ul');
+    dropdown.style.cssText = `
+      position:absolute; top:100%; left:0; right:0; z-index:999;
+      background:white; border:1.5px solid var(--xfinity-purple);
+      border-top:none; border-radius:0 0 10px 10px;
+      list-style:none; margin:0; padding:4px 0;
+      box-shadow:0 4px 16px rgba(103,19,210,0.15);
+      display:none; max-height:200px; overflow-y:auto;
+    `;
+    wrapper.appendChild(dropdown);
+
+    function showRepDropdown(filter) {
+      const names = getSavedNames().filter(n => n.toLowerCase().startsWith(filter.toLowerCase()));
+      dropdown.innerHTML = '';
+      if (!names.length) { dropdown.style.display = 'none'; return; }
+      names.forEach(name => {
+        const li = document.createElement('li');
+        li.textContent = name;
+        li.style.cssText = 'padding:10px 16px; cursor:pointer; font-size:15px; color:var(--text-primary);';
+        li.addEventListener('mousedown', e => {
+          e.preventDefault();
+          repNameEl.value = name;
+          loadRepFields(name);
+          safeStorage.setItem(KEY_LAST, name);
+          dropdown.style.display = 'none';
+        });
+        li.addEventListener('mouseover', () => li.style.background = 'var(--surface-2)');
+        li.addEventListener('mouseout',  () => li.style.background = '');
+        dropdown.appendChild(li);
+      });
+      dropdown.style.display = 'block';
+    }
+
+    repNameEl.addEventListener('input', () => showRepDropdown(repNameEl.value));
+    repNameEl.addEventListener('focus', () => { if (!repNameEl.value) showRepDropdown(''); });
+    repNameEl.addEventListener('blur',  () => setTimeout(() => { dropdown.style.display = 'none'; }, 150));
+  }
+
+  // ── Persist rep data on any change ──
+  function persistRepData() {
+    const name  = (document.getElementById('repName')   || {}).value || '';
+    const store = (document.getElementById('storeName') || {}).value || '';
+    const phone = (document.getElementById('repPhone')  || {}).value || '';
+    const email = (document.getElementById('repEmail')  || {}).value || '';
+    if (name) saveRepData(name, store, phone, email);
+    safeStorage.setItem(KEY_STORE, store);
+    safeStorage.setItem(KEY_PHONE, phone);
+    safeStorage.setItem(KEY_EMAIL, email);
+  }
+  ['storeName','repPhone','repEmail'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.addEventListener('change', persistRepData); el.addEventListener('blur', persistRepData); }
+  });
+  const repNameEl2 = document.getElementById('repName');
+  if (repNameEl2) {
+    repNameEl2.addEventListener('change', persistRepData);
+    repNameEl2.addEventListener('blur',   persistRepData);
+  }
+
+  // Restore last store if no rep pre-loaded
+  const storeEl = document.getElementById('storeName');
+  if (storeEl && !storeEl.value) {
+    const saved = safeStorage.getItem(KEY_STORE);
+    if (saved) storeEl.value = saved;
+  }
+
+  // ── Phone formatting (xxx) xxx-xxxx ──
+  function formatPhone(input) {
+    input.addEventListener('input', function() {
+      let d = this.value.replace(/\D/g, '').slice(0, 10);
+      let f = '';
+      if (d.length === 0) f = '';
+      else if (d.length <= 3) f = '(' + d;
+      else if (d.length <= 6) f = '(' + d.slice(0,3) + ') ' + d.slice(3);
+      else f = '(' + d.slice(0,3) + ') ' + d.slice(3,6) + '-' + d.slice(6);
+      this.value = f;
+    });
+  }
+  const repPhoneEl = document.getElementById('repPhone');
+  if (repPhoneEl) formatPhone(repPhoneEl);
+  const custPhoneInput = document.getElementById('customerPhone');
+  if (custPhoneInput) formatPhone(custPhoneInput);
+
+  // ── Email: keep @blufoxmobile.com suffix ──
+  const DOMAIN = '@blufoxmobile.com';
+  const emailInput = document.getElementById('repEmail');
+  if (emailInput) {
+    function enforceDomain() {
+      let val = emailInput.value;
+      if (!val.endsWith(DOMAIN)) {
+        const atIdx = val.indexOf('@');
+        const local = atIdx >= 0 ? val.slice(0, atIdx) : val;
+        emailInput.value = local + DOMAIN;
+      }
+    }
+    function snapCursor() {
+      const pos = emailInput.value.length - DOMAIN.length;
+      emailInput.setSelectionRange(pos, pos);
+    }
+    emailInput.addEventListener('focus', () => { enforceDomain(); setTimeout(snapCursor, 0); });
+    emailInput.addEventListener('click', function() {
+      if (this.selectionStart > this.value.length - DOMAIN.length) setTimeout(snapCursor, 0);
+    });
+    emailInput.addEventListener('keydown', function(e) {
+      const safeEnd = this.value.length - DOMAIN.length;
+      if ((e.key === 'Backspace' && this.selectionStart >= safeEnd) ||
+          (e.key === 'Delete'    && this.selectionEnd   >= safeEnd)) {
+        e.preventDefault();
+      }
+    });
+    emailInput.addEventListener('input', enforceDomain);
+  }
+});
+
+// ══════════════════════════════════════════════════
+//  SINGLE CONSOLIDATED DOMContentLoaded
+//  All startup code runs here in correct order
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  // 1. Set today's date
+  try {
+    var now = new Date();
+    var fmt = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    var el = document.getElementById('todayDate');
+    if (el) el.value = fmt;
+  } catch(e) {}
+
+  // 2. Build device rows
+  try {
+    rebuildRows('phone',  1, 'phone-rows-container');
+    rebuildRows('watch',  0, 'watch-rows-container');
+    rebuildRows('tablet', 0, 'tablet-rows-container');
+  } catch(e) {}
+
+  // 3. Initial render
+  try { updatePreview(); }    catch(e) {}
+  try { renderActivePromos(); } catch(e) {}
+});
+
+</script>
+</body>
+</html>
