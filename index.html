@@ -1764,12 +1764,15 @@ function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
         setTimeout(function() { _selected = false; }, 500);
       });
 
-      // Touch devices: touchstart sets flag, touchend triggers selection
+      // Touch: only select on tap — finger movement (scroll) cancels selection
       div.addEventListener('touchstart', function(e) {
         _selected = true;
+        div._tsY = e.touches[0].clientY;
+        div._tsMoved = false;
       }, { passive: true });
-
+      div.addEventListener('touchmove', function() { div._tsMoved = true; }, { passive: true });
       div.addEventListener('touchend', function(e) {
+        if (div._tsMoved) return;
         e.preventDefault();
         _selected = true;
         inputEl.value = label;
