@@ -2163,7 +2163,7 @@ function recalcRow(type, num) {
   if (type === 'phone') {
     // Use per-row premium state; fall back to global state.plan for legacy compat
     const isPremium = d.premium || state.plan === 'premium';
-    const plan = isPremium ? 'premium' : 'intro';
+    const plan = 'premium'; // Discount applies to all lines — no checkbox required
     const { promoAmt, promoLabel } = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, plan);
     d.promoAmt = promoAmt;
     const netCost = Math.max(0, d.price - promoAmt);
