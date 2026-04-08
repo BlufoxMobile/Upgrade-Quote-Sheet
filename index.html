@@ -1287,7 +1287,6 @@ const IPHONE17E_PRICE_799  = 799.99;
 function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
   var name      = (phoneName || '').toLowerCase();
   var isSamsung = name.indexOf('samsung') !== -1 || name.indexOf('galaxy') !== -1;
-  var is17e     = name.indexOf('17e') !== -1;
   var isPremium = plan === 'premium';
   var tradeRaw  = noTrade ? 0 : (parseFloat(tradeValue) || 0);
   var hasTrade  = tradeRaw > 0;
@@ -1297,67 +1296,45 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
 
   if (phonePrice <= 0) return { promoAmt: 0, promoLabel: '' };
 
-  // ── Samsung purchases ──────────────────────────────────────────────────
-  // Trade-in value is looked up from TRADE_INS. Samsung TIPS-eligible phones show $1,100.
-  // Non-Samsung-TIPS trade-ins use their actual value (up to their listed amount).
-  // No trade-in = automatic $500 (Premium) or $200 (Unlimited) minimum.
+  // ══════════════════════════════════════════════════════════════
+  //  CORE RULE: Phone price − discount = net cost ÷ 36 months
+  //  The trade-in value IS the discount amount — no arbitrary caps
+  //  on how much a trade saves (except Samsung TIPS max of $1,100)
+  // ══════════════════════════════════════════════════════════════
+
   if (isSamsung) {
+    // ── Samsung ─────────────────────────────────────────────────
     if (hasTrade && isPremium) {
-      // Use the trade-in's actual value — Samsung TIPS phones are already stored at $1,100
-      // Non-TIPS Samsung trades use their actual value (e.g. $700, $600, $450)
-      promoAmt   = Math.min(tradeRaw, 1100); // max $1,100 for Samsung
+      // Trade value from TIPS list — Samsung TIPS phones listed at $1,100
+      promoAmt   = Math.min(tradeRaw, 1100);
       promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Premium)';
     } else if (hasTrade) {
-      // Unlimited with trade: up to $500
+      // Samsung + trade + Unlimited → up to $500
       promoAmt   = Math.min(tradeRaw, 500);
       promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Unlimited)';
     } else if (isPremium) {
-      // No trade-in on Samsung Premium → automatic $500 off
+      // Samsung + no trade + Premium → automatic $500 off
       promoAmt   = 500;
       promoLabel = 'No Trade-In — $500 off (Premium)';
     } else {
-      // No trade-in on Samsung Intro → automatic $200 off
+      // Samsung + no trade + Unlimited → automatic $200 off
       promoAmt   = 200;
       promoLabel = 'No Trade-In — $200 off (Unlimited)';
     }
 
-  // ── iPhone 17e ─────────────────────────────────────────────────────────
-  // "On Us" ONLY applies when trade-in is a qualifying TIPS phone (value ≥ $830)
-  // A lower-value trade-in (e.g. $450) gives that actual amount off — not the full price
-  } else if (is17e) {
-    var trade17e = Math.min(tradeRaw, 830); // non-Samsung cap at $830
-    if (hasTrade && isPremium && tradeRaw >= 830) {
-      // Qualifying TIPS trade-in + Premium → iPhone 17e "On Us" (full price covered)
-      promoAmt   = phonePrice;
-      promoLabel = 'TIPS Trade-In — On Us!';
-    } else if (hasTrade && isPremium) {
-      // Trade-in below $830 + Premium → apply actual trade value toward 17e
-      promoAmt   = trade17e;
-      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Premium)';
-    } else if (hasTrade) {
-      // Trade-in on Unlimited (no Premium) → Up to $300 off promo
-      promoAmt   = Math.min(tradeRaw, 300);
-      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Unlimited)';
-    } else if (isPremium) {
-      // No trade-in + Premium → automatic $400 off
-      promoAmt   = 400;
-      promoLabel = 'No Trade-In — $400 off (Premium)';
-    }
-    // Intro + no trade = no discount
-
-  // ── Apple / Google / Motorola / LG / OnePlus ─────────────────────────
-  // Strictly capped at $830 — NEVER $1,100
   } else {
-    var trade = Math.min(tradeRaw, 830); // hard cap at $830
-    if (hasTrade && isPremium) {
-      promoAmt   = trade; // uses the actual value from TRADE_INS, max $830
-      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Premium)';
+    // ── Apple / Google / Motorola / LG / OnePlus ────────────────
+    // All phones follow the same simple rule:
+    // trade-in value IS the discount. No special cases.
+    if (hasTrade) {
+      promoAmt   = tradeRaw;
+      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off';
     } else if (isPremium) {
-      // No trade-in selected on Premium → automatic $400 off (Apple/Google/Moto)
+      // No trade + Premium → automatic $400 off
       promoAmt   = 400;
       promoLabel = 'No Trade-In — $400 off (Premium)';
     }
-    // Intro + no trade-in = no discount
+    // No trade + Intro = no discount, full price ÷ 36
   }
 
   promoAmt = Math.min(promoAmt, phonePrice); // never exceed full price
