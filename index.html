@@ -16,7 +16,7 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'DM Sans',sans-serif;background:#f0eeff;color:var(--text-primary);min-height:100vh;padding:24px;}
   .screen-wrapper{max-width:900px;margin:0 auto;}
-  .card{background:var(--surface);border-radius:var(--radius);box-shadow:vhar(--shadow-md);overflow:hidden;margin-bottom:20px;animation:fadeUp 0.4s ease both;}
+  .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;margin-bottom:20px;animation:fadeUp 0.4s ease both;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 
   /* HEADER */
@@ -1233,32 +1233,29 @@ const PHONES = [
   { name:"Apple iPhone 16",         price: 729.99, storage:[{gb:"128GB",price:729.99}] },
   { name:"Apple iPhone 16e",        price: 499.99, storage:[{gb:"128GB",price:499.99}] },
   // Samsung
-  { name:"Samsung Galaxy S26 Ultra",  price:1299.99, storage:[{gb:"256GB",price:1299.99},{gb:"512GB",price:1499.99},{gb:"1TB",price:1799.99}] },
-  { name:"Samsung Galaxy S26+",       price:1099.99, storage:[{gb:"256GB",price:1099.99},{gb:"512GB",price:1299.99}] },
-  { name:"Samsung Galaxy S26",        price: 899.99, storage:[{gb:"256GB",price:899.99},{gb:"512GB",price:1099.99}] },
-  { name:"Samsung Galaxy Z Fold7",    price:1999.99, storage:[{gb:"256GB",price:1999.99}] },
-  { name:"Samsung Galaxy Z Flip7",    price:1099.99, storage:[{gb:"256GB",price:1099.99}] },
-  { name:"Samsung Galaxy Z Flip7 FE", price: 899.99, storage:[{gb:"128GB",price:899.99}] },
-  { name:"Samsung Galaxy S25 Ultra",  price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1419.99}] },
-  { name:"Samsung Galaxy S25+",       price: 999.99, storage:[{gb:"256GB",price:999.99}] },
-  { name:"Samsung Galaxy S25 Edge",   price: 899.99, storage:[{gb:"128GB",price:899.99}] },
-  { name:"Samsung Galaxy S25 FE",     price: 649.99, storage:[{gb:"128GB",price:649.99}] },
-  { name:"Samsung Galaxy A36 5G",     price: 399.99 },
-  { name:"Samsung Galaxy A26 5G",     price: 299.99 },
-  { name:"Samsung Galaxy A16 5G",     price: 179.99 },
-  { name:"Samsung Galaxy A17 5G",     price: 199.99 },
+  { name:"Samsung Galaxy S26 Ultra",price:1299.99, storage:[{gb:"256GB",price:1299.99},{gb:"512GB",price:1499.99},{gb:"1TB",price:1799.99}] },
+  { name:"Samsung Galaxy S26+",     price:1099.99, storage:[{gb:"256GB",price:1099.99},{gb:"512GB",price:1299.99}] },
+  { name:"Samsung Galaxy S26",      price: 899.99, storage:[{gb:"256GB",price:899.99},{gb:"512GB",price:1099.99}] },
+  { name:"Samsung Galaxy Z Fold7",  price:1999.99, storage:[{gb:"256GB",price:1999.99}] },
+  { name:"Samsung Galaxy Z Flip7",  price:1099.99, storage:[{gb:"256GB",price:1099.99}] },
+  { name:"Samsung Galaxy Z Flip7 FE",price:899.99, storage:[{gb:"128GB",price:899.99}] },
+  { name:"Samsung Galaxy S25 Ultra",price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1419.99}] },
+  { name:"Samsung Galaxy S25+",     price: 999.99, storage:[{gb:"256GB",price:999.99}] },
+  { name:"Samsung Galaxy S25 Edge", price: 899.99, storage:[{gb:"128GB",price:899.99}] },
+  { name:"Samsung Galaxy S25 FE",   price: 649.99, storage:[{gb:"128GB",price:649.99}] },
+  { name:"Samsung Galaxy A17 5G",   price: 199.99, storage:[{gb:"128GB",price:199.99}] },
   // Google
-  { name:"Google Pixel 10 Pro Fold", price:1799.99, storage:[{gb:"256GB",price:1799.99},{gb:"512GB",price:1919.99}] },
-  { name:"Google Pixel 10 Pro XL",   price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1319.99}] },
-  { name:"Google Pixel 10 Pro",      price: 999.99, storage:[{gb:"128GB",price:999.99},{gb:"256GB",price:1099.99},{gb:"512GB",price:1219.99}] },
-  { name:"Google Pixel 10",          price: 799.99, storage:[{gb:"128GB",price:799.99},{gb:"256GB",price:929.99}] },
-  { name:"Google Pixel 10a",         price: 499.99 },
-  { name:"Google Pixel 9a",          price: 108.00 },
+  { name:"Google Pixel 10 Pro Fold",price:1799.99, storage:[{gb:"256GB",price:1799.99},{gb:"512GB",price:1919.99}] },
+  { name:"Google Pixel 10 Pro XL",  price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1319.99}] },
+  { name:"Google Pixel 10 Pro",     price: 999.99, storage:[{gb:"128GB",price:999.99},{gb:"256GB",price:1099.99},{gb:"512GB",price:1219.99}] },
+  { name:"Google Pixel 10",         price: 799.99, storage:[{gb:"128GB",price:799.99},{gb:"256GB",price:929.99}] },
+  { name:"Google Pixel 10a",        price: 499.99, storage:[{gb:"128GB",price:499.99}] },
+  { name:"Google Pixel 9a",         price: 108.00, storage:[{gb:"128GB",price:108.00}] },
   // Motorola
-  { name:"Motorola razr - 2025",    price: 599.99 },
-  { name:"moto g stylus 5G - 2024", price: 239.99 },
-  { name:"moto g - 2026",           price: 199.99 },
-  { name:"moto g - 2025",           price: 179.99 },
+  { name:"Motorola razr - 2025",    price: 599.99, storage:[{gb:"256GB",price:599.99}] },
+  { name:"moto g stylus 5G - 2024", price: 239.99, storage:[{gb:"128GB",price:239.99}] },
+  { name:"moto g - 2026",           price: 199.99, storage:[{gb:"128GB",price:199.99}] },
+  { name:"moto g - 2025",           price: 179.99, storage:[{gb:"128GB",price:179.99}] },
 ];
 
 // ══════════════════════════════════════════════════
@@ -1324,10 +1321,29 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
       promoLabel = 'No Trade-In — $200 off (Unlimited)';
     }
 
-  // ── iPhone 17e special "On Us" deal ───────────────────────────────────
-  } else if (is17e && hasTrade && isPremium) {
-    promoAmt   = phonePrice;
-    promoLabel = 'TIPS Trade-In — On Us!';
+  // ── iPhone 17e ─────────────────────────────────────────────────────────
+  // "On Us" ONLY applies when trade-in is a qualifying TIPS phone (value ≥ $830)
+  // A lower-value trade-in (e.g. $450) gives that actual amount off — not the full price
+  } else if (is17e) {
+    var trade17e = Math.min(tradeRaw, 830); // non-Samsung cap at $830
+    if (hasTrade && isPremium && tradeRaw >= 830) {
+      // Qualifying TIPS trade-in + Premium → iPhone 17e "On Us" (full price covered)
+      promoAmt   = phonePrice;
+      promoLabel = 'TIPS Trade-In — On Us!';
+    } else if (hasTrade && isPremium) {
+      // Trade-in below $830 + Premium → apply actual trade value toward 17e
+      promoAmt   = trade17e;
+      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Premium)';
+    } else if (hasTrade) {
+      // Trade-in on Unlimited (no Premium) → Up to $300 off promo
+      promoAmt   = Math.min(tradeRaw, 300);
+      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Unlimited)';
+    } else if (isPremium) {
+      // No trade-in + Premium → automatic $400 off
+      promoAmt   = 400;
+      promoLabel = 'No Trade-In — $400 off (Premium)';
+    }
+    // Intro + no trade = no discount
 
   // ── Apple / Google / Motorola / LG / OnePlus ─────────────────────────
   // Strictly capped at $830 — NEVER $1,100
@@ -1764,15 +1780,12 @@ function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
         setTimeout(function() { _selected = false; }, 500);
       });
 
-      // Touch: only select on tap — finger movement (scroll) cancels selection
+      // Touch devices: touchstart sets flag, touchend triggers selection
       div.addEventListener('touchstart', function(e) {
         _selected = true;
-        div._tsY = e.touches[0].clientY;
-        div._tsMoved = false;
       }, { passive: true });
-      div.addEventListener('touchmove', function() { div._tsMoved = true; }, { passive: true });
+
       div.addEventListener('touchend', function(e) {
-        if (div._tsMoved) return;
         e.preventDefault();
         _selected = true;
         inputEl.value = label;
@@ -1811,42 +1824,43 @@ let phoneCounts = 1, watchCounts = 0, tabletCounts = 0;
 // ── Watch and tablet data sorted by brand then price low→high ──
 // Apple watches for Apple phones, Samsung/Android watches for Samsung/Google/Motorola
 const WATCHES_APPLE = [
-  { name:"Apple Watch Ultra 3 49mm",    price:799.99 },
-  { name:"Apple Watch Ultra 2 49mm",    price:799.99 },
-  { name:"Apple Watch Series 11 46mm",  price:529.99 },
-  { name:"Apple Watch Series 11 42mm",  price:499.99 },
-  { name:"Apple Watch Series 10 46mm",  price:529.99 },
-  { name:"Apple Watch Series 10 42mm",  price:499.99 },
-  { name:"Apple Watch SE 3 44mm",       price:329.99 },
-  { name:"Apple Watch SE 3 40mm",       price:299.99 },
-  { name:"Apple Watch SE 44mm",         price:329.99 },
-  { name:"Apple Watch SE 40mm",         price:299.99 },
+  { name:"Apple Watch SE 40mm",       price:299.99 },
+  { name:"Apple Watch SE 3 40mm",     price:299.99 },
+  { name:"Apple Watch SE 44mm",       price:329.99 },
+  { name:"Apple Watch SE 3 44mm",     price:329.99 },
+  { name:"Apple Watch Series 10 42mm",price:499.99 },
+  { name:"Apple Watch Series 11 42mm",price:499.99 },
+  { name:"Apple Watch Series 10 46mm",price:529.99 },
+  { name:"Apple Watch Series 11 46mm",price:529.99 },
+  { name:"Apple Watch Ultra 2 49mm",  price:799.99 },
+  { name:"Apple Watch Ultra 3 49mm",  price:799.99 },
   // Android watches follow for mixed households
-  { name:"Galaxy Watch Ultra 47mm",     price:649.99 },
-  { name:"Galaxy Watch8 Classic",       price:549.99 },
-  { name:"Galaxy Watch8 44mm",          price:429.99 },
-  { name:"Galaxy Watch8 40mm",          price:399.99 },
-  { name:"Pixel Watch 4 45mm",          price:499.99 },
-  { name:"Pixel Watch 4 41mm",          price:449.99 },
+  { name:"Galaxy Watch8 40mm",        price:399.99 },
+  { name:"Galaxy Watch8 44mm",        price:429.99 },
+  { name:"Pixel Watch 4 41mm",        price:449.99 },
+  { name:"Pixel Watch 4 45mm",        price:499.99 },
+  { name:"Galaxy Watch8 Classic",     price:549.99 },
+  { name:"Galaxy Watch Ultra 47mm",   price:649.99 },
 ];
 const WATCHES_ANDROID = [
-  { name:"Galaxy Watch Ultra 47mm",     price:649.99 },
-  { name:"Galaxy Watch8 Classic",       price:549.99 },
-  { name:"Galaxy Watch8 44mm",          price:429.99 },
-  { name:"Galaxy Watch8 40mm",          price:399.99 },
-  { name:"Pixel Watch 4 45mm",          price:499.99 },
-  { name:"Pixel Watch 4 41mm",          price:449.99 },
+  // Samsung/Google/Motorola → lead with Samsung/Pixel watches
+  { name:"Galaxy Watch8 40mm",        price:399.99 },
+  { name:"Galaxy Watch8 44mm",        price:429.99 },
+  { name:"Pixel Watch 4 41mm",        price:449.99 },
+  { name:"Pixel Watch 4 45mm",        price:499.99 },
+  { name:"Galaxy Watch8 Classic",     price:549.99 },
+  { name:"Galaxy Watch Ultra 47mm",   price:649.99 },
   // Apple watches follow for mixed households
-  { name:"Apple Watch Ultra 3 49mm",    price:799.99 },
-  { name:"Apple Watch Ultra 2 49mm",    price:799.99 },
-  { name:"Apple Watch Series 11 46mm",  price:529.99 },
-  { name:"Apple Watch Series 11 42mm",  price:499.99 },
-  { name:"Apple Watch Series 10 46mm",  price:529.99 },
-  { name:"Apple Watch Series 10 42mm",  price:499.99 },
-  { name:"Apple Watch SE 3 44mm",       price:329.99 },
-  { name:"Apple Watch SE 3 40mm",       price:299.99 },
-  { name:"Apple Watch SE 44mm",         price:329.99 },
-  { name:"Apple Watch SE 40mm",         price:299.99 },
+  { name:"Apple Watch SE 40mm",       price:299.99 },
+  { name:"Apple Watch SE 3 40mm",     price:299.99 },
+  { name:"Apple Watch SE 44mm",       price:329.99 },
+  { name:"Apple Watch SE 3 44mm",     price:329.99 },
+  { name:"Apple Watch Series 10 42mm",price:499.99 },
+  { name:"Apple Watch Series 11 42mm",price:499.99 },
+  { name:"Apple Watch Series 10 46mm",price:529.99 },
+  { name:"Apple Watch Series 11 46mm",price:529.99 },
+  { name:"Apple Watch Ultra 2 49mm",  price:799.99 },
+  { name:"Apple Watch Ultra 3 49mm",  price:799.99 },
 ];
 const TABLETS_APPLE = [
   { name:"iPad (A16) 64GB",              price: 499.99 },
@@ -1867,11 +1881,11 @@ const TABLETS_APPLE = [
   { name:"Galaxy Tab S10 FE 5G 128GB",   price: 599.99 },
 ];
 const TABLETS_ANDROID = [
-  // Samsung/Android lead
+  // Samsung/Android → lead with Samsung tablets
   { name:"Galaxy Tab A9+ 64GB",          price: 269.99 },
   { name:"Galaxy Tab A11+ 5G 128GB",     price: 279.99 },
   { name:"Galaxy Tab S10 FE 5G 128GB",   price: 599.99 },
-  // Apple tablets follow for mixed households
+  // Apple tablets follow
   { name:"iPad (A16) 64GB",              price: 499.99 },
   { name:"iPad mini 7th Gen 128GB",      price: 649.99 },
   { name:"iPad Air 11-inch (M3) 128GB",  price: 749.99 },
@@ -2166,7 +2180,7 @@ function recalcRow(type, num) {
   if (type === 'phone') {
     // Use per-row premium state; fall back to global state.plan for legacy compat
     const isPremium = d.premium || state.plan === 'premium';
-    const plan = 'premium'; // Discount applies to all lines — no checkbox required
+    const plan = isPremium ? 'premium' : 'intro';
     const { promoAmt, promoLabel } = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, plan);
     d.promoAmt = promoAmt;
     const netCost = Math.max(0, d.price - promoAmt);
@@ -3122,7 +3136,7 @@ function handlePrint() {
 // ══════════════════════════════════════════════════
 //  SUBMIT TO ZAPIER
 // ══════════════════════════════════════════════════
-const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20441079/upxtzay/';
+const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20441079/up242h1/';
 
 async function handleSubmit() {
   const repName   = document.getElementById('repName').value.trim();
