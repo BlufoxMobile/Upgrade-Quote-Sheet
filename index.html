@@ -689,7 +689,8 @@
       <label>Customer Phone Number</label>
       <input type="tel" id="customerPhone" placeholder="(XXX) XXX-XXXX" autocomplete="off" oninput="updatePreview()">
     </div>
-    <div class="intake-field">
+    <!-- Today's date is auto-populated and submitted with the quote, but hidden from the rep's view to keep the form simple -->
+    <div class="intake-field" style="display:none;">
       <label>Today's Date</label>
       <input type="text" id="todayDate" class="readonly-date" readonly>
     </div>
@@ -2585,53 +2586,45 @@ function renderActivePromos() {
   const isGoogle  = name.startsWith('google');
   const isMoto    = name.includes('motorola') || name.includes('moto');
   const isNonSam  = isApple || isGoogle || isMoto;
-  const is17e     = name.includes('iphone 17e');
-  const isDiamond = state.tier === 'diamond';
   const hasWatch  = state.watchPrice > 0;
-  const hasTablet = state.tabletPrice > 0;
-  const isA11     = (state.tabletName || '').toLowerCase().includes('a11');
 
-  // Always-on
-  promos.push({ text: '🚫 One-time waived line activation fee', note: 'Jan 15–Apr 21, 2026', type: 'always' });
+  // ── CURRENT OFFERS (per C³ Product Training, April 2026) ──
+  // Removed expired dated promos. Only includes structural/ongoing
+  // offers reflected in the C³ training material.
 
-  // Phone-specific promos
+  // Phone-specific TIPS promos (always current — built into upgrade structure)
   if (state.phoneName) {
     if (isSamsung) {
       if (hasTrade && isPremium)
-        promos.push({ text: 'TIPS — Get up to $1,100 off select Samsung devices with trade-in (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'tips' });
+        promos.push({ text: 'TIPS — Up to $1,100 off select Samsung devices with trade-in (Premium Unlimited)', note: 'Current Offer', type: 'tips' });
       else if (hasTrade && !isPremium)
-        promos.push({ text: 'TIPS — Get up to $500 off select Samsung devices with trade-in (Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'tips' });
+        promos.push({ text: 'TIPS — Up to $500 off select Samsung devices with trade-in (Unlimited)', note: 'Current Offer', type: 'tips' });
       if (!hasTrade && isPremium)
-        promos.push({ text: 'Get $500 off select Samsung devices (Premium Unlimited, no trade-in)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
+        promos.push({ text: '$500 off select Samsung devices (Premium Unlimited, no trade-in)', note: 'Current Offer', type: 'discount' });
       else if (!hasTrade && !isPremium)
-        promos.push({ text: 'Get $200 off select Samsung devices (Unlimited, no trade-in)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
+        promos.push({ text: '$200 off select Samsung devices (Unlimited, no trade-in)', note: 'Current Offer', type: 'discount' });
       // $400 off applies to Samsung too (no trade required)
-      promos.push({ text: 'Get $400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
+      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Current Offer', type: 'discount' });
     } else if (isNonSam) {
-      if (is17e) {
-        if (hasTrade && isPremium)
-          promos.push({ text: 'TIPS — iPhone 17e "On Us" with trade-in (Premium Unlimited)', note: 'Mar 4–Apr 21, 2026', type: 'tips' });
-        if (hasTrade && !isPremium)
-          promos.push({ text: 'TIPS — Up to $300 off iPhone 17e with trade-in (Unlimited)', note: 'Mar 4–Mar 23, 2026', type: 'tips' });
-        promos.push({ text: 'Get up to $400 off iPhone 17e (Premium Unlimited)', note: 'Mar 4–Apr 21, 2026', type: 'discount' });
-      } else {
-        if (hasTrade && isPremium)
-          promos.push({ text: 'TIPS — Get up to $830 off select Apple, Google, or Motorola devices with trade-in (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'tips' });
-        promos.push({ text: 'Get $400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Feb 25–Apr 21, 2026', type: 'discount' });
-      }
+      if (hasTrade && isPremium)
+        promos.push({ text: 'TIPS — Up to $830 off select Apple, Google, or Motorola devices with trade-in (Premium Unlimited)', note: 'Current Offer', type: 'tips' });
+      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Current Offer', type: 'discount' });
     }
   }
 
-  // Watch promos
-  if (hasWatch) {
-    if (isDiamond)
-      promos.push({ text: 'Diamond members can get $300 off select smartwatches', note: 'Mar 6–Apr 19, 2026', type: 'watch' });
+  // Premium plan perk (from C³): Elite Upgrade — 2x per year on Premium Unlimited
+  if (state.phoneName && isPremium) {
+    promos.push({ text: '⭐ Premium Unlimited Elite Upgrade — eligible to upgrade up to 2x per year', note: 'Plan Benefit', type: 'discount' });
   }
 
-  // Tablet promos
-  if (hasTablet) {
-    if (isA11)
-      promos.push({ text: 'Get 50% off Samsung Galaxy Tab A11+', note: 'Mar 11–Mar 31, 2026', type: 'tablet' });
+  // Watch perk (from C³): No activation fee for watches
+  if (hasWatch) {
+    promos.push({ text: '⌚ Smartwatch lines: $10/mo with Number Sync — no activation fee', note: 'Plan Benefit', type: 'watch' });
+  }
+
+  // Internet bundle perk (from C³): Premium Mobile +$10/mo with 300+ Mbps Internet
+  if (state.phoneName && isPremium) {
+    promos.push({ text: '🏠 Bundle perk: Premium Mobile available for just +$10/mo with 300 Mbps+ Internet', note: 'Bundle Offer', type: 'always' });
   }
 
   const typeColors = {
@@ -2895,11 +2888,8 @@ function updatePreview() {
       for (var ti = 1; ti <= tabletCounts; ti++) {
         var td = getRowData('tablet', ti);
         if (!td.price) continue;
-        var tIsA11 = (td.name || '').toLowerCase().includes('a11');
-        var tPromo = tIsA11 ? `<div class="cmp-item-promo-tag">50% off Galaxy Tab A11+ (Mar 11–31)</div>` : '';
         allTabletBlocks += `<div class="cmp-item-block">
           <div class="cmp-item-name">${tabletCounts > 1 ? 'Tablet ' + ti + ': ' : ''}${td.name}</div>
-          ${tPromo}
           <div class="cmp-item-sub">Tablet · +$20/mo line fee</div>
           <div class="cmp-item-price">$${td.price.toFixed(2)}</div>
         </div>`;
@@ -3111,6 +3101,118 @@ function handlePrint() {
 }
 
 // ══════════════════════════════════════════════════
+//  RESET FORM — clears customer/quote data, keeps rep info
+//  Used after a successful submit so reps don't have to refresh
+// ══════════════════════════════════════════════════
+function resetForm() {
+  try {
+    // 1. Reset state object to initial defaults (do not reassign — keep references intact)
+    state.plan = 'intro';
+    state.tier = '';
+    state.phonePrice = 0;
+    state.phoneName  = '';
+    state.promoAmt   = 0;
+    state.tradeValue = 0;
+    state.tradeName  = '';
+    state.tradeCondition = '';
+    state.watchPrice = 0;
+    state.watchName  = '';
+    state.membershipDiscount = 0;
+    state.tabletPrice = 0;
+    state.tabletName  = '';
+    state.soldOnSpot  = '';
+    state.currentCoreBill   = 0;
+    state.currentMobileBill = 0;
+    state.newCoreBill       = 0;
+    state.newMobileBillOverride = 0;
+
+    // 2. Clear rowData (per-line phone/watch/tablet entries)
+    Object.keys(rowData).forEach(function(k) { delete rowData[k]; });
+
+    // 3. Reset device counts and rebuild rows fresh
+    phoneCounts = 1; watchCounts = 0; tabletCounts = 0;
+
+    // Reset count-button active states
+    function resetCountBtns(containerId, activeVal) {
+      var wrap = document.getElementById(containerId);
+      if (!wrap) return;
+      wrap.querySelectorAll('.wt-count-btn').forEach(function(b) {
+        b.classList.toggle('active', String(b.dataset.val) === String(activeVal));
+      });
+    }
+    resetCountBtns('phone-count-btns',  1);
+    resetCountBtns('watch-count-btns',  0);
+    resetCountBtns('tablet-count-btns', 0);
+
+    rebuildRows('phone',  1, 'phone-rows-container');
+    rebuildRows('watch',  0, 'watch-rows-container');
+    rebuildRows('tablet', 0, 'tablet-rows-container');
+
+    // 4. Clear membership tier UI
+    document.querySelectorAll('.intake-reward-btn').forEach(function(b) { b.classList.remove('active'); });
+
+    // 5. Clear customer + bill + notes inputs (KEEP rep fields: repName/storeName/repEmail/repPhone)
+    var FIELDS_TO_CLEAR = [
+      'customerFirstName', 'customerPhone',
+      'currentCoreBill',   'newCoreBill',
+      'currentMobileBill',
+      'additionalNotes',
+    ];
+    FIELDS_TO_CLEAR.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // 6. Clear hidden form values
+    var HIDDEN_TO_CLEAR = [
+      ['selectedPlan',               'intro'],
+      ['selectedTier',               ''],
+      ['selectedPromo',              '0'],
+      ['selectedWatchPrice',         '0'],
+      ['selectedWatchName',          ''],
+      ['selectedMembershipDiscount', '0'],
+      ['selectedTabletPrice',        '0'],
+      ['selectedTabletName',         ''],
+      ['soldOnSpot',                 ''],
+    ];
+    HIDDEN_TO_CLEAR.forEach(function(pair) {
+      var el = document.getElementById(pair[0]);
+      if (el) el.value = pair[1];
+    });
+
+    // 7. Reset Sold-On-Spot buttons
+    var soldYes = document.getElementById('soldYes');
+    var soldNo  = document.getElementById('soldNo');
+    if (soldYes) soldYes.className = 'sold-btn';
+    if (soldNo)  soldNo.className  = 'sold-btn';
+
+    // 8. Refresh today's date (in case the rep is starting a new day)
+    try {
+      var now = new Date();
+      var fmt = now.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+      var dt = document.getElementById('todayDate');
+      if (dt) dt.value = fmt;
+    } catch(e) {}
+
+    // 9. Clear any error borders left from validation
+    ['repName','storeName'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.border = '';
+    });
+
+    // 10. Re-run all calc + render passes so UI shows the empty starting state
+    try { calcBillingComparison(); } catch(e) {}
+    try { updatePreview(); }         catch(e) {}
+    try { renderActivePromos(); }    catch(e) {}
+
+    // 11. Send rep back to the intake form (the beginning)
+    showIntakePage();
+  } catch(err) {
+    console.error('resetForm error:', err);
+  }
+}
+
+// ══════════════════════════════════════════════════
 //  SUBMIT TO ZAPIER + GOOGLE APPS SCRIPT
 // ══════════════════════════════════════════════════
 // During parallel-run phase we post to BOTH so we have a safety net.
@@ -3235,7 +3337,14 @@ async function handleSubmit() {
     await Promise.all([zapierCall, appsScriptCall]);
     btn.innerHTML = '✅ Submitted!';
     btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
-    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.disabled = false; }, 3000);
+    // Show "Submitted!" briefly, then reset the form to the start so the rep
+    // can build the next quote without refreshing the page.
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.disabled = false;
+      try { resetForm(); } catch(e) { console.error('resetForm failed:', e); }
+    }, 1500);
   } catch(err) {
     btn.innerHTML = orig;
     btn.disabled = false;
