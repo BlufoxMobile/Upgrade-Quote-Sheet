@@ -3111,9 +3111,12 @@ function handlePrint() {
 }
 
 // ══════════════════════════════════════════════════
-//  SUBMIT TO ZAPIER
+//  SUBMIT TO ZAPIER + GOOGLE APPS SCRIPT
 // ══════════════════════════════════════════════════
+// During parallel-run phase we post to BOTH so we have a safety net.
+// After ~1 week of confirmed working, remove the Zapier call.
 const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20441079/up242h1/';
+const APPS_SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
 
 async function handleSubmit() {
   const repName   = document.getElementById('repName').value.trim();
@@ -3183,20 +3186,60 @@ async function handleSubmit() {
   btn.innerHTML = '⏳ Submitting...';
   btn.disabled = true;
 
+  // Build a payload in the schema the Apps Script doPost handler expects
+  // so this submission lands in the same "Current Month" tab as the Mobile Quote Sheet.
+  const watchesCount = payload.watchName ? 1 : 0;
+  const tabletsCount = payload.tabletName ? 1 : 0;
+  const phonesCount  = payload.phoneName  ? 1 : 0;
+  const coreSavingsNum = Math.max(0, (state.currentCoreBill - state.newCoreBill)).toFixed(2);
+  const monthlySavingsNum = parseFloat(payload.monthlySavings) || 0;
+  const annualSavings = (monthlySavingsNum * 12).toFixed(2);
+  const appsScriptPayload = {
+    store:             payload.storeName,
+    rep_name:          payload.repName,
+    rep_email:         '',
+    rep_phone:         '',
+    customer_name:     payload.customerFirstName,
+    customer_phone:    payload.customerPhone,
+    membership_tier:   payload.rewardTier,
+    current_carrier:   'Xfinity Mobile',
+    lines:             '',
+    current_bill:      payload.currentTotalBill,
+    plan_selected:     payload.currentPlan,
+    core_bill_current: payload.currentCoreBill,
+    core_bill_after:   payload.newCoreBill,
+    core_savings:      coreSavingsNum,
+    watches:           watchesCount,
+    tablets:           tabletsCount,
+    xv_to_xm:          '',
+    monthly_savings:   payload.monthlySavings,
+    annual_savings:    annualSavings,
+    devices_only:      false,
+    device_count:      phonesCount + watchesCount + tabletsCount,
+  };
+
   try {
-    await fetch(ZAPIER_WEBHOOK_URL, {
+    // Parallel submit: Zapier (safety net) + Apps Script (new tracker)
+    const zapierCall = fetch(ZAPIER_WEBHOOK_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    });
+    }).catch(err => console.error('Zapier submission failed:', err));
+    const appsScriptCall = fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appsScriptPayload),
+    }).catch(err => console.error('Apps Script submission failed:', err));
+    await Promise.all([zapierCall, appsScriptCall]);
     btn.innerHTML = '✅ Submitted!';
     btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
     setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.disabled = false; }, 3000);
   } catch(err) {
     btn.innerHTML = orig;
     btn.disabled = false;
-    alert('Submission failed. Please check the Zapier webhook URL.\n\nError: ' + err.message);
+    alert('Submission failed.\n\nError: ' + err.message);
   }
 }
 
