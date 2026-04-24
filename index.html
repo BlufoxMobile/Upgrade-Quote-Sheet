@@ -44,7 +44,7 @@
   input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
 
   /* REWARD BTNS */
-  .intake-rewards{display:flex;gap:10px;flex-wrap:wrap;}
+  .intake-rewards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
   .intake-reward-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:50px;border:2px solid var(--border);background:white;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;transition:all 0.2s;box-shadow:var(--shadow-sm);}
   .intake-reward-btn .dot{width:12px;height:12px;border-radius:50%;}
   .intake-reward-btn[data-tier="silver"] .dot{background:#C0C0C0;}
@@ -1283,12 +1283,25 @@ const IPHONE17E_PRICE_799  = 799.99;
 
 // ══════════════════════════════════════════════════
 //  SMART PROMO CALCULATOR
-//  Only Samsung devices get $1,100. All others cap at $830.
+//  Promo eligibility is INDEPENDENT of the "Upgrade to
+//  Premium" checkbox — that checkbox only governs whether
+//  the +$10/mo upgrade fee gets added to the quote (for
+//  customers who aren't already on Premium). All TIPS /
+//  no-trade promos calculate at Premium-tier eligibility,
+//  since either the customer is already on Premium or the
+//  rep is upgrading them to Premium as part of the deal.
+//
+//  Rules:
+//    • Samsung + trade-in   → up to $1,100 off
+//    • Samsung + no trade   → $500 off
+//    • Apple/Google/Moto + trade-in → full trade value (no cap)
+//    • Apple/Google/Moto + no trade → $400 off
 // ══════════════════════════════════════════════════
 function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
+  // `plan` is accepted for backwards compatibility but ignored —
+  // promo eligibility is no longer gated by the Premium toggle.
   var name      = (phoneName || '').toLowerCase();
   var isSamsung = name.indexOf('samsung') !== -1 || name.indexOf('galaxy') !== -1;
-  var isPremium = plan === 'premium';
   var tradeRaw  = noTrade ? 0 : (parseFloat(tradeValue) || 0);
   var hasTrade  = tradeRaw > 0;
 
@@ -1297,49 +1310,57 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
 
   if (phonePrice <= 0) return { promoAmt: 0, promoLabel: '' };
 
-  // ══════════════════════════════════════════════════════════════
-  //  CORE RULE: Phone price − discount = net cost ÷ 36 months
-  //  The trade-in value IS the discount amount — no arbitrary caps
-  //  on how much a trade saves (except Samsung TIPS max of $1,100)
-  // ══════════════════════════════════════════════════════════════
-
   if (isSamsung) {
-    // ── Samsung ─────────────────────────────────────────────────
-    if (hasTrade && isPremium) {
-      // Trade value from TIPS list — Samsung TIPS phones listed at $1,100
-      promoAmt   = Math.min(tradeRaw, 1100);
-      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Premium)';
-    } else if (hasTrade) {
-      // Samsung + trade + Unlimited → up to $500
-      promoAmt   = Math.min(tradeRaw, 500);
-      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off (Unlimited)';
-    } else if (isPremium) {
-      // Samsung + no trade + Premium → automatic $500 off
-      promoAmt   = 500;
-      promoLabel = 'No Trade-In — $500 off (Premium)';
-    } else {
-      // Samsung + no trade + Unlimited → automatic $200 off
-      promoAmt   = 200;
-      promoLabel = 'No Trade-In — $200 off (Unlimited)';
-    }
-
-  } else {
-    // ── Apple / Google / Motorola / LG / OnePlus ────────────────
-    // All phones follow the same simple rule:
-    // trade-in value IS the discount. No special cases.
     if (hasTrade) {
+      // Samsung TIPS — up to $1,100 with trade-in
+      promoAmt   = Math.min(tradeRaw, 1100);
+      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off';
+    } else {
+      // Samsung no-trade default
+      promoAmt   = 500;
+      promoLabel = 'No Trade-In — $500 off';
+    }
+  } else {
+    // Apple / Google / Motorola / LG / OnePlus
+    if (hasTrade) {
+      // Trade value IS the discount (no arbitrary cap)
       promoAmt   = tradeRaw;
       promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off';
-    } else if (isPremium) {
-      // No trade + Premium → automatic $400 off
+    } else {
+      // Non-Samsung no-trade default
       promoAmt   = 400;
-      promoLabel = 'No Trade-In — $400 off (Premium)';
+      promoLabel = 'No Trade-In — $400 off';
     }
-    // No trade + Intro = no discount, full price ÷ 36
   }
 
   promoAmt = Math.min(promoAmt, phonePrice); // never exceed full price
   return { promoAmt: promoAmt, promoLabel: promoLabel };
+}
+
+// ══════════════════════════════════════════════════
+//  TABLET PROMO HELPER
+//  Returns the discount amount in dollars for a given tablet.
+//  Currently eligible for 50% off (current offer):
+//    • iPad (A16) — base entry-level iPad
+//    • Samsung Galaxy Tab A11+
+//  Add more tablet promos here as they're announced.
+// ══════════════════════════════════════════════════
+function getTabletDiscount(name, price) {
+  var n = (name || '').toLowerCase();
+  // iPad A16 (entry-level) — match "ipad (a16)" but NOT iPad Air/Pro/mini
+  var isIpadA16 = n.includes('ipad') && n.includes('(a16)');
+  // Galaxy Tab A11 / A11+
+  var isGalaxyA11 = n.includes('galaxy tab a11') || n.includes('tab a11');
+  if (isIpadA16) {
+    return { amount: price * 0.5, label: '50% off iPad (A16)', applies: true };
+  }
+  if (isGalaxyA11) {
+    return { amount: price * 0.5, label: '50% off Galaxy Tab A11+', applies: true };
+  }
+  return { amount: 0, label: '', applies: false };
+}
+function getTabletNetPrice(name, price) {
+  return Math.max(0, (price || 0) - getTabletDiscount(name, price).amount);
 }
 
 // ══════════════════════════════════════════════════
@@ -1683,9 +1704,9 @@ function selectReward(btn) {
   state.tier = btn.dataset.tier;
   document.getElementById('selectedTier').value = state.tier;
 
-  // Auto-apply $300 Diamond watch discount — no separate button needed
-  const isDiamond = state.tier === 'diamond';
-  state.membershipDiscount = isDiamond ? 300 : 0;
+  // Auto-apply $300 watch discount for Platinum and Diamond tiers
+  const eligibleForWatchDiscount = state.tier === 'diamond' || state.tier === 'platinum';
+  state.membershipDiscount = eligibleForWatchDiscount ? 300 : 0;
   document.getElementById('selectedMembershipDiscount').value = state.membershipDiscount;
 
   // Re-run watch row with new discount (diamond note is inside the row)
@@ -1966,7 +1987,7 @@ function buildRow(type, num) {
       </div>`;
   }
   if (type === 'watch') {
-    extraFields = `<div id="${rowId}-diamond-note" style="display:none;background:linear-gradient(135deg,#e0f0ff,#b9d4f5);border:1.5px solid #6ca0dc;border-radius:var(--radius-sm);padding:8px 12px;"><div style="font-size:12px;font-weight:700;color:#1a5fa0;">💎 Diamond — $300 Off Applied Automatically</div></div>`;
+    extraFields = `<div id="${rowId}-diamond-note" style="display:none;background:linear-gradient(135deg,#e0f0ff,#b9d4f5);border:1.5px solid #6ca0dc;border-radius:var(--radius-sm);padding:8px 12px;"><div id="${rowId}-diamond-note-label" style="font-size:12px;font-weight:700;color:#1a5fa0;">💎 $300 Off Applied Automatically</div></div>`;
   }
 
   row.innerHTML = `
@@ -2156,15 +2177,16 @@ function recalcRow(type, num) {
   const xmcAdd = d.xmcEnabled ? d.xmcRate : 0;
 
   if (type === 'phone') {
-    // Use per-row premium state; fall back to global state.plan for legacy compat
+    // Per-row Premium checkbox = "rep is upgrading this line to Premium" (adds +$10/mo).
+    // It does NOT affect promo eligibility — all customers are treated as Premium-eligible
+    // for TIPS / no-trade discounts (they're either already on Premium or being upgraded).
     const isPremium = d.premium || state.plan === 'premium';
-    const plan = isPremium ? 'premium' : 'intro';
-    const { promoAmt, promoLabel } = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, plan);
+    const { promoAmt, promoLabel } = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, 'premium');
     d.promoAmt = promoAmt;
     const netCost = Math.max(0, d.price - promoAmt);
     const monthly = netCost / 36 + xmcAdd;
-    // $10/mo plan upgrade only if this line is being upgraded to Premium
-    const planExtra = isPremium && promoAmt > 0 ? 10 : 0;
+    // $10/mo plan upgrade fee — applies whenever the rep checks "Upgrade to Premium" on this line
+    const planExtra = isPremium ? 10 : 0;
     const promoLine   = promoAmt   > 0 ? `<span class="df-mo-promo">${promoLabel}</span>` : '';
     const upgradeLine = planExtra  > 0 ? `<span class="df-mo-promo upgrade">+$10/mo plan upgrade</span>` : '';
     const xmcLine     = xmcAdd     > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
@@ -2175,13 +2197,18 @@ function recalcRow(type, num) {
     const monthly  = netPrice / 36 + 10 + xmcAdd;
     const note = document.getElementById(`${rowId}-diamond-note`);
     if (note) note.style.display = discount > 0 ? 'block' : 'none';
-    const discLine = discount > 0 ? `<span class="df-mo-promo">−$${discount} Diamond</span>` : '';
+    const tierLbl  = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : '');
+    const discLine = discount > 0 ? `<span class="df-mo-promo">−$${discount}${tierLbl ? ' ' + tierLbl : ''}</span>` : '';
     const xmcLine  = xmcAdd   > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${discLine}${xmcLine}`;
   } else {
-    const monthly = d.price / 36 + 20 + xmcAdd;
-    const xmcLine = xmcAdd > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
-    monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${xmcLine}`;
+    // Tablet — apply A11+ 50% off if applicable
+    const tabletDisc = getTabletDiscount(d.name, d.price);
+    const netPrice = Math.max(0, d.price - tabletDisc.amount);
+    const monthly = netPrice / 36 + 20 + xmcAdd;
+    const discLine = tabletDisc.applies ? `<span class="df-mo-promo">−$${tabletDisc.amount.toFixed(2)} (${tabletDisc.label})</span>` : '';
+    const xmcLine  = xmcAdd > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
+    monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${discLine}${xmcLine}`;
   }
 
   syncStateFromAllRows();
@@ -2191,6 +2218,12 @@ function recalcRow(type, num) {
 function refreshWatchDiamondNotes() {
   for (let i = 1; i <= watchCounts; i++) {
     const note = document.getElementById(`watch-row-${i}-diamond-note`);
+    const lbl  = document.getElementById(`watch-row-${i}-diamond-note-label`);
+    if (lbl) {
+      const tierLbl = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : '');
+      const icon    = state.tier === 'diamond' ? '💎' : '🔘';
+      lbl.innerHTML = `${icon} ${tierLbl} — $300 Off Applied Automatically`;
+    }
     if (note) note.style.display = state.membershipDiscount > 0 ? 'block' : 'none';
     recalcRow('watch', i);
   }
@@ -2459,7 +2492,7 @@ function calcBillingComparison() {
       const watchPart  = state.watchPrice > 0
         ? ` + $${(Math.max(0, state.watchPrice - state.membershipDiscount) / 36 + 10).toFixed(2)} watch` : '';
       const tabletPart = state.tabletPrice > 0
-        ? ` + $${(state.tabletPrice / 36 + 20).toFixed(2)} tablet` : '';
+        ? ` + $${(getTabletNetPrice(state.tabletName, state.tabletPrice) / 36 + 20).toFixed(2)} tablet` : '';
       autoDisplay.textContent = `$${autoNewMobile.toFixed(2)}/mo`;
       const subEl = document.getElementById('newMobileAutoSub');
       if (subEl) subEl.textContent = `Current mobile $${state.currentMobileBill.toFixed(2)}${phonePart}${watchPart}${tabletPart}`;
@@ -2536,10 +2569,10 @@ function getAutoNewMobile() {
     var d = getRowData('phone', i);
     if (d.price > 0) {
       var isPrem = d.premium || state.plan === 'premium';
-      var planKey = isPrem ? 'premium' : 'intro';
-      var res = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, planKey);
+      var res = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, 'premium');
       phoneTotalMon += Math.max(0, d.price - res.promoAmt) / 36;
-      if (isPrem && res.promoAmt > 0) planUpgradeTotal += 10;
+      // +$10/mo upgrade fee whenever the rep marked this line for Premium upgrade
+      if (isPrem) planUpgradeTotal += 10;
     }
   }
   // Sum all watch rows
@@ -2552,7 +2585,7 @@ function getAutoNewMobile() {
   var tabletTotalMon = 0;
   for (var ti = 1; ti <= tabletCounts; ti++) {
     var td = getRowData('tablet', ti);
-    if (td.price > 0) tabletTotalMon += td.price / 36 + 20;
+    if (td.price > 0) tabletTotalMon += getTabletNetPrice(td.name, td.price) / 36 + 20;
   }
 
   return state.currentMobileBill + planUpgradeTotal + phoneTotalMon + watchTotalMon + tabletTotalMon;
@@ -2587,43 +2620,106 @@ function renderActivePromos() {
   const isMoto    = name.includes('motorola') || name.includes('moto');
   const isNonSam  = isApple || isGoogle || isMoto;
   const hasWatch  = state.watchPrice > 0;
+  const hasTablet = state.tabletPrice > 0;
+  const hasPhone  = state.phonePrice > 0;
+  const isDiamond = state.tier === 'diamond';
+  const isPlatinum = state.tier === 'platinum';
+  const isPlatOrDiamond = isDiamond || isPlatinum;
+  const tierLabel = isDiamond ? 'Diamond' : (isPlatinum ? 'Platinum' : '');
+
+  // ── Multi-line counting (for $200/$400 add-a-line bonus) ──
+  // A "line" = phone, watch, or tablet that has a device selected.
+  // The bonus requires 2+ lines with at least 1 phone OR tablet.
+  // The $400 (vs $200) variant kicks in when at least one phone or tablet
+  // is being financed (i.e., on a device payment plan).
+  var phoneLines = 0, watchLines = 0, tabletLines = 0;
+  for (var pl = 1; pl <= phoneCounts; pl++)  { if (getRowData('phone', pl).price  > 0) phoneLines++;  }
+  for (var wl = 1; wl <= watchCounts; wl++)  { if (getRowData('watch', wl).price  > 0) watchLines++;  }
+  for (var tl = 1; tl <= tabletCounts; tl++) { if (getRowData('tablet', tl).price > 0) tabletLines++; }
+  const totalLines        = phoneLines + watchLines + tabletLines;
+  const hasPhoneOrTablet  = phoneLines + tabletLines > 0;
+  // "Financed" = a phone or tablet is being added (each goes on the device payment plan)
+  const hasFinancedPhoneOrTablet = phoneLines + tabletLines > 0;
 
   // ── CURRENT OFFERS (per C³ Product Training, April 2026) ──
   // Removed expired dated promos. Only includes structural/ongoing
   // offers reflected in the C³ training material.
 
   // Phone-specific TIPS promos (always current — built into upgrade structure)
+  // Eligibility is independent of the Premium upgrade checkbox: every quote assumes
+  // the customer either is on Premium already or will be upgraded.
   if (state.phoneName) {
     if (isSamsung) {
-      if (hasTrade && isPremium)
-        promos.push({ text: 'TIPS — Up to $1,100 off select Samsung devices with trade-in (Premium Unlimited)', note: 'Current Offer', type: 'tips' });
-      else if (hasTrade && !isPremium)
-        promos.push({ text: 'TIPS — Up to $500 off select Samsung devices with trade-in (Unlimited)', note: 'Current Offer', type: 'tips' });
-      if (!hasTrade && isPremium)
-        promos.push({ text: '$500 off select Samsung devices (Premium Unlimited, no trade-in)', note: 'Current Offer', type: 'discount' });
-      else if (!hasTrade && !isPremium)
-        promos.push({ text: '$200 off select Samsung devices (Unlimited, no trade-in)', note: 'Current Offer', type: 'discount' });
-      // $400 off applies to Samsung too (no trade required)
-      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Current Offer', type: 'discount' });
+      if (hasTrade) {
+        promos.push({ text: 'TIPS — Up to $1,100 off select Samsung devices with trade-in', note: 'Current Offer', type: 'tips' });
+      } else {
+        promos.push({ text: '$500 off select Samsung devices (no trade-in)', note: 'Current Offer', type: 'discount' });
+      }
+      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices', note: 'Current Offer', type: 'discount' });
     } else if (isNonSam) {
-      if (hasTrade && isPremium)
-        promos.push({ text: 'TIPS — Up to $830 off select Apple, Google, or Motorola devices with trade-in (Premium Unlimited)', note: 'Current Offer', type: 'tips' });
-      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices (Premium Unlimited)', note: 'Current Offer', type: 'discount' });
+      if (hasTrade) {
+        promos.push({ text: 'TIPS — Trade-in value applied as discount on Apple, Google, or Motorola devices', note: 'Current Offer', type: 'tips' });
+      }
+      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices', note: 'Current Offer', type: 'discount' });
     }
   }
 
   // Premium plan perk (from C³): Elite Upgrade — 2x per year on Premium Unlimited
-  if (state.phoneName && isPremium) {
+  if (state.phoneName) {
     promos.push({ text: '⭐ Premium Unlimited Elite Upgrade — eligible to upgrade up to 2x per year', note: 'Plan Benefit', type: 'discount' });
   }
 
-  // Watch perk (from C³): No activation fee for watches
+  // Watch perks
   if (hasWatch) {
-    promos.push({ text: '⌚ Smartwatch lines: $10/mo with Number Sync — no activation fee', note: 'Plan Benefit', type: 'watch' });
+    // Platinum & Diamond reward — $300 off select smartwatches (auto-applied in calculator)
+    if (isPlatOrDiamond) {
+      const tierIcon = isDiamond ? '💎' : '🔘';
+      promos.push({ text: `${tierIcon} ${tierLabel} Reward — $300 off select smartwatches (applied automatically)`, note: 'Active Discount', type: 'watch' });
+    } else {
+      // Eligibility hint when customer isn't Platinum/Diamond yet
+      promos.push({ text: '💎 Platinum & Diamond members: $300 off select smartwatches', note: 'Tier Reward', type: 'watch' });
+    }
+    // Always-on smartwatch line benefit
+    promos.push({ text: '⌚ Smartwatch lines: $10/mo with Number Sync — no activation fee, 5G independent, Emergency SOS', note: 'Plan Benefit', type: 'watch' });
+  }
+
+  // Tablet perks (from C³ — By The Gig & Tablet Lines)
+  if (hasTablet) {
+    // Device-specific 50% off — applies automatically when iPad (A16) or Galaxy Tab A11+ is selected
+    var discountedLabels = [];
+    for (var ti3 = 1; ti3 <= tabletCounts; ti3++) {
+      var tdRow = getRowData('tablet', ti3);
+      if (tdRow.name) {
+        var di = getTabletDiscount(tdRow.name, tdRow.price);
+        if (di.applies && discountedLabels.indexOf(di.label) === -1) discountedLabels.push(di.label);
+      }
+    }
+    if (discountedLabels.length) {
+      promos.push({ text: '📋 ' + discountedLabels.join(' · ') + ' (applied automatically to financing)', note: 'Current Offer', type: 'tablet' });
+    } else {
+      // No qualifying tablet selected yet — show eligibility hint
+      promos.push({ text: '📋 Select an iPad (A16) or Galaxy Tab A11+ to unlock 50% off', note: 'Current Offer', type: 'tablet' });
+    }
+    promos.push({ text: '📋 Tablet lines: $20/mo for 15GB priority data — no line access fees, mix & match per line', note: 'Plan Benefit', type: 'tablet' });
+    // XMC bundle perk — protection available for tablets
+    promos.push({ text: '🛡️ Tablet protection available — XMC Insurance covers your tablet on Premium Unlimited', note: 'Add-On Offer', type: 'tablet' });
+  }
+
+  // Add-A-Line bonus: $200 for adding 2+ lines (one must be phone or tablet),
+  // bumped to $400 if a phone or tablet is being financed.
+  if (totalLines >= 2 && hasPhoneOrTablet) {
+    if (hasFinancedPhoneOrTablet) {
+      promos.push({ text: `🎁 Add-A-Line Bonus — $400 reward for ${totalLines} lines added with a financed device`, note: 'Active Bonus', type: 'tips' });
+    } else {
+      promos.push({ text: `🎁 Add-A-Line Bonus — $200 reward for ${totalLines} lines added`, note: 'Active Bonus', type: 'tips' });
+    }
+  } else if (totalLines === 1) {
+    // Eligibility hint when only 1 line is on the quote
+    promos.push({ text: '🎁 Add-A-Line Bonus — Add another line (with a phone or tablet) for $200, or $400 if a device is financed', note: 'Available', type: 'discount' });
   }
 
   // Internet bundle perk (from C³): Premium Mobile +$10/mo with 300+ Mbps Internet
-  if (state.phoneName && isPremium) {
+  if (state.phoneName) {
     promos.push({ text: '🏠 Bundle perk: Premium Mobile available for just +$10/mo with 300 Mbps+ Internet', note: 'Bundle Offer', type: 'always' });
   }
 
@@ -2717,14 +2813,17 @@ function updatePreview() {
   const watchMonthly     = watchNetPrice / 36 + 10;
 
   const tabletFullPrice  = state.tabletPrice;
+  const tabletDiscObj    = getTabletDiscount(state.tabletName, state.tabletPrice);
+  const tabletNetPrice   = Math.max(0, state.tabletPrice - tabletDiscObj.amount);
   const isA11Tab         = (state.tabletName || '').toLowerCase().includes('a11');
-  const tabletMonthly    = tabletFullPrice / 36 + 20;
+  const tabletMonthly    = tabletNetPrice / 36 + 20;
 
   // Per-line plan upgrade cost (summed across all lines)
+  // +$10/mo per line marked for Premium upgrade (regardless of trade/promo)
   var totalPlanUpgradeCost = 0;
   allPhoneData.forEach(function(p) {
     const isPrem = p.d.premium || state.plan === 'premium';
-    if (isPrem && p.d.promoAmt > 0) totalPlanUpgradeCost += 10;
+    if (isPrem) totalPlanUpgradeCost += 10;
   });
 
   // Brand label for right column title (based on first phone)
@@ -2800,14 +2899,14 @@ function updatePreview() {
       if (firstPhone) {
         const pd = firstPhone.d;
         const isPrem = pd.premium || state.plan === 'premium';
-        const planStr = isPrem ? 'premium' : 'intro';
-        const { promoLabel: pLabel } = calcSmartPromo(pd.name, pd.price, pd.tradeValue, pd.noTrade, planStr);
+        const { promoLabel: pLabel } = calcSmartPromo(pd.name, pd.price, pd.tradeValue, pd.noTrade, 'premium');
         const tipsPrice = Math.max(0, pd.price - pd.promoAmt);
         safeText('cmp-right-phoneName', pd.name);
         safeText('cmp-right-promoTag', pd.promoAmt > 0 ? pLabel : 'No trade-in applied');
         safeText('cmp-right-phonePrice', `$${tipsPrice.toFixed(2)}`);
         safeText('cmp-right-phoneStrike', pd.promoAmt > 0 ? `Was $${pd.price.toFixed(2)}` : '');
-        safeDisplay('cmp-right-planUpgrade', (isPrem && pd.promoAmt > 0) ? 'block' : 'none');
+        // Show plan upgrade line whenever the rep is upgrading this line to Premium
+        safeDisplay('cmp-right-planUpgrade', isPrem ? 'block' : 'none');
       }
     } else {
       if (rightSingleBlock) rightSingleBlock.style.display = 'none';
@@ -2823,10 +2922,9 @@ function updatePreview() {
         rc.innerHTML = allPhoneData.map(function(p) {
           const pd = p.d;
           const isPrem = pd.premium || state.plan === 'premium';
-          const planStr = isPrem ? 'premium' : 'intro';
-          const { promoLabel: pLabel } = calcSmartPromo(pd.name, pd.price, pd.tradeValue, pd.noTrade, planStr);
+          const { promoLabel: pLabel } = calcSmartPromo(pd.name, pd.price, pd.tradeValue, pd.noTrade, 'premium');
           const tipsPrice = Math.max(0, pd.price - pd.promoAmt);
-          const planUpgLine = (isPrem && pd.promoAmt > 0)
+          const planUpgLine = isPrem
             ? `<div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(0,0,0,0.1)"><span style="font-size:12px;color:var(--text-secondary);">Plan: Intro → Premium</span><span style="font-size:13px;font-weight:700;color:#b07000;">+$10/mo</span></div>`
             : '';
           return `<div class="cmp-item-block">
@@ -2858,10 +2956,11 @@ function updatePreview() {
       for (var wi = 1; wi <= watchCounts; wi++) {
         var wd = getRowData('watch', wi);
         if (!wd.price) continue;
-        var wDisc    = state.membershipDiscount;
+        var wDisc      = state.membershipDiscount;
+        var wTierLbl   = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : 'Membership');
         var wNet     = Math.max(0, wd.price - wDisc);
         var wSub     = wDisc > 0 ? `After discount · +$10/mo line fee` : `Watch · +$10/mo line fee`;
-        var wPromo   = wDisc > 0 ? `<div class="cmp-item-promo-tag">$${wDisc} Diamond Membership discount</div>` : '';
+        var wPromo   = wDisc > 0 ? `<div class="cmp-item-promo-tag">$${wDisc} ${wTierLbl} Membership discount</div>` : '';
         allWatchBlocks += `<div class="cmp-item-block">
           <div class="cmp-item-name">${watchCounts > 1 ? 'Watch ' + wi + ': ' : ''}${wd.name}</div>
           ${wPromo}
@@ -2888,10 +2987,15 @@ function updatePreview() {
       for (var ti = 1; ti <= tabletCounts; ti++) {
         var td = getRowData('tablet', ti);
         if (!td.price) continue;
+        var tDiscObj = getTabletDiscount(td.name, td.price);
+        var tNet     = Math.max(0, td.price - tDiscObj.amount);
+        var tPromo   = tDiscObj.applies ? `<div class="cmp-item-promo-tag">${tDiscObj.label} — Current Offer</div>` : '';
+        var tSub     = tDiscObj.applies ? `Was $${td.price.toFixed(2)} · Tablet · +$20/mo line fee` : `Tablet · +$20/mo line fee`;
         allTabletBlocks += `<div class="cmp-item-block">
           <div class="cmp-item-name">${tabletCounts > 1 ? 'Tablet ' + ti + ': ' : ''}${td.name}</div>
-          <div class="cmp-item-sub">Tablet · +$20/mo line fee</div>
-          <div class="cmp-item-price">$${td.price.toFixed(2)}</div>
+          ${tPromo}
+          <div class="cmp-item-sub">${tSub}</div>
+          <div class="cmp-item-price">$${tNet.toFixed(2)}</div>
         </div>`;
       }
       tabletContainer.innerHTML = allTabletBlocks;
@@ -2903,7 +3007,7 @@ function updatePreview() {
     var allWatchesNet = 0;
     for (var wi2 = 1; wi2 <= watchCounts; wi2++) { var wd2 = getRowData('watch', wi2); if (wd2.price) allWatchesNet += Math.max(0, wd2.price - state.membershipDiscount); }
     var allTabletsTotal = 0;
-    for (var ti2 = 1; ti2 <= tabletCounts; ti2++) { var td2 = getRowData('tablet', ti2); if (td2.price) allTabletsTotal += td2.price; }
+    for (var ti2 = 1; ti2 <= tabletCounts; ti2++) { var td2 = getRowData('tablet', ti2); if (td2.price) allTabletsTotal += getTabletNetPrice(td2.name, td2.price); }
     const rightTotal = allPhonesTIPSTotal + allWatchesNet + allTabletsTotal;
     safeText('cmp-right-total', `$${rightTotal.toFixed(2)}`);
 
@@ -2980,9 +3084,10 @@ function updatePreview() {
       for (var wbi = 1; wbi <= watchCounts; wbi++) {
         var wbd = getRowData('watch', wbi);
         if (!wbd.price) continue;
-        var wbDisc  = state.membershipDiscount;
-        var wbNet   = Math.max(0, wbd.price - wbDisc);
-        var wbLabel = (watchCounts > 1 ? 'Watch ' + wbi + ': ' : '') + wbd.name + (wbDisc > 0 ? ` (−$${wbDisc} Diamond)` : '');
+        var wbDisc    = state.membershipDiscount;
+        var wbTierLbl = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : 'Membership');
+        var wbNet     = Math.max(0, wbd.price - wbDisc);
+        var wbLabel   = (watchCounts > 1 ? 'Watch ' + wbi + ': ' : '') + wbd.name + (wbDisc > 0 ? ` (−$${wbDisc} ${wbTierLbl})` : '');
         var wbAmt   = (wbNet / 36 + 10).toFixed(2);
         watchBillHTML += `<div class="cmp-item-block" id="bill-promoWatchRow-${wbi}">
           <div class="cmp-item-name">${wbLabel}</div>
@@ -3010,8 +3115,10 @@ function updatePreview() {
       for (var tbi = 1; tbi <= tabletCounts; tbi++) {
         var tbd = getRowData('tablet', tbi);
         if (!tbd.price) continue;
-        var tbLabel = (tabletCounts > 1 ? 'Tablet ' + tbi + ': ' : '') + tbd.name;
-        var tbAmt   = (tbd.price / 36 + 20).toFixed(2);
+        var tbDisc  = getTabletDiscount(tbd.name, tbd.price);
+        var tbNet   = Math.max(0, tbd.price - tbDisc.amount);
+        var tbLabel = (tabletCounts > 1 ? 'Tablet ' + tbi + ': ' : '') + tbd.name + (tbDisc.applies ? ` (−$${tbDisc.amount.toFixed(2)} ${tbDisc.label})` : '');
+        var tbAmt   = (tbNet / 36 + 20).toFixed(2);
         tabletBillHTML += `<div class="cmp-item-block" id="bill-promoTabletRow-${tbi}">
           <div class="cmp-item-name">${tbLabel}</div>
           <div class="cmp-item-sub">Tablet financing ÷36 + $20/mo line fee</div>
@@ -3030,7 +3137,7 @@ function updatePreview() {
     var allWatchesMonthly = 0;
     for (var wt = 1; wt <= watchCounts; wt++) { var wtd = getRowData('watch', wt); if (wtd.price) allWatchesMonthly += Math.max(0, wtd.price - state.membershipDiscount) / 36 + 10; }
     var allTabletsMonthly = 0;
-    for (var tt = 1; tt <= tabletCounts; tt++) { var ttd = getRowData('tablet', tt); if (ttd.price) allTabletsMonthly += ttd.price / 36 + 20; }
+    for (var tt = 1; tt <= tabletCounts; tt++) { var ttd = getRowData('tablet', tt); if (ttd.price) allTabletsMonthly += getTabletNetPrice(ttd.name, ttd.price) / 36 + 20; }
     const rightTotal = promoCore + newMobileLineAmt
                      + allTIPSMonthlyForTotal
                      + allWatchesMonthly
@@ -3239,7 +3346,7 @@ async function handleSubmit() {
     ? ((Math.max(0, state.watchPrice - state.membershipDiscount) / 36) + 10).toFixed(2)
     : '0';
   const tabletMonthly = state.tabletName && state.tabletPrice > 0
-    ? ((state.tabletPrice / 36) + 20).toFixed(2)
+    ? ((getTabletNetPrice(state.tabletName, state.tabletPrice) / 36) + 20).toFixed(2)
     : '0';
   const bundleTotal = (parseFloat(phoneMonthly) + parseFloat(watchMonthly) + parseFloat(tabletMonthly)).toFixed(2);
 
