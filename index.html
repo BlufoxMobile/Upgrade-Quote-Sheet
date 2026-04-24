@@ -191,10 +191,38 @@
   .auto-badge{font-size:10px;font-weight:600;color:var(--text-muted);background:white;border:1px solid var(--border);border-radius:4px;padding:2px 7px;}
   .auto-display-sub{font-size:11px;color:var(--text-muted);margin-top:4px;}
 
-  /* SAVINGS BAR */
-  .savings-bar{margin-top:16px;background:linear-gradient(135deg,#00C853,#00E676);border-radius:var(--radius-sm);padding:14px 20px;display:none;align-items:center;justify-content:space-between;box-shadow:0 4px 16px rgba(0,200,83,0.25);}
-  .savings-bar.visible{display:flex;}
-  .savings-bar-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.9);}
+  /* RUNNING SAVINGS TALLY — fixed top banner (matches Mobile Quote Sheet design) */
+  .savings-tally-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#12022a 0%,#2d0a5e 50%,#12022a 100%);border-bottom:2px solid rgba(150,80,255,0.4);box-shadow:0 4px 24px rgba(103,19,210,0.35);padding:10px 24px;display:flex;align-items:center;justify-content:center;transform:translateY(-100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);}
+  .savings-tally-bar.visible{transform:translateY(0);}
+  body.tally-active{padding-top:80px;transition:padding-top 0.35s ease;}
+  .stb-inner{display:flex;align-items:center;gap:20px;max-width:900px;width:100%;}
+  .stb-label-row{font-family:'Outfit',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);white-space:nowrap;flex-shrink:0;}
+  .stb-stats{display:flex;align-items:center;gap:0;flex:1;justify-content:center;}
+  .stb-stat{display:flex;align-items:baseline;gap:4px;padding:0 24px;text-align:center;flex-direction:row;flex-wrap:wrap;justify-content:center;}
+  .stb-amount{font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;line-height:1;}
+  .stb-monthly{color:#69ff9c;}
+  .stb-yearly{color:#c4aaff;}
+  .stb-unit{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,0.45);margin-left:2px;}
+  .stb-desc{width:100%;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:1px;}
+  .stb-divider{width:1px;height:40px;background:rgba(255,255,255,0.12);flex-shrink:0;}
+  /* Mobile responsive — narrower padding, smaller text */
+  @media (max-width: 600px) {
+    .savings-tally-bar{padding:8px 12px;}
+    .stb-inner{gap:8px;}
+    .stb-label-row{font-size:9px;letter-spacing:1px;}
+    .stb-stat{padding:0 12px;}
+    .stb-amount{font-size:20px;}
+    .stb-unit{font-size:11px;}
+  }
+  /* Don't show the tally bar in print previews */
+  @media print {
+    .savings-tally-bar{display:none !important;}
+    body.tally-active{padding-top:0 !important;}
+  }
+
+  /* LEGACY SAVINGS BAR (kept hidden — replaced by top tally) */
+  .savings-bar{display:none !important;}
+  .savings-bar-label{font-size:12px;}
   .savings-bar-amounts{display:flex;gap:24px;}
   .sb-item{text-align:center;}
   .sb-amt{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:white;line-height:1;}
@@ -660,7 +688,34 @@
   }
 </style>
 </head>
-<body>
+<body class="tally-active">
+
+<!-- ══════════════════════════════════════
+     RUNNING SAVINGS TALLY (top of viewport)
+     Mirrors the design used on Mobile Quote Sheet —
+     monthly savings in green, annual in light purple.
+     Always visible during intake (shows $— when no
+     bill data entered yet). Hidden in print.
+══════════════════════════════════════ -->
+<div class="savings-tally-bar visible" id="savingsTallyBar">
+  <div class="stb-inner">
+    <div class="stb-label-row">💰 Running Savings Tally</div>
+    <div class="stb-stats">
+      <div class="stb-stat">
+        <div class="stb-amount stb-monthly" id="fssMonthly">$—</div>
+        <div class="stb-unit">/ mo</div>
+        <div class="stb-desc">Monthly</div>
+      </div>
+      <div class="stb-divider"></div>
+      <div class="stb-stat">
+        <div class="stb-amount stb-yearly" id="fssYearly">$—</div>
+        <div class="stb-unit">/ yr</div>
+        <div class="stb-desc">Annual</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="screen-wrapper">
 <div class="card">
 
@@ -889,20 +944,12 @@
 
 
 
-<!-- ══ REP SAVINGS SUMMARY — visible to rep before clicking preview ══ -->
-<div id="repSavingsSummary" style="display:none;margin:0 0 8px;padding:20px 28px;background:linear-gradient(135deg,#00C853,#00E676);border-radius:var(--radius);box-shadow:var(--shadow-md);">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-    <div>
-      <div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(0,0,0,0.55);margin-bottom:4px;">🎉 Customer Saves Per Month</div>
-      <div style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;color:white;line-height:1;" id="repSavingsAmt">$—</div>
-    </div>
-    <div style="text-align:right;">
-      <div style="font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:rgba(0,0,0,0.5);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Before</div>
-      <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:white;" id="repBeforeAmt">$—/mo</div>
-      <div style="font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:rgba(0,0,0,0.5);text-transform:uppercase;letter-spacing:0.8px;margin-top:6px;margin-bottom:3px;">After</div>
-      <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:white;" id="repAfterAmt">$—/mo</div>
-    </div>
-  </div>
+<!-- ══ REP SAVINGS SUMMARY — replaced by Running Savings Tally bar at top.
+     Element kept in DOM (display:none) so JS that updates these IDs doesn't break. ══ -->
+<div id="repSavingsSummary" style="display:none !important;">
+  <span id="repSavingsAmt"></span>
+  <span id="repBeforeAmt"></span>
+  <span id="repAfterAmt"></span>
 </div>
 
 </div><!-- end intake-body -->
@@ -2531,30 +2578,46 @@ function calcBillingComparison() {
     currSideBar.style.background = '';
   }
 
-  // Savings bar in input section
+  // Savings bar in input section (legacy — hidden via CSS, kept for any external readers)
   const savingsBar = document.getElementById('billingSavingsBar');
   if (hasSavings) {
     const smd = document.getElementById('savingsMonthlyDisplay'); if (smd) smd.textContent = `$${savings.toFixed(2)}`;
-    // yearly element kept in DOM but hidden — no update needed
     if (savingsBar) savingsBar.style.display = 'flex';
   } else {
     if (savingsBar) savingsBar.style.display = 'none';
   }
 
-  // ── Rep-facing savings summary above the footer ──
+  // ── Running Savings Tally (fixed top banner) ──
+  // Bar is always visible during intake; values just show $— until savings exist.
+  const tallyBar  = document.getElementById('savingsTallyBar');
+  const tallyMo   = document.getElementById('fssMonthly');
+  const tallyYr   = document.getElementById('fssYearly');
+  if (tallyBar && tallyMo && tallyYr) {
+    // Make sure the bar is showing (it could have been hidden via showPreviewPage logic)
+    tallyBar.classList.add('visible');
+    document.body.classList.add('tally-active');
+    if (hasSavings) {
+      tallyMo.textContent = `$${Math.round(savings)}`;
+      tallyYr.textContent = `$${Math.round(savings * 12)}`;
+    } else {
+      tallyMo.textContent = '$—';
+      tallyYr.textContent = '$—';
+    }
+  }
+
+  // ── Rep-facing savings summary (legacy) ──
+  // Replaced by the Running Savings Tally bar at the top of the page.
+  // Force the element hidden and clear any leftover text content so nothing
+  // leaks through if another script previously set inline display.
   const repSummary  = document.getElementById('repSavingsSummary');
   const repSavAmt   = document.getElementById('repSavingsAmt');
   const repBefore   = document.getElementById('repBeforeAmt');
   const repAfter    = document.getElementById('repAfterAmt');
   if (repSummary) {
-    if (hasSavings && beforeTotal > 0 && afterTotal > 0) {
-      repSummary.style.display = 'block';
-      if (repSavAmt) repSavAmt.textContent = `$${savings.toFixed(2)}`;
-      if (repBefore) repBefore.textContent = `$${beforeTotal.toFixed(2)}/mo`;
-      if (repAfter)  repAfter.textContent  = `$${afterTotal.toFixed(2)}/mo`;
-    } else {
-      repSummary.style.display = 'none';
-    }
+    repSummary.style.display = 'none';
+    if (repSavAmt) repSavAmt.textContent = '';
+    if (repBefore) repBefore.textContent = '';
+    if (repAfter)  repAfter.textContent  = '';
   }
 
   updatePreview();
@@ -3171,6 +3234,10 @@ function showPreviewPage() {
   var pp = document.getElementById('previewPage');
   if (ip) ip.style.cssText = 'display:none !important';
   if (pp) pp.style.cssText = 'display:block !important';
+  // Hide the rep-facing tally bar on the customer-facing preview page
+  var tBar = document.getElementById('savingsTallyBar');
+  if (tBar) tBar.classList.remove('visible');
+  document.body.classList.remove('tally-active');
   try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch(e) {}
 }
 
@@ -3179,6 +3246,10 @@ function showIntakePage() {
   var pp = document.getElementById('previewPage');
   if (ip) ip.style.cssText = 'display:block !important';
   if (pp) pp.style.cssText = 'display:none !important';
+  // Restore the running savings tally bar when returning to the intake form
+  var tBar = document.getElementById('savingsTallyBar');
+  if (tBar) tBar.classList.add('visible');
+  document.body.classList.add('tally-active');
   try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch(e) {}
 }
 
@@ -3307,12 +3378,21 @@ function resetForm() {
       if (el) el.style.border = '';
     });
 
-    // 10. Re-run all calc + render passes so UI shows the empty starting state
+    // 10. Reset running savings tally values to $— (keep bar visible)
+    var tBar = document.getElementById('savingsTallyBar');
+    var tMo  = document.getElementById('fssMonthly');
+    var tYr  = document.getElementById('fssYearly');
+    if (tMo)  tMo.textContent = '$—';
+    if (tYr)  tYr.textContent = '$—';
+    if (tBar) tBar.classList.add('visible');
+    document.body.classList.add('tally-active');
+
+    // 11. Re-run all calc + render passes so UI shows the empty starting state
     try { calcBillingComparison(); } catch(e) {}
     try { updatePreview(); }         catch(e) {}
     try { renderActivePromos(); }    catch(e) {}
 
-    // 11. Send rep back to the intake form (the beginning)
+    // 12. Send rep back to the intake form (the beginning)
     showIntakePage();
   } catch(err) {
     console.error('resetForm error:', err);
