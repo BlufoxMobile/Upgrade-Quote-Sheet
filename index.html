@@ -2239,7 +2239,8 @@ function recalcRow(type, num) {
     const xmcLine     = xmcAdd     > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${promoLine}${upgradeLine}${xmcLine}`;
   } else if (type === 'watch') {
-    const discount = state.membershipDiscount;
+    // Cap $300 membership discount at first 2 watches only
+    const discount = num <= 2 ? state.membershipDiscount : 0;
     const netPrice = Math.max(0, d.price - discount);
     const monthly  = netPrice / 36 + 10 + xmcAdd;
     const note = document.getElementById(`${rowId}-diamond-note`);
@@ -2271,7 +2272,8 @@ function refreshWatchDiamondNotes() {
       const icon    = state.tier === 'diamond' ? '💎' : '🔘';
       lbl.innerHTML = `${icon} ${tierLbl} — $300 Off Applied Automatically`;
     }
-    if (note) note.style.display = state.membershipDiscount > 0 ? 'block' : 'none';
+    // Only first 2 watches qualify for the $300 membership discount
+    if (note) note.style.display = (state.membershipDiscount > 0 && i <= 2) ? 'block' : 'none';
     recalcRow('watch', i);
   }
 }
@@ -2638,11 +2640,12 @@ function getAutoNewMobile() {
       if (isPrem) planUpgradeTotal += 10;
     }
   }
-  // Sum all watch rows
+  // Sum all watch rows — cap $300 discount at first 2 watches
   var watchTotalMon = 0;
   for (var wi = 1; wi <= watchCounts; wi++) {
     var wd = getRowData('watch', wi);
-    if (wd.price > 0) watchTotalMon += Math.max(0, wd.price - state.membershipDiscount) / 36 + 10;
+    var wDiscApplied = wi <= 2 ? state.membershipDiscount : 0;
+    if (wd.price > 0) watchTotalMon += Math.max(0, wd.price - wDiscApplied) / 36 + 10;
   }
   // Sum all tablet rows
   var tabletTotalMon = 0;
@@ -3019,7 +3022,8 @@ function updatePreview() {
       for (var wi = 1; wi <= watchCounts; wi++) {
         var wd = getRowData('watch', wi);
         if (!wd.price) continue;
-        var wDisc      = state.membershipDiscount;
+        // Cap $300 membership discount at first 2 watches only
+        var wDisc      = wi <= 2 ? state.membershipDiscount : 0;
         var wTierLbl   = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : 'Membership');
         var wNet     = Math.max(0, wd.price - wDisc);
         var wSub     = wDisc > 0 ? `After discount · +$10/mo line fee` : `Watch · +$10/mo line fee`;
@@ -3068,7 +3072,7 @@ function updatePreview() {
     // Totals — sum ALL phones, watches, tablets
     const allPhonesTIPSTotal = allPhoneData.reduce(function(s, p) { return s + Math.max(0, p.d.price - p.d.promoAmt); }, 0);
     var allWatchesNet = 0;
-    for (var wi2 = 1; wi2 <= watchCounts; wi2++) { var wd2 = getRowData('watch', wi2); if (wd2.price) allWatchesNet += Math.max(0, wd2.price - state.membershipDiscount); }
+    for (var wi2 = 1; wi2 <= watchCounts; wi2++) { var wd2 = getRowData('watch', wi2); var w2Disc = wi2 <= 2 ? state.membershipDiscount : 0; if (wd2.price) allWatchesNet += Math.max(0, wd2.price - w2Disc); }
     var allTabletsTotal = 0;
     for (var ti2 = 1; ti2 <= tabletCounts; ti2++) { var td2 = getRowData('tablet', ti2); if (td2.price) allTabletsTotal += getTabletNetPrice(td2.name, td2.price); }
     const rightTotal = allPhonesTIPSTotal + allWatchesNet + allTabletsTotal;
@@ -3147,7 +3151,8 @@ function updatePreview() {
       for (var wbi = 1; wbi <= watchCounts; wbi++) {
         var wbd = getRowData('watch', wbi);
         if (!wbd.price) continue;
-        var wbDisc    = state.membershipDiscount;
+        // Cap $300 membership discount at first 2 watches only
+        var wbDisc    = wbi <= 2 ? state.membershipDiscount : 0;
         var wbTierLbl = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : 'Membership');
         var wbNet     = Math.max(0, wbd.price - wbDisc);
         var wbLabel   = (watchCounts > 1 ? 'Watch ' + wbi + ': ' : '') + wbd.name + (wbDisc > 0 ? ` (−$${wbDisc} ${wbTierLbl})` : '');
@@ -3198,7 +3203,7 @@ function updatePreview() {
       return s + Math.max(0, p.d.price - p.d.promoAmt) / 36;
     }, 0);
     var allWatchesMonthly = 0;
-    for (var wt = 1; wt <= watchCounts; wt++) { var wtd = getRowData('watch', wt); if (wtd.price) allWatchesMonthly += Math.max(0, wtd.price - state.membershipDiscount) / 36 + 10; }
+    for (var wt = 1; wt <= watchCounts; wt++) { var wtd = getRowData('watch', wt); var wtDisc = wt <= 2 ? state.membershipDiscount : 0; if (wtd.price) allWatchesMonthly += Math.max(0, wtd.price - wtDisc) / 36 + 10; }
     var allTabletsMonthly = 0;
     for (var tt = 1; tt <= tabletCounts; tt++) { var ttd = getRowData('tablet', tt); if (ttd.price) allTabletsMonthly += getTabletNetPrice(ttd.name, ttd.price) / 36 + 20; }
     const rightTotal = promoCore + newMobileLineAmt
