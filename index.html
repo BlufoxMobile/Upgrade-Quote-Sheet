@@ -687,6 +687,9 @@
     .feat-table { break-inside: avoid; }
   }
 </style>
+<!-- PDF generation libs (used by handleSavePDF / handlePrint for iPad-friendly downloads) -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body class="tally-active">
 
@@ -1232,8 +1235,10 @@
 </div>  <!-- ── PREVIEW FOOTER ── -->
   <div class="preview-footer no-print">
     <div class="preview-footer-disclaimer">Pricing is estimated. All prices subject to change. Taxes &amp; fees not included.</div>
-    <div style="display:flex;gap:10px;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-outline" onclick="showIntakePage()">← Back to Form</button>
+      <button class="btn btn-outline" onclick="handleSavePDF()">💾 Save as PDF</button>
+      <button class="btn btn-outline" onclick="handlePrint()">🖨 Print</button>
       <button class="btn btn-submit"  onclick="handleSubmit()">✅ Submit Quote</button>
     </div>
   </div>
@@ -3262,25 +3267,108 @@ function showIntakePage() {
 function handlePreview() { showPreviewPage(); }
 
 // ══════════════════════════════════════════════════
-//  PRINT
+//  PDF / PRINT (iPad-friendly: html2canvas + jsPDF)
+//  window.print() is unreliable on iPad Safari/Chrome so we
+//  generate a real PDF and either download it or open it
+//  in a new tab where Safari's Share → Print works.
 // ══════════════════════════════════════════════════
-function handlePrint() {
-  const repName   = document.getElementById('repName').value.trim();
-  const storeName = document.getElementById('storeName').value;
-  if (!repName || !storeName) {
-    alert('Please fill in Your Name and Your Store before printing.');
-    if (!repName) { document.getElementById('repName').style.border = '2px solid #e53935'; document.getElementById('repName').focus(); }
-    if (!storeName) document.getElementById('storeName').style.border = '2px solid #e53935';
+async function _buildUpgradePdf({ openInNewTab = false } = {}) {
+  const target = document.getElementById('previewPage');
+  if (!target || !window.html2canvas || !window.jspdf) {
+    alert('PDF library not loaded yet. Please wait a moment and try again.');
     return;
   }
-  document.getElementById('repName').style.border = '';
-  document.getElementById('storeName').style.border = '';
-  // Make sure preview is visible for print
+
+  // Make sure the preview is visible & up to date before capture
   document.getElementById('previewSection').classList.add('visible');
   updatePreview();
   renderActivePromos();
   updateNotesPrint();
-  window.print();
+
+  // Hide elements not meant for the printed copy (footer buttons etc.) during capture
+  const hiddenEls = [];
+  target.querySelectorAll('.no-print').forEach(el => {
+    hiddenEls.push([el, el.style.display]);
+    el.style.display = 'none';
+  });
+  const prevBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'visible';
+  // Disable the trigger buttons during generation
+  const allBtns = document.querySelectorAll('.preview-footer .btn');
+  const origLabels = [];
+  allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
+
+  try {
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      windowWidth: target.scrollWidth,
+      windowHeight: target.scrollHeight,
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
+    const pageWidth  = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth   = pageWidth;
+    const imgHeight  = canvas.height * (imgWidth / canvas.width);
+
+    // Multi-page slicing
+    let position = 0;
+    let remaining = imgHeight;
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, position, imgWidth, imgHeight);
+    remaining -= pageHeight;
+    while (remaining > 0) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, position, imgWidth, imgHeight);
+      remaining -= pageHeight;
+    }
+
+    const customer = (document.getElementById('customerFirstName').value || 'Customer').trim();
+    const datePart = new Date().toISOString().slice(0, 10);
+    const filename = `Xfinity-Upgrade-Quote_${customer}_${datePart}.pdf`
+      .replace(/[^A-Za-z0-9._-]/g, '_');
+
+    if (openInNewTab) {
+      const blobUrl = pdf.output('bloburl');
+      window.open(blobUrl, '_blank');
+    } else {
+      pdf.save(filename);
+    }
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    alert('PDF generation failed: ' + err.message);
+  } finally {
+    hiddenEls.forEach(([el, d]) => { el.style.display = d; });
+    document.body.style.overflow = prevBodyOverflow;
+    origLabels.forEach(([b, label, disabled]) => { b.innerHTML = label; b.disabled = disabled; });
+  }
+}
+
+function _validateForExport() {
+  const repName   = document.getElementById('repName').value.trim();
+  const storeName = document.getElementById('storeName').value;
+  if (!repName || !storeName) {
+    alert('Please fill in Your Name and Your Store before exporting.');
+    if (!repName) { document.getElementById('repName').style.border = '2px solid #e53935'; document.getElementById('repName').focus(); }
+    if (!storeName) document.getElementById('storeName').style.border = '2px solid #e53935';
+    return false;
+  }
+  document.getElementById('repName').style.border = '';
+  document.getElementById('storeName').style.border = '';
+  return true;
+}
+
+function handleSavePDF() {
+  if (!_validateForExport()) return;
+  _buildUpgradePdf({ openInNewTab: false });
+}
+
+function handlePrint() {
+  if (!_validateForExport()) return;
+  _buildUpgradePdf({ openInNewTab: true });
 }
 
 // ══════════════════════════════════════════════════
