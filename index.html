@@ -1752,7 +1752,10 @@ function selectReward(btn) {
   document.getElementById('selectedTier').value = state.tier;
 
   // Auto-apply $300 watch discount for Platinum and Diamond tiers
-  const eligibleForWatchDiscount = state.tier === 'diamond' || state.tier === 'platinum';
+  // Gated on watch_elite promo being active (per PROMO_DEFINITIONS dates above).
+  // The discount is also capped at the first 2 watches in the per-row recalc logic.
+  const eligibleForWatchDiscount = (state.tier === 'diamond' || state.tier === 'platinum')
+    && (typeof isPromoActiveByTag === 'function' ? isPromoActiveByTag('watch_elite') : true);
   state.membershipDiscount = eligibleForWatchDiscount ? 300 : 0;
   document.getElementById('selectedMembershipDiscount').value = state.membershipDiscount;
 
@@ -2668,6 +2671,136 @@ function getStandardUpgradeMonthly() {
 }
 
 // ══════════════════════════════════════════════════
+//  PROMOTION DEFINITIONS (mirrors Mobile Quote Sheet)
+//  tag:       internal id (no spaces)
+//  text:      display string
+//  type:      category for color coding (tips, discount, watch, tablet, always)
+//  startDate: optional YYYY-MM-DD — promo hidden before this date
+//  endDate:   optional YYYY-MM-DD — promo hidden on/after this date
+// ══════════════════════════════════════════════════
+const PROMO_DEFINITIONS = [
+  // ════════════════════════════════════════════════
+  // MAY 11 – JUNE 21, 2026 PROMOTIONS
+  // ════════════════════════════════════════════════
+  {
+    tag:       'mc_event',
+    text:      '💳 $100–$500 Prepaid Mastercard when adding multiple new lines — Retail & Field Sales Events only',
+    type:      'discount',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'xm_act_fee_waived',
+    text:      '✅ Waived $25 line activation fee for new XM customers',
+    type:      'always',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'tips_pixel10_proxl_fold_1200',
+    text:      '📱 TIPs — Up to $1,200 off Pixel 10 Pro XL and Pro Fold',
+    type:      'tips',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'tips_pixel10_pro_1000',
+    text:      '📱 TIPs — Up to $1,000 off Pixel 10 Pro',
+    type:      'tips',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'tips_samsung_900',
+    text:      '📱 TIPs — Up to $900 off select Samsung',
+    type:      'tips',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'tips_nonsam_830',
+    text:      '📱 TIPs — Up to $830 off select Apple, Google, or Motorola',
+    type:      'tips',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'tradein_samsung_google_450',
+    text:      '🔁 Additional $450 off + your trade-in value towards a new Samsung or Google device',
+    type:      'tips',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'tradein_apple_moto_200',
+    text:      '🔁 Additional $200 off + your trade-in value towards a new Apple or Motorola device',
+    type:      'tips',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'samsung_notrade',
+    text:      '💰 $500 off select Samsung devices',
+    type:      'discount',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'premium_400',
+    text:      '💰 $400 off select Apple, Google, and Motorola',
+    type:      'discount',
+    startDate: '2026-05-11',
+    endDate:   '2026-06-21',
+  },
+  // Watch promo — kept continuously active so the $300 Diamond/Platinum discount stays on through the transition
+  {
+    tag:       'watch_elite',
+    text:      '⌚ Diamond members can get $300 off Apple, Samsung, and Google smartwatches',
+    type:      'watch',
+    startDate: '2026-04-15',
+    endDate:   '2026-06-21',
+  },
+
+  // ════════════════════════════════════════════════
+  // EXTENDED PROMOTIONS
+  // ════════════════════════════════════════════════
+  {
+    tag:       'ipad_a16_50off',
+    text:      '📲 50% off iPad A16 (128 GB)',
+    type:      'tablet',
+    startDate: '2026-04-20',
+    endDate:   '2026-06-21',
+  },
+  {
+    tag:       'xpe_watch_300',
+    text:      '⌚ $300 off Apple, Samsung, and Google smartwatches — XPE employee accounts only',
+    type:      'watch',
+    startDate: '2026-01-21',
+    endDate:   '2026-06-21',
+  },
+];
+
+// Returns true if today falls within the promo's startDate/endDate window (inclusive).
+function isPromoActive(promo) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (promo.startDate) {
+    const start = new Date(promo.startDate + 'T00:00:00');
+    if (today < start) return false;
+  }
+  if (promo.endDate) {
+    const end = new Date(promo.endDate + 'T00:00:00');
+    if (today > end) return false;
+  }
+  return true;
+}
+
+function isPromoActiveByTag(tag) {
+  const p = PROMO_DEFINITIONS.find(x => x.tag === tag);
+  return !!p && isPromoActive(p);
+}
+
+// ══════════════════════════════════════════════════
 //  RENDER ACTIVE PROMOTIONS BANNER
 //  Builds a contextual list of which promos apply
 //  based on: phone brand, plan, trade-in, tier,
@@ -2707,28 +2840,17 @@ function renderActivePromos() {
   // "Financed" = a phone or tablet is being added (each goes on the device payment plan)
   const hasFinancedPhoneOrTablet = phoneLines + tabletLines > 0;
 
-  // ── CURRENT OFFERS (per C³ Product Training, April 2026) ──
-  // Removed expired dated promos. Only includes structural/ongoing
-  // offers reflected in the C³ training material.
-
-  // Phone-specific TIPS promos (always current — built into upgrade structure)
-  // Eligibility is independent of the Premium upgrade checkbox: every quote assumes
-  // the customer either is on Premium already or will be upgraded.
-  if (state.phoneName) {
-    if (isSamsung) {
-      if (hasTrade) {
-        promos.push({ text: 'TIPS — Up to $1,100 off select Samsung devices with trade-in', note: 'Current Offer', type: 'tips' });
-      } else {
-        promos.push({ text: '$500 off select Samsung devices (no trade-in)', note: 'Current Offer', type: 'discount' });
-      }
-      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices', note: 'Current Offer', type: 'discount' });
-    } else if (isNonSam) {
-      if (hasTrade) {
-        promos.push({ text: 'TIPS — Trade-in value applied as discount on Apple, Google, or Motorola devices', note: 'Current Offer', type: 'tips' });
-      }
-      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices', note: 'Current Offer', type: 'discount' });
-    }
-  }
+  // ── CURRENT OFFERS — driven by PROMO_DEFINITIONS (date-aware, see top of script) ──
+  // Anything in PROMO_DEFINITIONS that is currently active (per startDate/endDate)
+  // is appended to the offers list. Old promos auto-expire; new promos auto-activate.
+  // Skip watch_elite and ipad_a16_50off — those have richer inline UX further down
+  // (showing "applied automatically" vs eligibility hints based on what's in the cart).
+  const _inlineHandledTags = new Set(['watch_elite', 'ipad_a16_50off']);
+  PROMO_DEFINITIONS.forEach(p => {
+    if (_inlineHandledTags.has(p.tag)) return;
+    if (!isPromoActive(p)) return;
+    promos.push({ text: p.text, note: 'Current Offer', type: p.type || 'discount' });
+  });
 
   // Premium plan perk (from C³): Elite Upgrade — 2x per year on Premium Unlimited
   if (state.phoneName) {
