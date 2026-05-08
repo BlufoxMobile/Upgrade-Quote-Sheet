@@ -31,8 +31,20 @@
   .intake-section{margin-bottom:36px;}
   .intake-section-title{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--xfinity-purple);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border);text-align:center;}
   .intake-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .rep-info-rows{display:flex;flex-direction:column;gap:12px;}
-  .rep-info-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  /* Rep + Customer info rows — match Mobile Quote Sheet layout */
+  .rep-info-rows{display:flex;flex-direction:column;gap:10px;width:100%;max-width:700px;margin:0 auto;}
+  .rep-info-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;}
+  /* Compact input styling for rep + customer sections, mirroring Mobile Quote Sheet */
+  #sec-rep .intake-field label,
+  #sec-customer .intake-field label {
+    font-size:10px;font-weight:700;letter-spacing:0.8px;margin-bottom:5px;text-align:left;text-transform:uppercase;color:var(--text-muted);
+  }
+  #sec-rep .intake-field input,
+  #sec-rep .intake-field select,
+  #sec-customer .intake-field input,
+  #sec-customer .intake-field select {
+    padding:10px 12px;font-size:13px;background:white;
+  }
 
   /* FIELDS */
   .intake-field label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
@@ -741,11 +753,11 @@
   <div class="rep-info-rows">
     <div class="rep-info-row">
       <div class="intake-field">
-        <label>Your Name <span style="color:#e53935;">*</span></label>
+        <label>Rep Name <span style="color:#e53935;">*</span></label>
         <input type="text" id="repName" autocomplete="off" placeholder="Your name">
       </div>
       <div class="intake-field">
-        <label>Your Store <span style="color:#e53935;">*</span></label>
+        <label>Store Name <span style="color:#e53935;">*</span></label>
         <select id="storeName" onchange="updatePreview(); if(typeof persistRepData==='function') persistRepData();">
           <option value="">— Select your store —</option>
           <option>Bourbonnais Xfinity Store</option><option>Burbank Xfinity Store</option>
@@ -776,24 +788,23 @@
   </div>
 </div>
 
-<!-- CUSTOMER INFORMATION (placed after Rep Information to match Mobile Quote Sheet ordering) -->
+<!-- CUSTOMER INFORMATION (mirrors Mobile Quote Sheet structure: rep-info-rows > rep-info-row > intake-field) -->
 <div class="intake-section" id="sec-customer">
   <div class="intake-section-title">Customer Information</div>
-  <div class="intake-grid">
-    <div class="intake-field">
-      <label>Customer's First Name <span style="color:#e53935;">*</span></label>
-      <input type="text" id="customerFirstName" placeholder="First name" autocomplete="off" oninput="updatePreview()">
-    </div>
-    <div class="intake-field">
-      <label>Customer Phone Number</label>
-      <input type="tel" id="customerPhone" placeholder="(XXX) XXX-XXXX" autocomplete="off" oninput="updatePreview()">
-    </div>
-    <!-- Today's date is auto-populated and submitted with the quote, but hidden from the rep's view to keep the form simple -->
-    <div class="intake-field" style="display:none;">
-      <label>Today's Date</label>
-      <input type="text" id="todayDate" class="readonly-date" readonly>
+  <div class="rep-info-rows">
+    <div class="rep-info-row">
+      <div class="intake-field">
+        <label>Customer Name <span style="color:#e53935;">*</span></label>
+        <input type="text" id="customerFirstName" placeholder="Full name" autocomplete="off" oninput="updatePreview()">
+      </div>
+      <div class="intake-field">
+        <label>Phone Number</label>
+        <input type="tel" id="customerPhone" placeholder="(XXX)XXX-XXXX" autocomplete="off" oninput="updatePreview()">
+      </div>
     </div>
   </div>
+  <!-- Today's date is auto-populated and submitted with the quote, but hidden from the rep's view to keep the form simple -->
+  <input type="text" id="todayDate" class="readonly-date" style="display:none;" readonly>
 </div>
 
 <!-- MEMBERSHIP TIER -->
