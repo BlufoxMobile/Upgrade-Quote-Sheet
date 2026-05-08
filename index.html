@@ -735,27 +735,7 @@
 
 <div class="intake-body">
 
-<!-- CUSTOMER INFORMATION -->
-<div class="intake-section" id="sec-customer">
-  <div class="intake-section-title">Customer Information</div>
-  <div class="intake-grid">
-    <div class="intake-field">
-      <label>Customer's First Name <span style="color:#e53935;">*</span></label>
-      <input type="text" id="customerFirstName" placeholder="First name" autocomplete="off" oninput="updatePreview()">
-    </div>
-    <div class="intake-field">
-      <label>Customer Phone Number</label>
-      <input type="tel" id="customerPhone" placeholder="(XXX) XXX-XXXX" autocomplete="off" oninput="updatePreview()">
-    </div>
-    <!-- Today's date is auto-populated and submitted with the quote, but hidden from the rep's view to keep the form simple -->
-    <div class="intake-field" style="display:none;">
-      <label>Today's Date</label>
-      <input type="text" id="todayDate" class="readonly-date" readonly>
-    </div>
-  </div>
-</div>
-
-<!-- REP INFORMATION -->
+<!-- REP INFORMATION (matches Mobile Quote Sheet ordering: Rep first, Customer second) -->
 <div class="intake-section" id="sec-rep">
   <div class="intake-section-title">👤 Rep Information</div>
   <div class="rep-info-rows">
@@ -792,6 +772,26 @@
         <label>Rep Phone <span style="font-size:10px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
         <input type="tel" id="repPhone" autocomplete="tel" placeholder="(555) 000-0000">
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER INFORMATION (placed after Rep Information to match Mobile Quote Sheet ordering) -->
+<div class="intake-section" id="sec-customer">
+  <div class="intake-section-title">Customer Information</div>
+  <div class="intake-grid">
+    <div class="intake-field">
+      <label>Customer's First Name <span style="color:#e53935;">*</span></label>
+      <input type="text" id="customerFirstName" placeholder="First name" autocomplete="off" oninput="updatePreview()">
+    </div>
+    <div class="intake-field">
+      <label>Customer Phone Number</label>
+      <input type="tel" id="customerPhone" placeholder="(XXX) XXX-XXXX" autocomplete="off" oninput="updatePreview()">
+    </div>
+    <!-- Today's date is auto-populated and submitted with the quote, but hidden from the rep's view to keep the form simple -->
+    <div class="intake-field" style="display:none;">
+      <label>Today's Date</label>
+      <input type="text" id="todayDate" class="readonly-date" readonly>
     </div>
   </div>
 </div>
