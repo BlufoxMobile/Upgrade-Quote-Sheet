@@ -3298,32 +3298,43 @@ async function _buildUpgradePdf({ openInNewTab = false } = {}) {
   const origLabels = [];
   allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
 
-  // Apply the existing @media print rules as live screen styles during capture.
-  // This makes html2canvas see the same vibrant colors / layout as a native
-  // print preview — without using foreignObjectRendering (which fails on iPad).
-  let printCssText = '';
-  try {
-    for (const sheet of document.styleSheets) {
-      try {
-        for (const rule of sheet.cssRules) {
-          if (rule.type === CSSRule.MEDIA_RULE &&
-              /\bprint\b/.test(rule.conditionText || (rule.media && rule.media.mediaText) || '')) {
-            for (const inner of rule.cssRules) {
-              printCssText += inner.cssText + '\n';
-            }
-          }
-        }
-      } catch (_) { /* cross-origin stylesheet — skip */ }
-    }
-  } catch (_) {}
+  // B&W PDF mode — drop colors, use bold borders + type weight for structure.
+  // Targeted at B&W printer output (Jeff's reps print on B&W hardware).
   const captureCss = document.createElement('style');
   captureCss.id = '__pdf_capture_css__';
   captureCss.textContent = `
-    html, body, ${'#previewPage'} * {
+    #previewPage, #previewPage * {
+      color: #000000 !important;
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      filter: none !important;
+      opacity: 1 !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
-    ${printCssText}
+    #previewPage .no-print,
+    #previewPage .preview-footer { display: none !important; }
+    #previewPage .preview-section,
+    #previewPage .cmp-item-block,
+    #previewPage .preview-card,
+    #previewPage .preview-row {
+      border: 1.5px solid #000000 !important;
+      border-radius: 4px !important;
+    }
+    #previewPage .preview-section-title,
+    #previewPage .preview-header,
+    #previewPage th {
+      font-weight: 700 !important;
+      border-bottom: 1.5px solid #000000 !important;
+    }
+    #previewPage td, #previewPage th {
+      border: 1px solid #000000 !important;
+    }
+    #previewPage h1, #previewPage h2, #previewPage h3 { font-weight: 700 !important; }
+    #previewPage em, #previewPage i { font-style: italic !important; }
   `;
   document.head.appendChild(captureCss);
 
