@@ -3298,14 +3298,44 @@ async function _buildUpgradePdf({ openInNewTab = false } = {}) {
   const origLabels = [];
   allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
 
+  // Inject a temporary style block that forces full-saturation colors during capture
+  const captureCss = document.createElement('style');
+  captureCss.id = '__pdf_capture_css__';
+  captureCss.textContent = `
+    .pdf-capturing, .pdf-capturing * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  `;
+  document.head.appendChild(captureCss);
+  target.classList.add('pdf-capturing');
+
   try {
-    const canvas = await html2canvas(target, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      windowWidth: target.scrollWidth,
-      windowHeight: target.scrollHeight,
-    });
+    // Try foreignObject rendering first (full SVG fidelity), fall back to canvas mode
+    let canvas;
+    try {
+      canvas = await html2canvas(target, {
+        scale: 2.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        foreignObjectRendering: true,
+        letterRendering: true,
+        windowWidth: target.scrollWidth,
+        windowHeight: target.scrollHeight,
+      });
+    } catch (e) {
+      console.warn('foreignObject capture failed, falling back to canvas mode:', e);
+      canvas = await html2canvas(target, {
+        scale: 2.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        letterRendering: true,
+        windowWidth: target.scrollWidth,
+        windowHeight: target.scrollHeight,
+      });
+    }
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
@@ -3314,15 +3344,18 @@ async function _buildUpgradePdf({ openInNewTab = false } = {}) {
     const imgWidth   = pageWidth;
     const imgHeight  = canvas.height * (imgWidth / canvas.width);
 
+    // Use PNG for max color fidelity (was JPEG which compresses gradients)
+    const imgData = canvas.toDataURL('image/png');
+
     // Multi-page slicing
     let position = 0;
     let remaining = imgHeight;
-    pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, position, imgWidth, imgHeight);
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
     remaining -= pageHeight;
     while (remaining > 0) {
       position -= pageHeight;
       pdf.addPage();
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       remaining -= pageHeight;
     }
 
@@ -3344,6 +3377,9 @@ async function _buildUpgradePdf({ openInNewTab = false } = {}) {
     hiddenEls.forEach(([el, d]) => { el.style.display = d; });
     document.body.style.overflow = prevBodyOverflow;
     origLabels.forEach(([b, label, disabled]) => { b.innerHTML = label; b.disabled = disabled; });
+    target.classList.remove('pdf-capturing');
+    const tmp = document.getElementById('__pdf_capture_css__');
+    if (tmp) tmp.remove();
   }
 }
 
