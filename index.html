@@ -582,10 +582,24 @@
   .wt-toggle-row { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:8px; }
   .wt-toggle-block { flex:1; min-width:180px; }
   .wt-toggle-label { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:10px; }
-  .wt-count-btns { display:flex; gap:6px; flex-wrap:wrap; }
-  .wt-count-btn { padding:7px 14px; border-radius:50px; border:2px solid var(--border); background:white; color:var(--text-secondary); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.18s; }
-  .wt-count-btn:hover { border-color:var(--xfinity-purple-light); color:var(--xfinity-purple); }
-  .wt-count-btn.active { background:var(--xfinity-purple); border-color:var(--xfinity-purple); color:white; }
+  .wt-count-btns { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:4px; }
+  .wt-count-btn { padding:8px 18px; border-radius:50px; border:2px solid var(--border); background:white; color:var(--text-secondary); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.18s; }
+  .wt-count-btn:hover { border-color:var(--xfinity-purple-light); color:var(--xfinity-purple); background:#f8f4ff; }
+  .wt-count-btn.active { background:var(--xfinity-purple); border-color:var(--xfinity-purple); color:white; box-shadow:0 2px 8px rgba(103,19,210,0.25); }
+
+  /* WATCH / TABLET STANDALONE SECTIONS — mirror Mobile Quote Sheet styling */
+  .wt-side-by-side { display:grid; grid-template-columns:1fr auto 1fr; gap:18px; align-items:stretch; }
+  .wt-divider-v { width:1px; background:var(--border); }
+  .wt-standalone-section { background:white; text-align:center; }
+  .wt-standalone-header { display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .wt-standalone-title-row { display:flex; align-items:center; justify-content:center; gap:14px; }
+  .wt-standalone-icon { font-size:28px; line-height:1.1; flex-shrink:0; }
+  .wt-standalone-title { font-family:'Outfit',sans-serif; font-size:15px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--xfinity-purple); margin-bottom:3px; text-align:center; }
+  .wt-standalone-sub { font-size:12px; color:var(--text-muted); line-height:1.5; text-align:center; }
+  @media (max-width: 768px) {
+    .wt-side-by-side { grid-template-columns:1fr; gap:24px; }
+    .wt-divider-v { width:100%; height:1px; }
+  }
 
   /* ══ T-SHEET STYLE DEVICE ROWS ══ */
   .df-group-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--xfinity-purple); margin:14px 0 8px; padding-bottom:6px; border-bottom:1.5px solid var(--border); }
@@ -911,35 +925,52 @@
   <div id="phone-rows-container"></div>
 </div>
 
-<!-- ══ WATCHES — standalone section ══ -->
-<div class="intake-section" id="sec-watches">
-  <div class="intake-section-title">⌚ Add Watches</div>
-  <p style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:18px;">Adding a watch? Each watch adds a <strong>+$10/mo</strong> line fee.</p>
-  <div class="wt-count-btns" id="watch-count-btns" style="justify-content:center;gap:10px;margin-bottom:22px;">
-    <button class="wt-count-btn active" data-val="0" onclick="setDeviceCount('watch',0,this)">None</button>
-    <button class="wt-count-btn" data-val="1" onclick="setDeviceCount('watch',1,this)">1</button>
-    <button class="wt-count-btn" data-val="2" onclick="setDeviceCount('watch',2,this)">2</button>
-    <button class="wt-count-btn" data-val="3" onclick="setDeviceCount('watch',3,this)">3</button>
-    <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('watch',4,this)">4</button>
-    <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('watch',5,this)">5</button>
+<!-- ══ WATCHES + TABLETS — side-by-side, matches Mobile Quote Sheet styling ══ -->
+<div class="wt-side-by-side">
+  <div class="intake-section wt-standalone-section" id="sec-watches">
+    <div class="wt-standalone-header">
+      <div class="wt-standalone-title-row">
+        <span class="wt-standalone-icon">⌚</span>
+        <div>
+          <div class="wt-standalone-title">ADD WATCHES</div>
+          <div class="wt-standalone-sub">Each watch adds a <strong>+$10/mo</strong> line fee</div>
+        </div>
+      </div>
+      <div class="wt-count-btns" id="watch-count-btns">
+        <button class="wt-count-btn active" data-val="0" onclick="setDeviceCount('watch',0,this)">None</button>
+        <button class="wt-count-btn" data-val="1" onclick="setDeviceCount('watch',1,this)">1</button>
+        <button class="wt-count-btn" data-val="2" onclick="setDeviceCount('watch',2,this)">2</button>
+        <button class="wt-count-btn" data-val="3" onclick="setDeviceCount('watch',3,this)">3</button>
+        <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('watch',4,this)">4</button>
+        <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('watch',5,this)">5</button>
+      </div>
+    </div>
+    <div id="accessory-brand-hint" style="display:none;border-radius:var(--radius-sm);border:1.5px solid;padding:10px 16px;font-size:13px;font-weight:600;margin-top:16px;"></div>
+    <div id="watch-rows-container" style="margin-top:16px;"></div>
   </div>
-  <div id="accessory-brand-hint" style="display:none;border-radius:var(--radius-sm);border:1.5px solid;padding:10px 16px;font-size:13px;font-weight:600;margin-bottom:16px;"></div>
-  <div id="watch-rows-container"></div>
-</div>
 
-<!-- ══ TABLETS — standalone section ══ -->
-<div class="intake-section" id="sec-tablets">
-  <div class="intake-section-title">📋 Add Tablets</div>
-  <p style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:18px;">Adding a tablet? Each tablet adds a <strong>+$20/mo</strong> line fee.</p>
-  <div class="wt-count-btns" id="tablet-count-btns" style="justify-content:center;gap:10px;margin-bottom:22px;">
-    <button class="wt-count-btn active" data-val="0" onclick="setDeviceCount('tablet',0,this)">None</button>
-    <button class="wt-count-btn" data-val="1" onclick="setDeviceCount('tablet',1,this)">1</button>
-    <button class="wt-count-btn" data-val="2" onclick="setDeviceCount('tablet',2,this)">2</button>
-    <button class="wt-count-btn" data-val="3" onclick="setDeviceCount('tablet',3,this)">3</button>
-    <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('tablet',4,this)">4</button>
-    <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('tablet',5,this)">5</button>
+  <div class="wt-divider-v"></div>
+
+  <div class="intake-section wt-standalone-section" id="sec-tablets">
+    <div class="wt-standalone-header">
+      <div class="wt-standalone-title-row">
+        <span class="wt-standalone-icon">📋</span>
+        <div>
+          <div class="wt-standalone-title">ADD TABLETS</div>
+          <div class="wt-standalone-sub">Each tablet adds a <strong>+$20/mo</strong> line fee</div>
+        </div>
+      </div>
+      <div class="wt-count-btns" id="tablet-count-btns">
+        <button class="wt-count-btn active" data-val="0" onclick="setDeviceCount('tablet',0,this)">None</button>
+        <button class="wt-count-btn" data-val="1" onclick="setDeviceCount('tablet',1,this)">1</button>
+        <button class="wt-count-btn" data-val="2" onclick="setDeviceCount('tablet',2,this)">2</button>
+        <button class="wt-count-btn" data-val="3" onclick="setDeviceCount('tablet',3,this)">3</button>
+        <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('tablet',4,this)">4</button>
+        <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('tablet',5,this)">5</button>
+      </div>
+    </div>
+    <div id="tablet-rows-container" style="margin-top:16px;"></div>
   </div>
-  <div id="tablet-rows-container"></div>
 </div>
 <!-- ACTIVE PROMOTIONS -->
 <div class="intake-section" id="sec-promos" style="display:none;">
