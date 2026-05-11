@@ -11421,14 +11421,17 @@ function renderActivePromos() {
       if (hasTrade) {
         promos.push({ text: 'TIPS — Up to $900 off select Samsung devices with trade-in', note: 'Current Offer', type: 'tips' });
       } else {
-        promos.push({ text: '$500 off select Samsung devices (no trade-in)', note: 'Current Offer', type: 'discount' });
+        // Samsung no-trade gets the $500 Samsung promo (mutually exclusive
+        // with the $400 non-Samsung promo)
+        promos.push({ text: '$500 off select Samsung devices (no trade-in required)', note: 'Current Offer', type: 'discount' });
       }
-      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices', note: 'Current Offer', type: 'discount' });
     } else if (isNonSam) {
       if (hasTrade) {
         promos.push({ text: 'TIPS — Up to $830 off select Apple, Google, or Motorola devices with trade-in', note: 'Current Offer', type: 'tips' });
+      } else {
+        // Non-Samsung no-trade gets the $400 promo (Apple/Google/Motorola only)
+        promos.push({ text: '$400 off select Apple, Google, or Motorola devices (no trade-in required)', note: 'Current Offer', type: 'discount' });
       }
-      promos.push({ text: '$400 off select Apple, Samsung, Google, or Motorola devices', note: 'Current Offer', type: 'discount' });
     }
   }
 
