@@ -10420,8 +10420,10 @@ function selectReward(btn) {
   state.tier = btn.dataset.tier;
   document.getElementById('selectedTier').value = state.tier;
 
-  // Auto-apply $300 watch discount for Platinum and Diamond tiers
-  const eligibleForWatchDiscount = state.tier === 'diamond' || state.tier === 'platinum';
+  // Auto-apply $300 watch discount for Diamond tier ONLY.
+  // Platinum was previously eligible but was dropped — only Diamond members
+  // get the $300 off going forward.
+  const eligibleForWatchDiscount = state.tier === 'diamond';
   state.membershipDiscount = eligibleForWatchDiscount ? 300 : 0;
   document.getElementById('selectedMembershipDiscount').value = state.membershipDiscount;
 
@@ -10933,8 +10935,8 @@ function recalcRow(type, num) {
     const monthly  = netPrice / 36 + 10 + xmcAdd;
     const note = document.getElementById(`${rowId}-diamond-note`);
     if (note) note.style.display = discount > 0 ? 'block' : 'none';
-    const tierLbl  = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : '');
-    const discLine = discount > 0 ? `<span class="df-mo-promo">−$${discount}${tierLbl ? ' ' + tierLbl : ''}</span>` : '';
+    // Diamond is the only tier that triggers the discount, so the label is fixed.
+    const discLine = discount > 0 ? `<span class="df-mo-promo">−$${discount} Diamond</span>` : '';
     const xmcLine  = xmcAdd   > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${discLine}${xmcLine}`;
   } else {
@@ -10956,9 +10958,8 @@ function refreshWatchDiamondNotes() {
     const note = document.getElementById(`watch-row-${i}-diamond-note`);
     const lbl  = document.getElementById(`watch-row-${i}-diamond-note-label`);
     if (lbl) {
-      const tierLbl = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : '');
-      const icon    = state.tier === 'diamond' ? '💎' : '🔘';
-      lbl.innerHTML = `${icon} ${tierLbl} — $300 Off Applied Automatically`;
+      // Diamond is the only tier that earns the $300 watch discount now.
+      lbl.innerHTML = `💎 Diamond — $300 Off Applied Automatically`;
     }
     // Only first 2 watches qualify for the $300 membership discount
     if (note) note.style.display = (state.membershipDiscount > 0 && i <= 2) ? 'block' : 'none';
@@ -11580,7 +11581,7 @@ function updatePreview() {
         if (!wd.price) continue;
         // Cap $300 membership discount at first 2 watches only
         var wDisc      = wi <= 2 ? state.membershipDiscount : 0;
-        var wTierLbl   = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : 'Membership');
+        var wTierLbl   = 'Diamond'  /* Diamond is the only tier that triggers wDisc > 0 now */;
         var wNet     = Math.max(0, wd.price - wDisc);
         var wSub     = wDisc > 0 ? `After discount · +$10/mo line fee` : `Watch · +$10/mo line fee`;
         var wPromo   = wDisc > 0 ? `<div class="cmp-item-promo-tag">$${wDisc} ${wTierLbl} Membership discount</div>` : '';
@@ -11709,7 +11710,7 @@ function updatePreview() {
         if (!wbd.price) continue;
         // Cap $300 membership discount at first 2 watches only
         var wbDisc    = wbi <= 2 ? state.membershipDiscount : 0;
-        var wbTierLbl = state.tier === 'diamond' ? 'Diamond' : (state.tier === 'platinum' ? 'Platinum' : 'Membership');
+        var wbTierLbl = 'Diamond'  /* Diamond is the only tier that triggers wDisc > 0 now */;
         var wbNet     = Math.max(0, wbd.price - wbDisc);
         var wbLabel   = (watchCounts > 1 ? 'Watch ' + wbi + ': ' : '') + wbd.name + (wbDisc > 0 ? ` (−$${wbDisc} ${wbTierLbl})` : '');
         var wbAmt   = (wbNet / 36 + 10).toFixed(2);
