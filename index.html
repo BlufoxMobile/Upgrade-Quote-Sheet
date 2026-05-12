@@ -1446,22 +1446,18 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
 // ══════════════════════════════════════════════════
 //  TABLET PROMO HELPER
 //  Returns the discount amount in dollars for a given tablet.
-//  Currently eligible for 50% off (current offer):
+//  Currently eligible for 50% off:
 //    • iPad (A16) — base entry-level iPad
-//    • Samsung Galaxy Tab A11+
+//  Discontinued:
+//    • Galaxy Tab A11+ 50% off — ended 2026-05-10
 //  Add more tablet promos here as they're announced.
 // ══════════════════════════════════════════════════
 function getTabletDiscount(name, price) {
   var n = (name || '').toLowerCase();
   // iPad A16 (entry-level) — match "ipad (a16)" but NOT iPad Air/Pro/mini
   var isIpadA16 = n.includes('ipad') && n.includes('(a16)');
-  // Galaxy Tab A11 / A11+
-  var isGalaxyA11 = n.includes('galaxy tab a11') || n.includes('tab a11');
   if (isIpadA16) {
     return { amount: price * 0.5, label: '50% off iPad (A16)', applies: true };
-  }
-  if (isGalaxyA11) {
-    return { amount: price * 0.5, label: '50% off Galaxy Tab A11+', applies: true };
   }
   return { amount: 0, label: '', applies: false };
 }
@@ -10942,7 +10938,7 @@ function recalcRow(type, num) {
     const xmcLine  = xmcAdd   > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${discLine}${xmcLine}`;
   } else {
-    // Tablet — apply A11+ 50% off if applicable
+    // Tablet — apply per-tablet discount via getTabletDiscount (currently iPad A16 only)
     const tabletDisc = getTabletDiscount(d.name, d.price);
     const netPrice = Math.max(0, d.price - tabletDisc.amount);
     const monthly = netPrice / 36 + 20 + xmcAdd;
@@ -11366,165 +11362,14 @@ function getStandardUpgradeMonthly() {
 //  watch, tablet selections
 // ══════════════════════════════════════════════════
 function renderActivePromos() {
-  const promos = [];
-  const name     = (state.phoneName || '').toLowerCase();
-  const isPremium = state.plan === 'premium';
-  const noTradeEl = document.getElementById('phone-row-1-notrade');
-  const noTrade   = noTradeEl ? noTradeEl.checked : false;
-  const hasTrade  = state.tradeValue > 0 && !noTrade;
-  const isSamsung = name.startsWith('samsung');
-  const isApple   = name.startsWith('apple');
-  const isGoogle  = name.startsWith('google');
-  const isMoto    = name.includes('motorola') || name.includes('moto');
-  const isNonSam  = isApple || isGoogle || isMoto;
-  const hasWatch  = state.watchPrice > 0;
-  const hasTablet = state.tabletPrice > 0;
-  const hasPhone  = state.phonePrice > 0;
-  const isDiamond = state.tier === 'diamond';
-  const isPlatinum = state.tier === 'platinum';
-  const isPlatOrDiamond = isDiamond || isPlatinum;
-  const tierLabel = isDiamond ? 'Diamond' : (isPlatinum ? 'Platinum' : '');
-
-  // ── Multi-line counting (for $200/$400 add-a-line bonus) ──
-  // A "line" = phone, watch, or tablet that has a device selected.
-  // The bonus requires 2+ lines with at least 1 phone OR tablet.
-  // The $400 (vs $200) variant kicks in when at least one phone or tablet
-  // is being financed (i.e., on a device payment plan).
-  var phoneLines = 0, watchLines = 0, tabletLines = 0;
-  for (var pl = 1; pl <= phoneCounts; pl++)  { if (getRowData('phone', pl).price  > 0) phoneLines++;  }
-  for (var wl = 1; wl <= watchCounts; wl++)  { if (getRowData('watch', wl).price  > 0) watchLines++;  }
-  for (var tl = 1; tl <= tabletCounts; tl++) { if (getRowData('tablet', tl).price > 0) tabletLines++; }
-  const totalLines        = phoneLines + watchLines + tabletLines;
-  const hasPhoneOrTablet  = phoneLines + tabletLines > 0;
-  // "Financed" = a phone or tablet is being added (each goes on the device payment plan)
-  const hasFinancedPhoneOrTablet = phoneLines + tabletLines > 0;
-
-  // ── CURRENT OFFERS (per C³ Product Training, April 2026) ──
-  // Removed expired dated promos. Only includes structural/ongoing
-  // offers reflected in the C³ training material.
-
-  // Phone-specific TIPS promos — three active promos for the May 11 –
-  // June 21, 2026 cycle. Eligibility is independent of the Premium upgrade
-  // checkbox: every quote assumes the customer either is on Premium already
-  // or will be upgraded.
-  if (state.phoneName) {
-    // Pixel 10 Pro XL / Pro Fold purchases get the $1,200 top-tier promo
-    const isPixelTopTier =
-      name.includes('pixel 10 pro xl') || name.includes('pixel 10 pro fold');
-    if (isPixelTopTier) {
-      if (hasTrade) {
-        promos.push({ text: 'TIPS — Up to $1,200 off Pixel 10 Pro XL or Pixel 10 Pro Fold with trade-in', note: 'Current Offer', type: 'tips' });
-      } else {
-        promos.push({ text: 'TIPS — Pixel 10 Pro XL / Pro Fold qualify for up to $1,200 off with a trade-in', note: 'Eligibility Hint', type: 'tips' });
-      }
-    } else if (isSamsung) {
-      if (hasTrade) {
-        promos.push({ text: 'TIPS — Up to $900 off select Samsung devices with trade-in', note: 'Current Offer', type: 'tips' });
-      } else {
-        // Samsung no-trade gets the $500 Samsung promo (mutually exclusive
-        // with the $400 non-Samsung promo)
-        promos.push({ text: '$500 off select Samsung devices (no trade-in required)', note: 'Current Offer', type: 'discount' });
-      }
-    } else if (isNonSam) {
-      if (hasTrade) {
-        promos.push({ text: 'TIPS — Up to $830 off select Apple, Google, or Motorola devices with trade-in', note: 'Current Offer', type: 'tips' });
-      } else {
-        // Non-Samsung no-trade gets the $400 promo (Apple/Google/Motorola only)
-        promos.push({ text: '$400 off select Apple, Google, or Motorola devices (no trade-in required)', note: 'Current Offer', type: 'discount' });
-      }
-    }
-  }
-
-  // Premium plan perk (from C³): Elite Upgrade — 2x per year on Premium Unlimited
-  if (state.phoneName) {
-    promos.push({ text: '⭐ Premium Unlimited Elite Upgrade — eligible to upgrade up to 2x per year', note: 'Plan Benefit', type: 'discount' });
-  }
-
-  // Watch perks
-  if (hasWatch) {
-    // Platinum & Diamond reward — $300 off select smartwatches (auto-applied in calculator)
-    if (isPlatOrDiamond) {
-      const tierIcon = isDiamond ? '💎' : '🔘';
-      promos.push({ text: `${tierIcon} ${tierLabel} Reward — $300 off select smartwatches (applied automatically)`, note: 'Active Discount', type: 'watch' });
-    } else {
-      // Eligibility hint when customer isn't Platinum/Diamond yet
-      promos.push({ text: '💎 Platinum & Diamond members: $300 off select smartwatches', note: 'Tier Reward', type: 'watch' });
-    }
-  }
-
-  // Tablet perks (from C³ — By The Gig & Tablet Lines)
-  if (hasTablet) {
-    // Device-specific 50% off — applies automatically when iPad (A16) or Galaxy Tab A11+ is selected
-    var discountedLabels = [];
-    for (var ti3 = 1; ti3 <= tabletCounts; ti3++) {
-      var tdRow = getRowData('tablet', ti3);
-      if (tdRow.name) {
-        var di = getTabletDiscount(tdRow.name, tdRow.price);
-        if (di.applies && discountedLabels.indexOf(di.label) === -1) discountedLabels.push(di.label);
-      }
-    }
-    if (discountedLabels.length) {
-      promos.push({ text: '📋 ' + discountedLabels.join(' · ') + ' (applied automatically to financing)', note: 'Current Offer', type: 'tablet' });
-    } else {
-      // No qualifying tablet selected yet — show eligibility hint
-      promos.push({ text: '📋 Select an iPad (A16) or Galaxy Tab A11+ to unlock 50% off', note: 'Current Offer', type: 'tablet' });
-    }
-  }
-
-  // Prepaid Mastercard sliding-scale promo (May 11 – June 21, 2026):
-  //   • Requires 2+ FINANCED Plus phone lines (Premium plan + a new device
-  //     with price > 0). BYOD-style $0 lines do not qualify because the
-  //     customer must finance a new device to earn the $100.
-  //   • $100 for the qualifying 2nd financed Plus line.
-  //   • +$100 per additional financed Plus phone line, watch, or tablet.
-  //   • Hard cap at $500 (= 6 total financed lines).
-  //   • Without 2 financed Plus phone lines → not eligible.
-  // The phoneLines / watchLines / tabletLines counters above already
-  // filter to price > 0 (i.e., financed) lines, so this branch can rely
-  // on them directly.
-  if (phoneLines >= 2) {
-    const mcCount  = phoneLines + watchLines + tabletLines;
-    const mcAmount = Math.min((mcCount - 1) * 100, 500);
-    if (mcAmount > 0) {
-      promos.push({
-        text: `💳 $${mcAmount} Prepaid Mastercard — qualifying for ${mcCount} of 6 financed lines (2+ financed Plus phone lines required, +$100 per additional financed Plus line, watch, or tablet; capped at $500)`,
-        note: 'Active Bonus',
-        type: 'tips',
-      });
-    }
-  } else if (phoneLines === 1) {
-    // Eligibility hint when only 1 financed phone line is on the quote
-    promos.push({
-      text: '💳 Prepaid Mastercard — Add a 2nd financed Plus phone line to start at $100, then $100 per additional financed Plus line, watch, or tablet up to $500',
-      note: 'Available',
-      type: 'discount',
-    });
-  }
-
-  const typeColors = {
-    always:   '#5a5a7a',
-    tips:     '#00843D',
-    discount: '#6713D2',
-    watch:    '#0066CC',
-    tablet:   '#c47a00',
-  };
-
-  const renderItem = (p) => `
-    <li style="display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;color:${typeColors[p.type] || '#333'};">
-      <span style="flex:1;">${p.text}</span>
-      ${p.note ? `<span style="font-size:10px;font-weight:700;white-space:nowrap;background:rgba(0,0,0,0.07);border-radius:50px;padding:2px 8px;color:#555;">${p.note}</span>` : ''}
-    </li>`;
-
-  const html = promos.map(renderItem).join('');
-
-  // Form banner
+  // Promo callouts removed from the Upgrade quote sheet per Jeff's request:
+  // "The upgrade quote sheet won't have any promotional calls."
+  // Hide the banner section entirely. Function is left callable because
+  // many other code paths (selectReward, recalcWatchRow, etc.) invoke it.
   const section = document.getElementById('sec-promos');
   const list    = document.getElementById('promoBannerList');
-  if (section && list) {
-    list.innerHTML = html;
-    section.style.display = promos.length ? 'block' : 'none';
-  }
-
+  if (list)    list.innerHTML = '';
+  if (section) section.style.display = 'none';
 }
 function selectSold(val) {
   state.soldOnSpot = val;
@@ -11593,7 +11438,6 @@ function updatePreview() {
   const tabletFullPrice  = state.tabletPrice;
   const tabletDiscObj    = getTabletDiscount(state.tabletName, state.tabletPrice);
   const tabletNetPrice   = Math.max(0, state.tabletPrice - tabletDiscObj.amount);
-  const isA11Tab         = (state.tabletName || '').toLowerCase().includes('a11');
   const tabletMonthly    = tabletNetPrice / 36 + 20;
 
   // Per-line plan upgrade cost (summed across all lines)
