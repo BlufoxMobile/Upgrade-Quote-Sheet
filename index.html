@@ -712,6 +712,79 @@
     .preview-footer { display: none !important; }
     .feat-table { break-inside: avoid; }
   }
+
+  /* ──────────────────────────────────────────────────────────────────
+     PER-LINE TRADE-IN: portal button + value input side by side.
+     Xfinity blocks iframe embedding (X-Frame-Options), so the button
+     opens the portal in a new tab; the rep reads the value there and
+     types it into the input on the right.
+     ────────────────────────────────────────────────────────────────── */
+  .trade-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+  .trade-portal-btn {
+    flex: 0 0 auto;
+    background: var(--xfinity-purple);
+    color: #fff;
+    text-decoration: none;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .trade-portal-btn:hover  { background: var(--xfinity-purple-dark); }
+  .trade-portal-btn:active { transform: translateY(1px); }
+  .trade-value-input-wrap {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-3);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+  }
+  .trade-value-input-wrap .trade-value-prefix {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--xfinity-purple);
+  }
+  .trade-value-input-wrap input[type="number"] {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: white;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+  }
+  .trade-value-input-wrap input[type="number"]:focus {
+    box-shadow: 0 0 0 2px var(--xfinity-purple);
+  }
+  /* Hide the entire trade-in field group when the new phone is not on
+     the $200/$450 auto-discount lists (no trade-in offer applies). */
+  .df-row.no-auto-discount .df-trade-section { display: none !important; }
+
+  /* ──────────────────────────────────────────────────────────────────
+     HIDDEN: Upgrade-to-Premium toggle + its divider.
+     The May 12, 2026 promo cycle no longer requires Premium for the
+     auto-discount, so the per-row "Upgrade to Premium" checkbox is
+     hidden. To bring it back when the promo flips, delete this rule
+     (and optionally clean up the .upgrade-premium-toggle classes in
+     the row markup).
+     ────────────────────────────────────────────────────────────────── */
+  .upgrade-premium-toggle { display: none !important; }
 </style>
 <!-- PDF generation libs (used by handleSavePDF / handlePrint for iPad-friendly downloads) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -922,6 +995,9 @@
     <button class="wt-count-btn" data-val="4" onclick="setDeviceCount('phone',4,this)">4</button>
     <button class="wt-count-btn" data-val="5" onclick="setDeviceCount('phone',5,this)">5</button>
   </div>
+  <!-- Trade-in portal lives per-row now — Xfinity's X-Frame-Options blocks
+       iframe embeds, so each phone row gets its own "Look Up Trade-In Value"
+       button that opens the portal in a new tab. -->
   <div id="phone-rows-container"></div>
 </div>
 
@@ -1353,6 +1429,98 @@ const PHONES = [
   { name:"moto g - 2025",           price: 179.99, storage:[{gb:"128GB",price:179.99}] },
 ];
 
+// ══════════════════════════════════════════════════════════════════════
+//  AUTO-DISCOUNT TIERS — May 12, 2026 promo cycle
+//  ──────────────────────────────────────────────────────────────────────
+//  Replaced the old TIPS-trade-in-routing model. The new structure:
+//    • $200 off → most Apple iPhones, iPhone Air, select Motorola
+//    • $450 off → Samsung Galaxy A/S/Z series, Google Pixel 9/10 series
+//    • Customer also adds the trade-in value from the Xfinity portal
+//      (https://www.xfinity.com/mobile/trade-in/check-condition)
+//      on top of the auto-discount.
+//
+//  Eligibility lists are matched against the new phone's name with a
+//  permissive substring rule (case-insensitive) so storage-suffixed
+//  catalog names still match (e.g., "Apple iPhone 17 Pro Max" matches
+//  even if the catalog ever evolves to "Apple iPhone 17 Pro Max 256GB").
+//
+//  Phones NOT on either list get NO auto-discount and the trade-in
+//  section is hidden — per Jeff: "leave them alone and we won't offer
+//  any discounts."
+// ══════════════════════════════════════════════════════════════════════
+const AUTO_DISCOUNT_PHONES = {
+  // $200 off — Apple iPhones (15 family, 16/16e/16 Plus, Air, 17 family) + select Motorola
+  200: [
+    'Apple iPhone 15',
+    'Apple iPhone 15 Plus',
+    'Apple iPhone 15 Pro',
+    'Apple iPhone 15 Pro Max',
+    'Apple iPhone 16',
+    'Apple iPhone 16 Plus',
+    'Apple iPhone 16e',
+    'Apple iPhone Air',
+    'Apple iPhone 17',
+    'Apple iPhone 17 Pro',
+    'Apple iPhone 17 Pro Max',
+    'Apple iPhone 17e',
+    'Motorola razr - 2025',
+    'moto razr - 2025',
+    'moto g stylus - 2025',
+    'Motorola edge',
+    'motorola edge',
+    'moto g - 2026',
+    'moto g play - 2026',
+    'moto g stylus - 2026',
+  ],
+  // $450 off — Samsung Galaxy A/S/Z + Google Pixel 9/10 series
+  450: [
+    'Samsung Galaxy A17',
+    'Samsung Galaxy A26',
+    'Samsung Galaxy A36',
+    'Samsung Galaxy A37',
+    'Samsung Galaxy S25',
+    'Samsung Galaxy S25 Edge',
+    'Samsung Galaxy S25 Ultra',
+    'Samsung Galaxy S25+',
+    'Samsung Galaxy S25 FE',
+    'Samsung Galaxy Z Fold7',
+    'Samsung Galaxy Z Flip7',
+    'Samsung Galaxy Z Flip7 FE',
+    'Samsung Galaxy S26',
+    'Samsung Galaxy S26+',
+    'Samsung Galaxy S26 Ultra',
+    'Google Pixel 9',
+    'Google Pixel 10',
+    'Google Pixel 10 Pro',
+    'Google Pixel 10 Pro XL',
+    'Google Pixel 10 Pro Fold',
+    'Google Pixel 9a',
+    'Google Pixel 10a',
+  ],
+};
+
+// Returns the auto-discount in dollars for a given new-phone purchase.
+// Matching rule (case-insensitive):
+//   • Exact match wins ("Apple iPhone 16" == "Apple iPhone 16")
+//   • Otherwise the catalog name must START with the eligible name
+//     followed by a word delimiter (space or hyphen). This handles
+//     storage/qualifier suffixes like "Samsung Galaxy A17 5G" matching
+//     "Samsung Galaxy A17", while preventing false positives like
+//     "Apple iPhone 16e" matching "Apple iPhone 16".
+function getAutoDiscount(phoneName) {
+  if (!phoneName) return 0;
+  const name = phoneName.toLowerCase().trim();
+  for (const [amount, list] of Object.entries(AUTO_DISCOUNT_PHONES)) {
+    for (const eligible of list) {
+      const e = eligible.toLowerCase();
+      if (name === e || name.startsWith(e + ' ') || name.startsWith(e + '-')) {
+        return Number(amount);
+      }
+    }
+  }
+  return 0;
+}
+
 // ══════════════════════════════════════════════════
 //  PROMO LOGIC CONSTANTS
 //  These drive the smart Samsung vs. non-Samsung
@@ -1377,69 +1545,40 @@ const NONSAM_PREMIUM_NO_TRADE = 400;
 const IPHONE17E_PRICE_599  = 599.99;
 const IPHONE17E_PRICE_799  = 799.99;
 
-// ══════════════════════════════════════════════════
-//  SMART PROMO CALCULATOR
-//  Promo eligibility is INDEPENDENT of the "Upgrade to
-//  Premium" checkbox — that checkbox only governs whether
-//  the +$10/mo upgrade fee gets added to the quote (for
-//  customers who aren't already on Premium). All TIPS /
-//  no-trade promos calculate at Premium-tier eligibility,
-//  since either the customer is already on Premium or the
-//  rep is upgrading them to Premium as part of the deal.
+// ══════════════════════════════════════════════════════════════════════
+//  SMART PROMO CALCULATOR — May 12, 2026 promo cycle
+//  ──────────────────────────────────────────────────────────────────────
+//  Total discount = AUTO-DISCOUNT  +  TRADE-IN VALUE
 //
-//  Rules (May 11 – June 21, 2026 cycle):
-//    • Pixel 10 Pro XL / Pro Fold + trade-in → up to $1,200 off
-//    • Samsung + trade-in              → up to $900 off
-//    • Samsung + no trade              → $500 off
-//    • Apple/Google/Moto + trade-in    → up to $830 off
-//    • Apple/Google/Moto + no trade    → $400 off
-//  Trade-in caps are enforced by the routed TIPS promo JSON (the per-promo
-//  trade-in table caps the value naturally), not by this function.
-// ══════════════════════════════════════════════════
+//  • The discount ONLY fires when there's a trade-in. Per Jeff: "the
+//    $200 and $450 are only if there is a trade in with the upgrade.
+//    Without the trade in, there is nothing of value to discount."
+//  • AUTO-DISCOUNT comes from getAutoDiscount(phoneName). $200 for the
+//    iPhone / Motorola list, $450 for the Samsung Galaxy / Pixel list,
+//    $0 for any phone not on either list.
+//  • TRADE-IN VALUE is whatever the rep types into the per-line input
+//    (sourced from the customer-facing Xfinity trade-in portal — link
+//    button next to the input).
+//  • Capped at the full phone price so we never produce a negative.
+//  • Premium plan no longer required — the `plan` arg is ignored.
+//  • Phones not on either auto-discount list get $0 discount AND the
+//    trade-in section is hidden (per Jeff: "leave them alone").
+// ══════════════════════════════════════════════════════════════════════
 function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
-  // `plan` is accepted for backwards compatibility but ignored —
-  // promo eligibility is no longer gated by the Premium toggle.
-  var tradeRaw  = noTrade ? 0 : (parseFloat(tradeValue) || 0);
-  var hasTrade  = tradeRaw > 0;
-
   if (phonePrice <= 0) return { promoAmt: 0, promoLabel: '' };
 
-  // Which TIPS bucket does this new phone belong to?
-  var promoTag = getTipsPromoForNewPhone(phoneName).promo_tag;
-  var isPixelTop = promoTag === 'tips_pixel_1200';
-  var isSamsung  = promoTag === 'tips_samsung_900';
+  var autoDiscount = getAutoDiscount(phoneName);
+  // Off-list phone → no discount
+  if (autoDiscount <= 0) return { promoAmt: 0, promoLabel: '' };
 
-  var promoAmt   = 0;
-  var promoLabel = '';
-
-  if (hasTrade) {
-    // Trade-in promo: pay the actual trade-in value from the routed promo
-    // table. The table itself enforces the per-promo cap ($830 / $900 / $1,200)
-    // so no separate Math.min cap is needed here.
-    promoAmt = tradeRaw;
-    if (isPixelTop) {
-      promoLabel = 'TIPS Pixel Trade-In — $' + promoAmt + ' off';
-    } else if (isSamsung) {
-      promoLabel = 'Samsung TIPS Trade-In — $' + promoAmt + ' off';
-    } else {
-      promoLabel = 'TIPS Trade-In — $' + promoAmt + ' off';
-    }
-  } else {
-    // No-trade fallback promos (unchanged from previous logic)
-    if (isPixelTop) {
-      // Pixel top-tier promo requires a trade-in — no no-trade fallback
-      promoAmt   = 0;
-      promoLabel = '';
-    } else if (isSamsung) {
-      promoAmt   = 500;
-      promoLabel = 'No Trade-In — $500 off';
-    } else {
-      promoAmt   = 400;
-      promoLabel = 'No Trade-In — $400 off';
-    }
+  var tradeRaw = noTrade ? 0 : (parseFloat(tradeValue) || 0);
+  if (tradeRaw <= 0) {
+    // No trade-in → the auto-discount doesn't apply either (Jeff's rule)
+    return { promoAmt: 0, promoLabel: '' };
   }
 
-  promoAmt = Math.min(promoAmt, phonePrice); // never exceed full price
+  var promoAmt = Math.min(autoDiscount + tradeRaw, phonePrice);
+  var promoLabel = '$' + autoDiscount + ' off + $' + tradeRaw + ' trade-in (Xfinity portal)';
   return { promoAmt: promoAmt, promoLabel: promoLabel };
 }
 
@@ -10697,24 +10836,35 @@ function buildRow(type, num) {
   let extraFields = '';
   if (type === 'phone') {
     extraFields = `
-      <div class="df-field-group">
-        <div class="df-field-label">TIPS Trade-In Promotion</div>
-        <div class="df-autocomplete-wrap">
-          <input type="text" id="${rowId}-trade" placeholder="Search trade-in phones..." autocomplete="off">
-          <div class="df-dropdown-list" id="${rowId}-trade-list"></div>
+      <div class="df-field-group df-trade-section">
+        <div class="df-field-label">Trade-In Value (look up at Xfinity portal, then enter here)</div>
+        <div class="trade-input-row">
+          <a href="https://www.xfinity.com/mobile/trade-in/check-condition"
+             target="_blank" rel="noopener"
+             class="trade-portal-btn">
+            🔍 Look Up Trade-In Value ↗
+          </a>
+          <div class="trade-value-input-wrap">
+            <span class="trade-value-prefix">$</span>
+            <input type="number" id="${rowId}-trade-value" placeholder="0" min="0" step="1" aria-label="Trade-In Value">
+          </div>
         </div>
-        <div class="df-no-trade-wrap">
+        <div class="df-no-trade-wrap" style="margin-top:8px;">
           <input type="checkbox" id="${rowId}-notrade">
           <label for="${rowId}-notrade">No trade-in</label>
         </div>
       </div>
       <div style="background:linear-gradient(135deg,#f3e8ff,#e8d5ff);border:2px solid var(--xfinity-purple);border-radius:8px;padding:11px 14px;display:flex;align-items:center;gap:12px;">
-        <input type="checkbox" id="${rowId}-premium" style="width:17px;height:17px;accent-color:var(--xfinity-purple);cursor:pointer;flex-shrink:0;">
-        <label for="${rowId}-premium" style="font-size:12px;font-weight:700;color:var(--xfinity-purple);cursor:pointer;line-height:1.3;flex:1;min-width:0;">
+        <!-- Upgrade-to-Premium toggle is HIDDEN starting the May 12, 2026 promo
+             cycle (Premium plan is no longer required for the discount).
+             The .upgrade-premium-toggle CSS rule hides these three elements;
+             remove that rule to restore the toggle when the promo flips back. -->
+        <input type="checkbox" id="${rowId}-premium" class="upgrade-premium-toggle" style="width:17px;height:17px;accent-color:var(--xfinity-purple);cursor:pointer;flex-shrink:0;">
+        <label for="${rowId}-premium" class="upgrade-premium-toggle" style="font-size:12px;font-weight:700;color:var(--xfinity-purple);cursor:pointer;line-height:1.3;flex:1;min-width:0;">
           Upgrade to Premium
           <span style="font-weight:500;font-size:11px;display:block;color:var(--xfinity-purple-dark);margin-top:1px;">+$10/mo · Required for TIPS</span>
         </label>
-        <div style="width:1px;background:rgba(103,19,210,0.25);align-self:stretch;flex-shrink:0;"></div>
+        <div class="upgrade-premium-toggle" style="width:1px;background:rgba(103,19,210,0.25);align-self:stretch;flex-shrink:0;"></div>
         <input type="checkbox" id="${rowId}-xmc" style="width:17px;height:17px;accent-color:var(--xfinity-purple);cursor:pointer;flex-shrink:0;">
         <label id="${rowId}-xmc-lbl" for="${rowId}-xmc" style="font-size:12px;font-weight:700;color:var(--xfinity-purple);cursor:pointer;line-height:1.3;flex:1;min-width:0;">
           Add XMC Insurance
@@ -10773,11 +10923,19 @@ function wireRowAutocomplete(type, num) {
     d.tradeName = '';
     d.tradeCondition = '';
     d.noTrade = false;
-    // Clear trade-in input and re-enable it
-    const tradeInpEl = document.getElementById(`${type}-row-${num}-trade`);
+    // Clear trade-in value input + checkbox; re-enable both
+    const tradeValEl = document.getElementById(`${type}-row-${num}-trade-value`);
     const noTradeEl  = document.getElementById(`${type}-row-${num}-notrade`);
-    if (tradeInpEl) { tradeInpEl.value = ''; tradeInpEl.disabled = false; tradeInpEl.style.opacity = '1'; }
+    if (tradeValEl) { tradeValEl.value = ''; tradeValEl.disabled = false; tradeValEl.style.opacity = '1'; }
     if (noTradeEl)  { noTradeEl.checked = false; }
+    // Toggle visibility of the trade-in section based on auto-discount eligibility.
+    // Phones not on the $200/$450 list don't qualify for any discount, so the
+    // trade-in section hides entirely.
+    if (type === 'phone') {
+      const rowEl = document.getElementById(`${type}-row-${num}`);
+      const eligible = getAutoDiscount(item.name) > 0;
+      if (rowEl) rowEl.classList.toggle('no-auto-discount', !eligible);
+    }
 
     // Storage picker (phones with variants)
     storagePkr.innerHTML = '';
@@ -10817,59 +10975,55 @@ function wireRowAutocomplete(type, num) {
 
     // When a phone is selected, re-wire watch/tablet dropdowns + auto-populate accessories
     // Also re-wire the trade-in list for THIS row with the correct Samsung/non-Samsung filter
+    // When a phone is selected, re-wire watch/tablet dropdowns + auto-populate accessories.
+    // Trade-in is now a manual value input (rep types in the value from the
+    // shared Xfinity portal at the top of the section), so no list-rewiring
+    // is needed here.
     if (type === 'phone') {
       setTimeout(function() {
         rewireAccessoryDropdowns();
         autoPopulateAccessories(item.name);
-        // Re-wire trade-in autocomplete with filtered list for the newly selected phone
-        var tradeInpEl  = document.getElementById(rowId + '-trade');
-        var tradeListEl = document.getElementById(rowId + '-trade-list');
-        if (tradeInpEl && tradeListEl) {
-          tradeListEl.innerHTML = '';
-          tradeListEl.classList.remove('open');
-          makeDfAutocomplete(tradeInpEl, tradeListEl, getFilteredTradeIns(item.name), function(tradeItem) {
-            var dRow = getRowData('phone', num);
-            dRow.tradeValue = tradeItem.value;
-            dRow.tradeName  = tradeItem.name;
-            dRow.tradeCondition = tradeItem.condition || '';
-            dRow.noTrade = false;
-            var noTradeEl = document.getElementById(rowId + '-notrade');
-            if (noTradeEl) noTradeEl.checked = false;
-            tradeInpEl.value = tradeItem.name + ' \u2014 ' + tradeItem.condition + ' \xb7 $' + tradeItem.value;
-            recalcRow('phone', num);
-          });
-        }
       }, 30);
     }
   });
 
-  // Trade-in (phones only)
+  // Trade-in value input + No-trade checkbox (phones only).
+  // Replaces the old autocomplete: rep looks up the value via the shared
+  // Xfinity portal at the top of the Phone Upgrades section, then types
+  // it into this number input. The auto-discount ($200/$450 from
+  // getAutoDiscount) is added to this value in calcSmartPromo.
   if (type === 'phone') {
-    const tradeInp  = document.getElementById(`${rowId}-trade`);
-    const tradeList = document.getElementById(`${rowId}-trade-list`);
-    const noTrade   = document.getElementById(`${rowId}-notrade`);
-    if (tradeInp) {
-      // Use filtered list based on the routed TIPS promo for the purchased phone
-      // (tips_pixel_1200 / tips_samsung_900 / tips_nonsam_830 — see getTipsPromoForNewPhone)
-      makeDfAutocomplete(tradeInp, tradeList, getFilteredTradeIns(getRowData('phone', num).name), (item) => {
+    const tradeValEl = document.getElementById(`${rowId}-trade-value`);
+    const noTrade    = document.getElementById(`${rowId}-notrade`);
+    if (tradeValEl) {
+      tradeValEl.addEventListener('input', () => {
         const d = getRowData('phone', num);
-        d.tradeValue = item.value;
-        d.tradeName  = item.name;
-        d.tradeCondition = item.condition || '';
-        d.noTrade = false;
-        noTrade.checked = false;
-        tradeInp.value = `${item.name} — ${item.condition} · $${item.value}`;
+        const v = parseFloat(tradeValEl.value) || 0;
+        d.tradeValue = v;
+        d.tradeName = v > 0 ? 'Customer trade-in' : '';
+        d.tradeCondition = '';
+        // If the rep typed a value, uncheck "No trade-in" so the math reflects it
+        if (v > 0 && noTrade && noTrade.checked) {
+          noTrade.checked = false;
+          d.noTrade = false;
+        }
         recalcRow('phone', num);
       });
+    }
+    if (noTrade) {
       noTrade.addEventListener('change', () => {
         const d = getRowData('phone', num);
         d.noTrade = noTrade.checked;
         if (noTrade.checked) {
           d.tradeValue = 0; d.tradeName = '';
-          tradeInp.value = '';
-          tradeInp.disabled = true; tradeInp.style.opacity = '0.4';
-        } else {
-          tradeInp.disabled = false; tradeInp.style.opacity = '1';
+          if (tradeValEl) {
+            tradeValEl.value = '';
+            tradeValEl.disabled = true;
+            tradeValEl.style.opacity = '0.4';
+          }
+        } else if (tradeValEl) {
+          tradeValEl.disabled = false;
+          tradeValEl.style.opacity = '1';
         }
         recalcRow('phone', num);
       });
