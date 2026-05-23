@@ -1550,35 +1550,28 @@ const IPHONE17E_PRICE_799  = 799.99;
 //  ──────────────────────────────────────────────────────────────────────
 //  Total discount = AUTO-DISCOUNT  +  TRADE-IN VALUE
 //
-//  • The discount ONLY fires when there's a trade-in. Per Jeff: "the
-//    $200 and $450 are only if there is a trade in with the upgrade.
-//    Without the trade in, there is nothing of value to discount."
-//  • AUTO-DISCOUNT comes from getAutoDiscount(phoneName). $200 for the
-//    iPhone / Motorola list, $450 for the Samsung Galaxy / Pixel list,
-//    $0 for any phone not on either list.
-//  • TRADE-IN VALUE is whatever the rep types into the per-line input
-//    (sourced from the customer-facing Xfinity trade-in portal — link
-//    button next to the input).
-//  • Capped at the full phone price so we never produce a negative.
+//  • AUTO-DISCOUNT applies automatically for any phone on the eligibility
+//    list, with OR without a trade-in. $200 for the iPhone / Motorola
+//    list, $450 for the Samsung Galaxy / Pixel list, $0 for off-list.
+//  • TRADE-IN VALUE is added on top when the rep enters a value from the
+//    Xfinity portal (button to the left of the input).
+//  • Capped at the full phone price.
 //  • Premium plan no longer required — the `plan` arg is ignored.
-//  • Phones not on either auto-discount list get $0 discount AND the
-//    trade-in section is hidden (per Jeff: "leave them alone").
+//  • Off-list phones get $0 discount.
 // ══════════════════════════════════════════════════════════════════════
 function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
   if (phonePrice <= 0) return { promoAmt: 0, promoLabel: '' };
 
   var autoDiscount = getAutoDiscount(phoneName);
-  // Off-list phone → no discount
   if (autoDiscount <= 0) return { promoAmt: 0, promoLabel: '' };
 
   var tradeRaw = noTrade ? 0 : (parseFloat(tradeValue) || 0);
-  if (tradeRaw <= 0) {
-    // No trade-in → the auto-discount doesn't apply either (Jeff's rule)
-    return { promoAmt: 0, promoLabel: '' };
-  }
+  if (tradeRaw < 0) tradeRaw = 0;
 
   var promoAmt = Math.min(autoDiscount + tradeRaw, phonePrice);
-  var promoLabel = '$' + autoDiscount + ' off + $' + tradeRaw + ' trade-in (Xfinity portal)';
+  var promoLabel = (tradeRaw > 0)
+    ? '$' + autoDiscount + ' off + $' + tradeRaw + ' trade-in (Xfinity portal)'
+    : '$' + autoDiscount + ' off';
   return { promoAmt: promoAmt, promoLabel: promoLabel };
 }
 
