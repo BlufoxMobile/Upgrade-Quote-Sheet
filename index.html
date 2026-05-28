@@ -616,9 +616,14 @@
   .df-autocomplete-wrap { position:relative; overflow:visible; }
   .df-autocomplete-wrap input { width:100%; border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text-primary); background:white; outline:none; transition:border-color 0.2s; }
   .df-autocomplete-wrap input:focus { border-color:var(--xfinity-purple); box-shadow:0 0 0 3px rgba(103,19,210,0.1); }
-  .df-dropdown-list { position:absolute; top:100%; left:0; right:0; background:white; border:1.5px solid var(--xfinity-purple); border-top:none; border-radius:0 0 var(--radius-sm) var(--radius-sm); max-height:220px; overflow-y:scroll; z-index:9999; display:none; box-shadow:0 8px 24px rgba(103,19,210,0.15); }
+  .df-dropdown-list { position:absolute; top:100%; left:0; right:0; background:white; border:1.5px solid var(--xfinity-purple); border-top:none; border-radius:0 0 var(--radius-sm) var(--radius-sm); max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; z-index:9999; display:none; box-shadow:0 8px 24px rgba(103,19,210,0.15); }
   .df-dropdown-list.open { display:block; }
   .df-dropdown-item { padding:0 14px; font-size:13px; cursor:pointer; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; height:44px; min-height:44px; max-height:44px; box-sizing:border-box; flex-shrink:0; }
+  /* iPad/mobile: more list room and larger taps */
+  @media (hover: none) and (pointer: coarse) {
+    .df-dropdown-list { max-height:50vh; }
+    .df-dropdown-item { height:52px; min-height:52px; max-height:52px; font-size:14px; }
+  }
   .df-dropdown-item:last-child { border-bottom:none; }
   .df-dropdown-item:hover { background:var(--surface-3); color:var(--xfinity-purple); }
   .df-dropdown-item .item-price { font-size:12px; color:var(--text-muted); white-space:nowrap; font-weight:600; }
@@ -10583,11 +10588,23 @@ function getXmcRate(price) {
 //  DEVICE ROW AUTOCOMPLETE (T-Sheet style)
 // ══════════════════════════════════════════════════
 function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
-  var _selected = false; // tracks whether a selection is in progress
+  var _selected = false;     // selection in progress (suppresses blur close)
+  var _touchingList = false; // finger is on the list (scrolling or tapping)
+  var TAP_THRESHOLD = 10;    // px of finger movement allowed before it counts as a scroll
 
   function closeList() {
     listEl.classList.remove('open');
     listEl.innerHTML = '';
+  }
+
+  function commitSelection(item, label) {
+    _selected = true;
+    inputEl.value = label;
+    closeList();
+    try { onSelect(item); } catch(err) {}
+    // Keep focus on the input so the mobile keyboard doesn't reflow the page
+    try { inputEl.focus({ preventScroll: true }); } catch(_) { try { inputEl.focus(); } catch(__) {} }
+    setTimeout(function() { _selected = false; }, 500);
   }
 
   function renderList(q) {
@@ -10625,62 +10642,63 @@ function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
       var label = item.name + (item.condition ? ' \u2014 ' + item.condition : '');
       div.innerHTML = '<span>' + label + '</span><span class="item-price">' + priceStr + '</span>';
 
-      // mousedown fires before blur — use it to set the flag
-      div.addEventListener('mousedown', function(e) {
-        e.preventDefault(); // prevent input losing focus
-        _selected = true;
-      });
-
-      // click fires after mousedown+mouseup — reliable on all platforms
+      // Desktop: mousedown stops the input from blurring before click lands.
+      div.addEventListener('mousedown', function(e) { e.preventDefault(); });
       div.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        _selected = true;
-        // 1. Set the input value immediately and visibly
-        inputEl.value = label;
-        // 2. Close the dropdown right away
-        closeList();
-        // 3. Call onSelect (may trigger recalcs — value is already set so it won't clear)
-        try { onSelect(item); } catch(err) {}
-        // 4. Keep focus on input so keyboard doesn't pop back on mobile
-        inputEl.focus();
-        setTimeout(function() { _selected = false; }, 500);
+        commitSelection(item, label);
       });
 
-      // Touch devices: touchstart sets flag, touchend triggers selection
+      // Touch: only fire on a real tap. Track finger motion; if it moves more
+      // than TAP_THRESHOLD px in either direction, treat as a scroll and bail.
       div.addEventListener('touchstart', function(e) {
-        _selected = true;
+        var t = e.touches[0];
+        div._tsX = t.clientX; div._tsY = t.clientY; div._tsMoved = false;
+      }, { passive: true });
+
+      div.addEventListener('touchmove', function(e) {
+        if (div._tsMoved) return;
+        var t = e.touches[0];
+        if (Math.abs(t.clientY - div._tsY) > TAP_THRESHOLD ||
+            Math.abs(t.clientX - div._tsX) > TAP_THRESHOLD) {
+          div._tsMoved = true;
+        }
       }, { passive: true });
 
       div.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        _selected = true;
-        inputEl.value = label;
-        closeList();
-        try { onSelect(item); } catch(err) {}
-        setTimeout(function() { _selected = false; }, 500);
-      });
+        if (div._tsMoved) return; // user was scrolling
+        try { e.preventDefault(); } catch(_) {} // suppress synthetic click
+        commitSelection(item, label);
+      }, { passive: false });
 
       listEl.appendChild(div);
     });
     listEl.classList.add('open');
   }
 
+  // While a finger is touching the list (e.g. scrolling) keep blur from closing it.
+  listEl.addEventListener('touchstart', function() { _touchingList = true; }, { passive: true });
+  var releaseTouching = function() { setTimeout(function() { _touchingList = false; }, 300); };
+  listEl.addEventListener('touchend',    releaseTouching, { passive: true });
+  listEl.addEventListener('touchcancel', releaseTouching, { passive: true });
+
   inputEl.addEventListener('input', function() { renderList(inputEl.value); });
   inputEl.addEventListener('focus', function() { renderList(inputEl.value); });
   inputEl.addEventListener('blur',  function() {
-    // Only close if user didn't just click a list item
     setTimeout(function() {
-      if (!_selected) closeList();
+      if (!_selected && !_touchingList) closeList();
     }, 250);
   });
 
-  // Close if clicking anywhere outside
-  document.addEventListener('mousedown', function(e) {
+  // Close on outside taps (mouse AND touch)
+  function outsideHandler(e) {
     if (!listEl.contains(e.target) && e.target !== inputEl) {
       if (!_selected) closeList();
     }
-  });
+  }
+  document.addEventListener('mousedown', outsideHandler);
+  document.addEventListener('touchstart', outsideHandler, { passive: true });
 }
 
 // ══════════════════════════════════════════════════
