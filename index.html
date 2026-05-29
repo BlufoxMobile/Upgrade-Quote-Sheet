@@ -1436,11 +1436,11 @@ const PHONES = [
   // Motorola
   { name:"Motorola razr - 2026",    price: 699.99, storage:[{gb:"128GB",price:699.99}] },
   { name:"Motorola razr - 2025",    price: 599.99, storage:[{gb:"256GB",price:599.99}] },
-  { name:"moto g stylus - 2026",    price: 499.99, storage:[{gb:"128GB",price:499.99}] },
+  { name:"Motorola moto g stylus - 2026", price: 499.99, storage:[{gb:"128GB",price:499.99}] },
   { name:"Motorola edge",           price: 399.99, storage:[{gb:"256GB",price:399.99}] },
-  { name:"moto g stylus - 2025",    price: 289.99, storage:[{gb:"128GB",price:289.99}] },
-  { name:"moto g - 2026",           price: 249.99, storage:[{gb:"128GB",price:249.99}] },
-  { name:"moto g play - 2026",      price: 179.99, storage:[{gb:"64GB", price:179.99}] },
+  { name:"Motorola moto g stylus - 2025", price: 289.99, storage:[{gb:"128GB",price:289.99}] },
+  { name:"Motorola moto g - 2026",  price: 249.99, storage:[{gb:"128GB",price:249.99}] },
+  { name:"Motorola moto g play - 2026", price: 179.99, storage:[{gb:"64GB", price:179.99}] },
 ];
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1487,6 +1487,10 @@ const AUTO_DISCOUNT_PHONES = {
     'moto g - 2026',
     'moto g play - 2026',
     'moto g stylus - 2026',
+    'Motorola moto g stylus - 2026',
+    'Motorola moto g stylus - 2025',
+    'Motorola moto g - 2026',
+    'Motorola moto g play - 2026',
   ],
   // $450 off — Samsung Galaxy A/S/Z + Google Pixel 9/10 series
   450: [
@@ -1563,18 +1567,20 @@ const IPHONE17E_PRICE_599  = 599.99;
 const IPHONE17E_PRICE_799  = 799.99;
 
 // ══════════════════════════════════════════════════════════════════════
-//  SMART PROMO CALCULATOR — May 12, 2026 promo cycle
+//  SMART PROMO CALCULATOR — current promo cycle
 //  ──────────────────────────────────────────────────────────────────────
 //  Total discount = AUTO-DISCOUNT  +  TRADE-IN VALUE
 //
-//  • AUTO-DISCOUNT applies automatically for any phone on the eligibility
-//    list, with OR without a trade-in. $200 for the iPhone / Motorola
-//    list, $450 for the Samsung Galaxy / Pixel list, $0 for off-list.
-//  • TRADE-IN VALUE is added on top when the rep enters a value from the
-//    Xfinity portal (button to the left of the input).
-//  • Capped at the full phone price.
-//  • Premium plan no longer required — the `plan` arg is ignored.
+//  • Apple iPhone / Motorola list → $200, applied with OR without a trade-in.
+//  • Samsung Galaxy / Google Pixel list → $450, but ONLY when a trade-in is
+//    present. With no trade-in, those devices fall back to the flat $200.
+//    (The $450 and $200 are alternatives — they are never stacked.)
 //  • Off-list phones get $0 discount.
+//  • TRADE-IN VALUE (from the Xfinity portal) is added on top of whichever
+//    auto-discount applies, via the button to the left of the input.
+//  • Capped at the full phone price.
+//  • Plus and Premium are treated identically — the `plan` arg is not used to
+//    gate the discount (this sheet operates in the Plus/Premium context).
 // ══════════════════════════════════════════════════════════════════════
 function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
   if (phonePrice <= 0) return { promoAmt: 0, promoLabel: '' };
@@ -1584,6 +1590,14 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
 
   var tradeRaw = noTrade ? 0 : (parseFloat(tradeValue) || 0);
   if (tradeRaw < 0) tradeRaw = 0;
+
+  // The $450 tier (Samsung Galaxy / Google Pixel) requires a trade-in.
+  // With NO trade-in, those devices fall back to the flat $200 anytime-upgrade
+  // discount. Apple/Motorola devices always get $200 (trade or no trade).
+  // The $450 and $200 are alternatives — never stacked.
+  if (autoDiscount === 450 && tradeRaw <= 0) {
+    autoDiscount = 200;
+  }
 
   var promoAmt = Math.min(autoDiscount + tradeRaw, phonePrice);
   var promoLabel = (tradeRaw > 0)
@@ -10476,7 +10490,7 @@ const TIPS_PROMOS = {
 // Which TIPS promo applies for the new phone being purchased?
 function getTipsPromoForNewPhone(deviceName) {
   const name = (deviceName || '').toLowerCase();
-  if (name.includes('pixel 10 pro xl') || name.includes('pixel 10 pro fold')) {
+  if (name.includes('pixel 10 pro')) {
     return TIPS_PROMOS.tips_pixel_1200;
   }
   if (name.includes('samsung') || name.includes('galaxy')) {
@@ -10730,21 +10744,21 @@ const WATCHES_APPLE = [
   { name:"Apple Watch Ultra 2 49mm",            price:799.99 },
   { name:"Apple Watch Ultra 3 49mm",            price:799.99 },
   // Android watches follow for mixed households
-  { name:"Galaxy Watch8 40mm",                  price:399.99 },
-  { name:"Galaxy Watch8 44mm",                  price:429.99 },
-  { name:"Pixel Watch 4 41mm",                  price:449.99 },
-  { name:"Pixel Watch 4 45mm",                  price:499.99 },
-  { name:"Galaxy Watch8 Classic",               price:549.99 },
-  { name:"Galaxy Watch Ultra 47mm",             price:649.99 },
+  { name:"Samsung Galaxy Watch8 40mm",                  price:399.99 },
+  { name:"Samsung Galaxy Watch8 44mm",                  price:429.99 },
+  { name:"Google Pixel Watch 4 41mm",                  price:449.99 },
+  { name:"Google Pixel Watch 4 45mm",                  price:499.99 },
+  { name:"Samsung Galaxy Watch8 Classic",               price:549.99 },
+  { name:"Samsung Galaxy Watch Ultra 47mm",             price:649.99 },
 ];
 const WATCHES_ANDROID = [
   // Samsung/Google/Motorola → lead with Samsung/Pixel watches
-  { name:"Galaxy Watch8 40mm",                  price:399.99 },
-  { name:"Galaxy Watch8 44mm",                  price:429.99 },
-  { name:"Pixel Watch 4 41mm",                  price:449.99 },
-  { name:"Pixel Watch 4 45mm",                  price:499.99 },
-  { name:"Galaxy Watch8 Classic",               price:549.99 },
-  { name:"Galaxy Watch Ultra 47mm",             price:649.99 },
+  { name:"Samsung Galaxy Watch8 40mm",                  price:399.99 },
+  { name:"Samsung Galaxy Watch8 44mm",                  price:429.99 },
+  { name:"Google Pixel Watch 4 41mm",                  price:449.99 },
+  { name:"Google Pixel Watch 4 45mm",                  price:499.99 },
+  { name:"Samsung Galaxy Watch8 Classic",               price:549.99 },
+  { name:"Samsung Galaxy Watch Ultra 47mm",             price:649.99 },
   // Apple watches follow for mixed households
   { name:"Apple Watch SE 3 Aluminum 40mm",      price:299.99 },
   { name:"Apple Watch SE 3 Aluminum 44mm",      price:329.99 },
