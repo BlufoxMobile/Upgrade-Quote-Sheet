@@ -11114,8 +11114,8 @@ function recalcRow(type, num) {
     const xmcLine     = xmcAdd     > 0 ? `<span class="df-mo-promo">+XMC $${xmcAdd}/mo</span>` : '';
     monthlyEl.innerHTML = `$${monthly.toFixed(2)}/mo${promoLine}${upgradeLine}${xmcLine}`;
   } else if (type === 'watch') {
-    // Cap $300 membership discount at first 2 watches only
-    const discount = num <= 2 ? state.membershipDiscount : 0;
+    // Cap $300 membership discount at first 5 watches only
+    const discount = num <= 5 ? state.membershipDiscount : 0;
     const netPrice = Math.max(0, d.price - discount);
     const monthly  = netPrice / 36 + 10 + xmcAdd;
     const note = document.getElementById(`${rowId}-diamond-note`);
@@ -11146,8 +11146,8 @@ function refreshWatchDiamondNotes() {
       // Diamond is the only tier that earns the $300 watch discount now.
       lbl.innerHTML = `💎 Diamond — $300 Off Applied Automatically`;
     }
-    // Only first 2 watches qualify for the $300 membership discount
-    if (note) note.style.display = (state.membershipDiscount > 0 && i <= 2) ? 'block' : 'none';
+    // Only first 5 watches qualify for the $300 membership discount
+    if (note) note.style.display = (state.membershipDiscount > 0 && i <= 5) ? 'block' : 'none';
     recalcRow('watch', i);
   }
 }
@@ -11514,11 +11514,11 @@ function getAutoNewMobile() {
       if (isPrem) planUpgradeTotal += 10;
     }
   }
-  // Sum all watch rows — cap $300 discount at first 2 watches
+  // Sum all watch rows — cap $300 discount at first 5 watches
   var watchTotalMon = 0;
   for (var wi = 1; wi <= watchCounts; wi++) {
     var wd = getRowData('watch', wi);
-    var wDiscApplied = wi <= 2 ? state.membershipDiscount : 0;
+    var wDiscApplied = wi <= 5 ? state.membershipDiscount : 0;
     if (wd.price > 0) watchTotalMon += Math.max(0, wd.price - wDiscApplied) / 36 + 10;
   }
   // Sum all tablet rows
@@ -11764,8 +11764,8 @@ function updatePreview() {
       for (var wi = 1; wi <= watchCounts; wi++) {
         var wd = getRowData('watch', wi);
         if (!wd.price) continue;
-        // Cap $300 membership discount at first 2 watches only
-        var wDisc      = wi <= 2 ? state.membershipDiscount : 0;
+        // Cap $300 membership discount at first 5 watches only
+        var wDisc      = wi <= 5 ? state.membershipDiscount : 0;
         var wTierLbl   = 'Diamond'  /* Diamond is the only tier that triggers wDisc > 0 now */;
         var wNet     = Math.max(0, wd.price - wDisc);
         var wSub     = wDisc > 0 ? `After discount · +$10/mo line fee` : `Watch · +$10/mo line fee`;
@@ -11893,8 +11893,8 @@ function updatePreview() {
       for (var wbi = 1; wbi <= watchCounts; wbi++) {
         var wbd = getRowData('watch', wbi);
         if (!wbd.price) continue;
-        // Cap $300 membership discount at first 2 watches only
-        var wbDisc    = wbi <= 2 ? state.membershipDiscount : 0;
+        // Cap $300 membership discount at first 5 watches only
+        var wbDisc    = wbi <= 5 ? state.membershipDiscount : 0;
         var wbTierLbl = 'Diamond'  /* Diamond is the only tier that triggers wDisc > 0 now */;
         var wbNet     = Math.max(0, wbd.price - wbDisc);
         var wbLabel   = (watchCounts > 1 ? 'Watch ' + wbi + ': ' : '') + wbd.name + (wbDisc > 0 ? ` (−$${wbDisc} ${wbTierLbl})` : '');
