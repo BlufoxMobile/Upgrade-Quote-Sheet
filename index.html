@@ -12625,5 +12625,95 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
+<!-- BLUFOX_ROSTER_DROPDOWNS_V1 : roster-driven Store + Rep dropdowns (auto-added) -->
+<script>
+(function(){
+  if (window.__BLUFOX_ROSTER__) return; window.__BLUFOX_ROSTER__ = true;
+  var CFG = {"storeId": "storeName", "repId": "repName", "repNameAttr": null, "fieldSel": ".intake-field", "shortStores": false, "lsStore": "bfx_lastStore", "lsRep": "bfx_lastRep", "onStoreChange": null, "onRepChange": null};
+  var DIR='https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/store-directory.json';
+  var RST='https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/rep-roster.json';
+  function L(){try{return window.localStorage}catch(e){return null}}
+  function gL(k){var s=L();try{return s?s.getItem(k):null}catch(e){return null}}
+  function sL(k,v){var s=L();try{if(s)s.setItem(k,v)}catch(e){}}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function jget(u){return fetch(u,{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()})}
+  function toFull(s){return CFG.shortStores ? s+' Xfinity Store' : s;}
+  function toDisplay(full){return CFG.shortStores ? full.replace(/ Xfinity Store$/,'') : full;}
+  function call(name){ if(name && typeof window[name]==='function'){ try{window[name]()}catch(e){} } }
+
+  function go(){
+    var storeSel=document.getElementById(CFG.storeId);
+    var repEl=document.getElementById(CFG.repId);
+    if(!storeSel||!repEl) return;
+    var roster={}, ready=false;
+    var lastStore = gL(CFG.lsStore) || storeSel.value || '';
+    var lastRep   = gL(CFG.lsRep)   || (repEl.value||'').trim() || '';
+    var repClass  = repEl.className || '';
+    var field = (repEl.closest && repEl.closest(CFG.fieldSel)) || repEl.parentNode;
+    var labelEl = field.querySelector('label');
+    var labelHtml = labelEl ? labelEl.outerHTML : '';
+
+    // Separate existing store options into real stores (fallback) vs special entries (e.g. "DM Submission")
+    var fallback=[], special=[];
+    Array.prototype.slice.call(storeSel.options).forEach(function(o){
+      var v=(o.value||o.textContent||'').trim();
+      if(!v||/select your store/i.test(v)) return;
+      if(CFG.shortStores || /xfinity store$/i.test(v)) fallback.push(v); else special.push(v);
+    });
+
+    function nameAttr(){ return CFG.repNameAttr ? (' name="'+CFG.repNameAttr+'"') : ''; }
+    function buildRep(inner){ field.innerHTML = labelHtml + inner; return document.getElementById(CFG.repId); }
+    function attach(el){
+      el.addEventListener('change', function(){ var v=(el.value||'').trim(); if(v) sL(CFG.lsRep,v); call(CFG.onRepChange); });
+      el.addEventListener('input',  function(){ var v=(el.value||'').trim(); if(v) sL(CFG.lsRep,v); call(CFG.onRepChange); });
+    }
+    function repPlaceholder(text){
+      var el=buildRep('<select id="'+CFG.repId+'"'+nameAttr()+' autocomplete="name"><option value="">'+esc(text)+'</option></select>');
+      el.disabled=true; if(repClass) el.className=repClass; attach(el);
+    }
+    function repList(reps){
+      var opts='<option value="">— Select your name —</option>';
+      reps.forEach(function(n){ opts+='<option'+(n===lastRep?' selected':'')+'>'+esc(n)+'</option>'; });
+      var el=buildRep('<select id="'+CFG.repId+'"'+nameAttr()+' autocomplete="name">'+opts+'</select>');
+      el.disabled=false; if(repClass) el.className=repClass; attach(el);
+    }
+    function repFree(){
+      var el=buildRep('<input id="'+CFG.repId+'"'+nameAttr()+' type="text" autocomplete="name" placeholder="Type your full name">');
+      if(repClass) el.className=repClass; if(lastRep) el.value=lastRep; attach(el);
+    }
+    function refreshRep(){
+      var sv=storeSel.value;
+      if(!sv){ repPlaceholder('— Select your store first —'); return; }
+      if(!ready){ repPlaceholder('— Loading names… —'); return; }
+      var reps = roster[toFull(sv)];
+      if(reps && reps.length){ repList(reps); } else { repFree(); }
+    }
+    function fillStores(fullStores){
+      var keep=storeSel.value;
+      var html='<option value="">— Select your store —</option>';
+      fullStores.forEach(function(full){ html+='<option>'+esc(toDisplay(full))+'</option>'; });
+      special.forEach(function(s){ html+='<option>'+esc(s)+'</option>'; });
+      storeSel.innerHTML=html;
+      var want=keep||lastStore;
+      if(want){ storeSel.value=want; if(storeSel.value!==want) storeSel.value=''; }
+    }
+
+    storeSel.addEventListener('change', function(){ sL(CFG.lsStore, storeSel.value); refreshRep(); call(CFG.onStoreChange); });
+
+    // Initial render from existing/fallback options so the form works offline / pre-fetch
+    fillStores(CFG.shortStores ? fallback.map(toFull) : fallback.slice());
+    refreshRep(); call(CFG.onStoreChange);
+
+    var bust='?d='+new Date().toISOString().slice(0,10);
+    jget(DIR+bust).then(function(d){ if(d&&d.stores&&d.stores.length){ fillStores(d.stores); refreshRep(); call(CFG.onStoreChange); } }).catch(function(){});
+    jget(RST+bust).then(function(r){ roster=(r&&r.byStore)||{}; ready=true; refreshRep(); call(CFG.onStoreChange); })
+                  .catch(function(){ ready=true; refreshRep(); call(CFG.onStoreChange); });
+  }
+  function boot(){ setTimeout(go, 250); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
 </body>
 </html>
