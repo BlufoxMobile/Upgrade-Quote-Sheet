@@ -12386,20 +12386,9 @@ async function handleSubmit() {
   };
 
   try {
-    // Parallel submit: Zapier (safety net) + Apps Script (new tracker)
-    const zapierCall = fetch(ZAPIER_WEBHOOK_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }).catch(err => console.error('Zapier submission failed:', err));
-    const appsScriptCall = fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(appsScriptPayload),
-    }).catch(err => console.error('Apps Script submission failed:', err));
-    await Promise.all([zapierCall, appsScriptCall]);
+    // Durable delivery: persist locally first, then send with auto-retry (Blufox outbox).
+    const __deliver = window.__blufoxDeliver || function(o){ try{fetch(o.zapierUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(o.zapierPayload)});}catch(e){} try{fetch(o.appsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(o.appsPayload)});}catch(e){} return Promise.resolve({delivered:true}); };
+    await __deliver({ appsUrl: APPS_SCRIPT_URL, appsPayload: appsScriptPayload, zapierUrl: ZAPIER_WEBHOOK_URL, zapierPayload: payload });
     btn.innerHTML = '✅ Submitted!';
     btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
     // Show "Submitted!" briefly, then reset the form to the start so the rep
@@ -12629,6 +12618,83 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+
+
+
+
+<!-- BLUFOX_SUBMISSION_OUTBOX_V1 : durable submission outbox (auto-added) -->
+<script>
+(function(){
+  if (window.__blufoxOutboxReady) return; window.__blufoxOutboxReady = true;
+  var KEY = 'blufox_outbox_v1';
+  var AWAIT_MS = 6000;       // how long a submit waits for confirmation before reloading
+  var COOLDOWN_MS = 15000;   // min gap before re-sending a still-pending item (avoids dupes)
+  function L(){ try { return window.localStorage; } catch(e){ return null; } }
+  function load(){ try { return JSON.parse(L().getItem(KEY)) || []; } catch(e){ return []; } }
+  function save(a){ try { L().setItem(KEY, JSON.stringify(a)); } catch(e){} }
+  function uid(){ return 'sub_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9); }
+  function add(it){ var a = load(); a.push(it); save(a); }
+  function remove(id){ save(load().filter(function(x){ return x.id !== id; })); }
+  function touch(id){ var a = load(); a.forEach(function(x){ if(x.id===id) x.lastTry = Date.now(); }); save(a); }
+
+  // no-cors POST: resolves when the request completes (opaque), rejects only on a
+  // network-layer failure (offline / connection reset) -> the safe signal to retry.
+  function post(url, body){
+    return fetch(url, { method:'POST', mode:'no-cors',
+      headers:{ 'Content-Type':'text/plain;charset=UTF-8' }, body: body });
+  }
+  function timeout(ms){ return new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, ms); }); }
+
+  // Deliver one item. The Apps Script POST is the one that feeds the T-Sheet site,
+  // so its completion is what we treat as "delivered".
+  function sendItem(it){
+    if (it.zapUrl && it.zapBody) post(it.zapUrl, it.zapBody).catch(function(){});
+    return post(it.appsUrl, it.appsBody);
+  }
+  function retryable(id){ var a = load(); a.forEach(function(x){ if(x.id===id) x.lastTry = 0; }); save(a); }
+  function flushItem(it, awaitMs){
+    touch(it.id);
+    var p = sendItem(it)
+      .then(function(){ remove(it.id); return { delivered:true }; })
+      // network reject = request definitively failed -> make it instantly retry-eligible.
+      .catch(function(){ retryable(it.id); return { delivered:false }; });
+    if (!awaitMs) return p;
+    return Promise.race([ p, timeout(awaitMs).then(function(){ return { delivered:false }; }) ]);
+  }
+  var busy = {};
+  function flushAll(){
+    var now = Date.now();
+    load().forEach(function(it){
+      if (busy[it.id]) return;
+      if (it.lastTry && (now - it.lastTry) < COOLDOWN_MS) return;
+      busy[it.id] = true;
+      flushItem(it, 0).then(function(){ delete busy[it.id]; }).catch(function(){ delete busy[it.id]; });
+    });
+  }
+
+  // Public API used by handleSubmit()
+  window.__blufoxDeliver = function(o){
+    var sid = uid();
+    function stamp(obj){ var c = {}; for (var k in obj) c[k] = obj[k]; c.submission_id = sid; return c; }
+    var it = {
+      id: sid,
+      appsUrl: o.appsUrl,
+      appsBody: JSON.stringify(stamp(o.appsPayload || {})),
+      zapUrl:  o.zapierUrl,
+      zapBody: JSON.stringify(stamp(o.zapierPayload || {})),
+      ts: Date.now(), lastTry: 0
+    };
+    add(it);
+    return flushItem(it, AWAIT_MS);
+  };
+  window.__blufoxOutboxPending = function(){ return load().length; };
+
+  // Retry triggers: shortly after load, when connectivity returns, and on a timer.
+  window.addEventListener('load', function(){ setTimeout(flushAll, 1500); });
+  window.addEventListener('online', flushAll);
+  setInterval(flushAll, 20000);
+})();
+</script>
 
 <!-- BLUFOX_ROSTER_DROPDOWNS_V1 : roster-driven Store + Rep dropdowns (auto-added) -->
 <script>
