@@ -1580,7 +1580,7 @@ const PROMO_MATRIX = {
       "tag": "tips_pixel_1200",
       "active": true,
       "category": "new_line_with_trade",
-      "marketing_name": "Up to $1,200 off Pixel 10 Pro / Pro XL / Pro Fold",
+      "marketing_name": "Up to $1,200 off Pixel 10 Pro XL and Pro Fold",
       "max_value_usd": 1200,
       "line_type": "new_line",
       "plan_eligibility": "plus_or_premium_unl",
@@ -1593,13 +1593,12 @@ const PROMO_MATRIX = {
         "Google"
       ],
       "device_models": [
-        "Google Pixel 10 Pro",
         "Google Pixel 10 Pro XL 5G",
         "Google Pixel 10 Pro Fold"
       ],
       "values_source": "xfinity-tips-promotions:promo-1200-pixel-pro-xl-fold.json",
       "ends": "2026-06-21",
-      "notes": "The Pixel 10 Pro family \u2014 Pro, Pro XL, and Pro Fold \u2014 all route to this $1,200 bucket. There is no separate $1,000 Pixel bucket this cycle."
+      "notes": "NARROW BUCKET: only Pixel 10 Pro XL and Pixel 10 Pro Fold route here per the Comcast PDF. Base Pixel 10 and base Pixel 10 Pro both route to tips_nonsam_830 instead. There is no separate $1,000 Pixel bucket this cycle."
     },
     {
       "tag": "tips_pixel_1000",
@@ -1662,7 +1661,7 @@ const PROMO_MATRIX = {
         "Google",
         "Motorola"
       ],
-      "device_models_note": "Select Apple, Google (excluding Pixel 10 Pro / Pro XL / Pro Fold), and Motorola devices",
+      "device_models_note": "Select Apple, Google (including base Pixel 10 and Pixel 10 Pro; EXCLUDING only Pixel 10 Pro XL and Pixel 10 Pro Fold), and Motorola devices",
       "values_source": "xfinity-tips-promotions:promo-830-apple-google-motorola.json",
       "ends": "2026-06-21"
     },
@@ -1961,7 +1960,8 @@ const PROMO_MATRIX = {
     "select_or_now_suppresses_new_line_device_promos": true,
     "upgrade_with_trade_prefer_plus_up": "If the customer is upgrading and has a trade-in, PLUS UP is the default since it works on any plan and stacks the bonus on top of trade value.",
     "upgrade_no_trade_requires_plus_or_premium": "anytime_upgrade_200 is only available on Plus or Premium Unlimited. Customers on Select with no trade-in have no current upgrade device promo.",
-    "pixel_pro_family_routes_to_1200": "The entire Pixel 10 Pro family \u2014 Pixel 10 Pro, Pixel 10 Pro XL, and Pixel 10 Pro Fold \u2014 routes to tips_pixel_1200 ($1,200 bucket), never to tips_nonsam_830. There is no separate $1,000 Pixel bucket.",
+    "pixel_pro_xl_and_fold_only_route_to_1200": "ONLY Pixel 10 Pro XL and Pixel 10 Pro Fold route to tips_pixel_1200 ($1,200 bucket). Base Pixel 10 and base Pixel 10 Pro route to tips_nonsam_830 ($830 bucket). There is no separate $1,000 Pixel bucket. Routing is by DESTINATION new phone, NOT trade-in phone \u2014 an iPhone trade toward a Samsung purchase uses tips_samsung_900, not tips_pixel_1200, regardless of how much the iPhone is worth in the Pixel bucket.",
+    "tips_routing_by_destination_phone": "TIPS bucket selection is keyed on the new phone the customer is BUYING, not the phone they're trading in. Quote-sheet UI must re-evaluate the trade-in value whenever the destination phone changes \u2014 the same trade-in model can be worth different amounts in different buckets (e.g., an iPhone 16 Plus is worth up to $1,200 in the Pixel bucket but only $900 in the Samsung bucket).",
     "samsung_new_line_with_trade_routes_to_900": "Samsung new-line with trade-in routes to tips_samsung_900. With no trade-in, routes to flat_samsung_500.",
     "upgrade_samsung_google_450_requires_trade": "On an upgrade, Samsung and Google devices get $450 ONLY when a trade-in is present (plus_up_upgrade_samsung_google_450, any plan, $450 + trade value). With no trade-in, a Samsung/Google upgrade falls back to anytime_upgrade_200 ($200, Plus/Premium). The $450 and $200 are alternatives \u2014 never stacked.",
     "upgrade_apple_motorola_200_always": "On an upgrade, Apple and Motorola devices get $200 regardless of trade-in: anytime_upgrade_200 with no trade (Plus/Premium), or plus_up_upgrade_apple_motorola_200 ($200 + trade value, any plan) when a trade is present.",
@@ -1971,7 +1971,6 @@ const PROMO_MATRIX = {
     "ipad_50_off_is_dpp_bill_credit": "The 'iPad 50% off' promo is actually $250 off the $499.99 MSRP delivered as $6.94/mo bill credits over a 36-month Tablet plan DPP, NOT a flat in-store discount. Customer who pays in full forfeits the discount. Requires new line activation on the Tablet plan."
   }
 };
-
 //  PROMO LOGIC CONSTANTS
 //  These drive the smart Samsung vs. non-Samsung
 //  discount calculation — update monthly as needed
@@ -12725,124 +12724,180 @@ function resetForm() {
 const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20441079/up242h1/';
 const APPS_SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
 
+// ── HARDENED SUBMIT (2026-06-03) ─────────────────────────────────
+// See Mobile-Quote-Sheet-6th-Gen handleSubmit for the full rationale.
+// Same three failure modes addressed here:
+//   1) Entire body wrapped in try/catch from the first line so a thrown
+//      runtime error during payload construction surfaces as an alert
+//      instead of a silent dead click.
+//   2) The outbox returns { delivered:true|false }; we now read it and
+//      only show ✅ on confirmed delivery. Pending/failed shows a
+//      truthful "Saved — will deliver when online" warning state.
+//   3) Refuses to send if window.__blufoxDeliver isn't ready instead of
+//      firing the CORS-broken fire-and-forget fallback that omitted the
+//      text/plain Content-Type the Apps Script doPost handler needs.
 async function handleSubmit() {
-  const repName   = document.getElementById('repName').value.trim();
-  const storeName = document.getElementById('storeName').value;
-  const customerName = document.getElementById('customerFirstName').value.trim();
-
-  if (!repName || !storeName) {
-    alert('Please fill in Your Name and Your Store before submitting.');
-    if (!repName) { document.getElementById('repName').style.border = '2px solid #e53935'; document.getElementById('repName').focus(); }
-    if (!storeName) document.getElementById('storeName').style.border = '2px solid #e53935';
-    return;
-  }
-
-  const phoneMonthly = state.phoneName && state.phonePrice > 0
-    ? (state.promoAmt > 0 ? (Math.max(0, state.phonePrice - state.promoAmt) / 36).toFixed(2) : (state.phonePrice / 36).toFixed(2))
-    : '0';
-  const watchMonthly = state.watchName && state.watchPrice > 0
-    ? ((Math.max(0, state.watchPrice - state.membershipDiscount) / 36) + 10).toFixed(2)
-    : '0';
-  const tabletMonthly = state.tabletName && state.tabletPrice > 0
-    ? ((getTabletNetPrice(state.tabletName, state.tabletPrice) / 36) + 20).toFixed(2)
-    : '0';
-  const bundleTotal = (parseFloat(phoneMonthly) + parseFloat(watchMonthly) + parseFloat(tabletMonthly)).toFixed(2);
-
-  const payload = {
-    customerFirstName:    customerName,
-    customerPhone:        (document.getElementById('customerPhone') || {}).value || '',
-    date:                 document.getElementById('todayDate').value,
-    currentPlan:          state.plan === 'premium' ? 'Unlimited Premium' : 'Unlimited Intro',
-    rewardTier:           state.tier,
-    repName,
-    storeName,
-    phoneName:            state.phoneName,
-    phonePrice:           state.phonePrice,
-    promoApplied:         state.promoAmt,
-    promoLabel:           state.promoAmt > 0
-      ? calcSmartPromo(state.phoneName, state.phonePrice, state.tradeValue,
-          (document.getElementById('phone-row-1-notrade') ? document.getElementById('phone-row-1-notrade').checked : false), state.plan).promoLabel
-      : 'None',
-    phoneNetCost:         Math.max(0, state.phonePrice - state.promoAmt),
-    phoneMonthlyPayment:  phoneMonthly,
-    tradeName:            state.tradeName,
-    tradeCondition:       state.tradeCondition,
-    tradeValue:           state.tradeValue,
-    watchName:            state.watchName,
-    watchPrice:           state.watchPrice,
-    membershipDiscount:   state.membershipDiscount,
-    watchMonthlyPayment:  watchMonthly,
-    tabletName:           state.tabletName,
-    tabletPrice:          state.tabletPrice,
-    tabletMonthlyPayment: tabletMonthly,
-    bundleTotalMonthly:   bundleTotal,
-    currentCoreBill:      state.currentCoreBill,
-    currentMobileBill:    state.currentMobileBill,
-    currentTotalBill:     (state.currentCoreBill + state.currentMobileBill).toFixed(2),
-    newCoreBill:          state.newCoreBill,
-    newMobileBill:        (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()).toFixed(2),
-    newTotalBill:         (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile())).toFixed(2),
-    monthlySavings:       Math.max(0, (state.currentCoreBill + state.currentMobileBill) - (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()))).toFixed(2),
-    soldOnSpot:           state.soldOnSpot,
-    notes:                document.getElementById('additionalNotes').value,
-    submittedAt:          new Date().toISOString(),
-  };
-
-  const btn = document.querySelector('.btn-submit');
-  const orig = btn.innerHTML;
-  btn.innerHTML = '⏳ Submitting...';
-  btn.disabled = true;
-
-  // Build a payload in the schema the Apps Script doPost handler expects
-  // so this submission lands in the same "Current Month" tab as the Mobile Quote Sheet.
-  const watchesCount = payload.watchName ? 1 : 0;
-  const tabletsCount = payload.tabletName ? 1 : 0;
-  const phonesCount  = payload.phoneName  ? 1 : 0;
-  const coreSavingsNum = Math.max(0, (state.currentCoreBill - state.newCoreBill)).toFixed(2);
-  const monthlySavingsNum = parseFloat(payload.monthlySavings) || 0;
-  const annualSavings = (monthlySavingsNum * 12).toFixed(2);
-  const appsScriptPayload = {
-    store:             payload.storeName,
-    rep_name:          payload.repName,
-    rep_email:         '',
-    rep_phone:         '',
-    customer_name:     payload.customerFirstName,
-    customer_phone:    payload.customerPhone,
-    membership_tier:   payload.rewardTier,
-    current_carrier:   'Xfinity Mobile',
-    lines:             '',
-    current_bill:      payload.currentTotalBill,
-    plan_selected:     payload.currentPlan,
-    core_bill_current: payload.currentCoreBill,
-    core_bill_after:   payload.newCoreBill,
-    core_savings:      coreSavingsNum,
-    watches:           watchesCount,
-    tablets:           tabletsCount,
-    xv_to_xm:          '',
-    monthly_savings:   payload.monthlySavings,
-    annual_savings:    annualSavings,
-    devices_only:      false,
-    device_count:      phonesCount + watchesCount + tabletsCount,
-  };
-
-  try {
-    // Durable delivery: persist locally first, then send with auto-retry (Blufox outbox).
-    const __deliver = window.__blufoxDeliver || function(o){ try{fetch(o.zapierUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(o.zapierPayload)});}catch(e){} try{fetch(o.appsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(o.appsPayload)});}catch(e){} return Promise.resolve({delivered:true}); };
-    await __deliver({ appsUrl: APPS_SCRIPT_URL, appsPayload: appsScriptPayload, zapierUrl: ZAPIER_WEBHOOK_URL, zapierPayload: payload });
-    btn.innerHTML = '✅ Submitted!';
-    btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
-    // Show "Submitted!" briefly, then reset the form to the start so the rep
-    // can build the next quote without refreshing the page.
-    setTimeout(() => {
-      btn.innerHTML = orig;
-      btn.style.background = '';
-      btn.disabled = false;
-      try { resetForm(); } catch(e) { console.error('resetForm failed:', e); }
-    }, 1500);
-  } catch(err) {
+  const btn  = document.querySelector('.btn-submit');
+  const orig = btn ? btn.innerHTML : '';
+  function resetBtn() {
+    if (!btn) return;
     btn.innerHTML = orig;
     btn.disabled = false;
-    alert('Submission failed.\n\nError: ' + err.message);
+    btn.style.background = '';
+  }
+  function elVal(id) {
+    const el = document.getElementById(id);
+    return el ? (el.value || '') : '';
+  }
+  try {
+    const repName      = elVal('repName').trim();
+    const storeName    = elVal('storeName');
+    const customerName = elVal('customerFirstName').trim();
+
+    if (!repName || !storeName) {
+      alert('Please fill in Your Name and Your Store before submitting.');
+      const repEl = document.getElementById('repName');
+      const stEl  = document.getElementById('storeName');
+      if (!repName && repEl) { repEl.style.border = '2px solid #e53935'; repEl.focus(); }
+      if (!storeName && stEl) stEl.style.border = '2px solid #e53935';
+      return;
+    }
+
+    // Immediate UI feedback so the rep knows the click registered.
+    if (btn) {
+      btn.innerHTML = '⏳ Submitting...';
+      btn.disabled = true;
+    }
+
+    const phoneMonthly = state.phoneName && state.phonePrice > 0
+      ? (state.promoAmt > 0 ? (Math.max(0, state.phonePrice - state.promoAmt) / 36).toFixed(2) : (state.phonePrice / 36).toFixed(2))
+      : '0';
+    const watchMonthly = state.watchName && state.watchPrice > 0
+      ? ((Math.max(0, state.watchPrice - state.membershipDiscount) / 36) + 10).toFixed(2)
+      : '0';
+    const tabletMonthly = state.tabletName && state.tabletPrice > 0
+      ? ((getTabletNetPrice(state.tabletName, state.tabletPrice) / 36) + 20).toFixed(2)
+      : '0';
+    const bundleTotal = (parseFloat(phoneMonthly) + parseFloat(watchMonthly) + parseFloat(tabletMonthly)).toFixed(2);
+
+    // Compute the promo label defensively — calcSmartPromo can throw on
+    // a malformed state, and we don't want a label fail to kill the submit.
+    let promoLabel = 'None';
+    if (state.promoAmt > 0) {
+      try {
+        const noTradeChk = document.getElementById('phone-row-1-notrade');
+        promoLabel = calcSmartPromo(
+          state.phoneName, state.phonePrice, state.tradeValue,
+          noTradeChk ? noTradeChk.checked : false, state.plan
+        ).promoLabel;
+      } catch (e) {
+        console.warn('[handleSubmit] calcSmartPromo failed, falling back to "Discount applied":', e);
+        promoLabel = 'Discount applied';
+      }
+    }
+
+    const payload = {
+      customerFirstName:    customerName,
+      customerPhone:        elVal('customerPhone'),
+      date:                 elVal('todayDate'),
+      currentPlan:          state.plan === 'premium' ? 'Unlimited Premium' : 'Unlimited Intro',
+      rewardTier:           state.tier,
+      repName,
+      storeName,
+      phoneName:            state.phoneName,
+      phonePrice:           state.phonePrice,
+      promoApplied:         state.promoAmt,
+      promoLabel,
+      phoneNetCost:         Math.max(0, state.phonePrice - state.promoAmt),
+      phoneMonthlyPayment:  phoneMonthly,
+      tradeName:            state.tradeName,
+      tradeCondition:       state.tradeCondition,
+      tradeValue:           state.tradeValue,
+      watchName:            state.watchName,
+      watchPrice:           state.watchPrice,
+      membershipDiscount:   state.membershipDiscount,
+      watchMonthlyPayment:  watchMonthly,
+      tabletName:           state.tabletName,
+      tabletPrice:          state.tabletPrice,
+      tabletMonthlyPayment: tabletMonthly,
+      bundleTotalMonthly:   bundleTotal,
+      currentCoreBill:      state.currentCoreBill,
+      currentMobileBill:    state.currentMobileBill,
+      currentTotalBill:     (state.currentCoreBill + state.currentMobileBill).toFixed(2),
+      newCoreBill:          state.newCoreBill,
+      newMobileBill:        (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()).toFixed(2),
+      newTotalBill:         (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile())).toFixed(2),
+      monthlySavings:       Math.max(0, (state.currentCoreBill + state.currentMobileBill) - (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()))).toFixed(2),
+      soldOnSpot:           state.soldOnSpot,
+      notes:                elVal('additionalNotes'),
+      submittedAt:          new Date().toISOString(),
+    };
+
+    // Build a payload in the schema the Apps Script doPost handler expects
+    // so this submission lands in the same "Current Month" tab as the Mobile Quote Sheet.
+    const watchesCount = payload.watchName ? 1 : 0;
+    const tabletsCount = payload.tabletName ? 1 : 0;
+    const phonesCount  = payload.phoneName  ? 1 : 0;
+    const coreSavingsNum = Math.max(0, (state.currentCoreBill - state.newCoreBill)).toFixed(2);
+    const monthlySavingsNum = parseFloat(payload.monthlySavings) || 0;
+    const annualSavings = (monthlySavingsNum * 12).toFixed(2);
+    const appsScriptPayload = {
+      store:             payload.storeName,
+      rep_name:          payload.repName,
+      rep_email:         '',
+      rep_phone:         '',
+      customer_name:     payload.customerFirstName,
+      customer_phone:    payload.customerPhone,
+      membership_tier:   payload.rewardTier,
+      current_carrier:   'Xfinity Mobile',
+      lines:             '',
+      current_bill:      payload.currentTotalBill,
+      plan_selected:     payload.currentPlan,
+      core_bill_current: payload.currentCoreBill,
+      core_bill_after:   payload.newCoreBill,
+      core_savings:      coreSavingsNum,
+      watches:           watchesCount,
+      tablets:           tabletsCount,
+      xv_to_xm:          '',
+      monthly_savings:   payload.monthlySavings,
+      annual_savings:    annualSavings,
+      devices_only:      false,
+      device_count:      phonesCount + watchesCount + tabletsCount,
+    };
+
+    if (typeof window.__blufoxDeliver !== 'function') {
+      throw new Error('Submission system not ready yet. Please refresh the page and try again — your work is safe.');
+    }
+    const result = await window.__blufoxDeliver({
+      appsUrl:       APPS_SCRIPT_URL,
+      appsPayload:   appsScriptPayload,
+      zapierUrl:     ZAPIER_WEBHOOK_URL,
+      zapierPayload: payload,
+    });
+    if (btn) {
+      if (result && result.delivered === true) {
+        btn.innerHTML = '✅ Submitted!';
+        btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
+        setTimeout(() => {
+          resetBtn();
+          try { resetForm(); } catch(e) { console.error('resetForm failed:', e); }
+        }, 1500);
+      } else {
+        btn.innerHTML = '✅ Saved — will deliver when online';
+        btn.style.background = 'linear-gradient(135deg, #FFB300, #FFA000)';
+        const pending = (typeof window.__blufoxOutboxPending === 'function')
+          ? window.__blufoxOutboxPending() : 0;
+        console.warn('[handleSubmit] outbox pending count:', pending);
+        setTimeout(() => {
+          resetBtn();
+          try { resetForm(); } catch(e) { console.error('resetForm failed:', e); }
+        }, 4000);
+      }
+    }
+  } catch(err) {
+    console.error('[handleSubmit] failed:', err);
+    resetBtn();
+    alert('Submission failed.\n\n' + (err && err.message ? err.message : err) + '\n\nYour quote was NOT saved. Please try again or refresh the page.');
   }
 }
 
@@ -13067,8 +13122,8 @@ document.addEventListener('DOMContentLoaded', function() {
 (function(){
   if (window.__blufoxOutboxReady) return; window.__blufoxOutboxReady = true;
   var KEY = 'blufox_outbox_v1';
-  var AWAIT_MS = 6000;       // how long a submit waits for confirmation before reloading
-  var COOLDOWN_MS = 15000;   // min gap before re-sending a still-pending item (avoids dupes)
+  var AWAIT_MS = 8000;       // how long a submit waits for confirmation (raised 2026-06-03 — 6s was cutting off slow connections too aggressively)
+  var COOLDOWN_MS = 5000;    // min gap before re-sending a still-pending item (lowered 2026-06-03 — 15s left stranded items waiting too long)
   function L(){ try { return window.localStorage; } catch(e){ return null; } }
   function load(){ try { return JSON.parse(L().getItem(KEY)) || []; } catch(e){ return []; } }
   function save(a){ try { L().setItem(KEY, JSON.stringify(a)); } catch(e){} }
@@ -13129,10 +13184,15 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   window.__blufoxOutboxPending = function(){ return load().length; };
 
-  // Retry triggers: shortly after load, when connectivity returns, and on a timer.
+  // Retry triggers: shortly after load, when connectivity returns, when
+  // the tab regains focus (rep reopens after a context switch), and on a
+  // timer.
   window.addEventListener('load', function(){ setTimeout(flushAll, 1500); });
   window.addEventListener('online', flushAll);
-  setInterval(flushAll, 20000);
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) flushAll();
+  });
+  setInterval(flushAll, 15000);
 })();
 </script>
 
