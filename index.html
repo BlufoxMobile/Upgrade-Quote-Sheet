@@ -10914,7 +10914,6 @@ const TIPS_PROMOS = {
     ]
   }
 };
-
 // Which TIPS promo applies for the new phone being purchased?
 function getTipsPromoForNewPhone(deviceName) {
   const name = (deviceName || '').toLowerCase();
@@ -11075,25 +11074,33 @@ function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
   function renderList(q) {
     var query = (q || '').trim().toLowerCase();
 
-    // ── Value search: query like "$450", "450", "$1,200", "1200" matches
-    // every dataset item whose `value` equals that number. Useful for the
-    // trade-in dropdown when reps want all phones worth a given amount.
+    // ── Search behavior (revised 2026-06-03):
+    // Name search ALWAYS runs first. Value search runs only as a fallback
+    // when no name matches AND the query is purely numeric. This fixes the
+    // bug where typing "17" returned an empty list because the autocomplete
+    // tried to find dataset items priced at $17 instead of phones named
+    // "iPhone 17". For explicit value searches that match the name of zero
+    // phones, this still works — e.g. "450" → name search finds no phone
+    // named "450" → falls through to value search → returns all $450 rows.
     var numericPart = query.replace(/[$,\s]/g, '');
     var isValueQuery = numericPart.length > 0 && /^\d+(\.\d+)?$/.test(numericPart);
 
     var matches;
     if (query.length === 0) {
       matches = dataset.slice(0, 60);
-    } else if (isValueQuery) {
-      var target = parseFloat(numericPart);
-      matches = dataset
-        .filter(function(d) { return d.value != null && Number(d.value) === target; })
-        .sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); })
-        .slice(0, 200);
     } else {
+      // 1) Always try name substring match first.
       matches = dataset
         .filter(function(d) { return d.name.toLowerCase().indexOf(query) !== -1; })
         .slice(0, 60);
+      // 2) Fall through to value search if numeric AND no name matches.
+      if (matches.length === 0 && isValueQuery) {
+        var target = parseFloat(numericPart);
+        matches = dataset
+          .filter(function(d) { return d.value != null && Number(d.value) === target; })
+          .sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); })
+          .slice(0, 200);
+      }
     }
     listEl.innerHTML = '';
     if (!matches.length) { listEl.classList.remove('open'); return; }
