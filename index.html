@@ -791,7 +791,7 @@
      ────────────────────────────────────────────────────────────────── */
   .upgrade-premium-toggle { display: none !important; }
 </style>
-<!-- PDF generation libs (used by handleSavePDF / handlePrint for iPad-friendly downloads) -->
+<!-- PDF generation libs (used by handleEmailPDF / handlePrint for iPad-friendly sharing & downloads) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
@@ -1360,7 +1360,7 @@
     <div class="preview-footer-disclaimer">Pricing is estimated. All prices subject to change. Taxes &amp; fees not included.</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-outline" onclick="showIntakePage()">← Back to Form</button>
-      <button class="btn btn-outline" onclick="handleSavePDF()">💾 Save as PDF</button>
+      <button class="btn btn-outline btn-footer-email" onclick="handleEmailPDF()">📧 Email PDF</button>
       <button class="btn btn-outline" onclick="handlePrint()">🖨 Print</button>
       <button class="btn btn-submit"  onclick="handleSubmit()">✅ Submit Quote</button>
     </div>
@@ -12455,11 +12455,21 @@ function handlePreview() { showPreviewPage(); }
 //  generate a real PDF and either download it or open it
 //  in a new tab where Safari's Share → Print works.
 // ══════════════════════════════════════════════════
-async function _buildUpgradePdf({ openInNewTab = false } = {}) {
+// ── REWORKED 2026-06-10 ──────────────────────────────────────────
+// The old version hid the live page's .no-print elements, injected the B&W
+// stylesheet into the LIVE document, and disabled EVERY footer button —
+// including Submit — while html2canvas rendered. On iPads the render can
+// take many seconds, and if Safari's canvas limits made it hang, the cleanup
+// never ran: Submit stayed dead until a refresh. This version applies all
+// capture styling inside html2canvas's cloned document (onclone) so the live
+// page is never touched, never disables Submit, caps the canvas under iPad
+// Safari's ~16.7M-pixel limit, and adds a 40 s watchdog. Supports
+// returnBlob:true so Email PDF can hand the file to the share sheet.
+async function _buildUpgradePdf({ openInNewTab = false, returnBlob = false } = {}) {
   const target = document.getElementById('previewPage');
   if (!target || !window.html2canvas || !window.jspdf) {
     alert('PDF library not loaded yet. Please wait a moment and try again.');
-    return;
+    return null;
   }
 
   // Make sure the preview is visible & up to date before capture
@@ -12468,24 +12478,15 @@ async function _buildUpgradePdf({ openInNewTab = false } = {}) {
   renderActivePromos();
   updateNotesPrint();
 
-  // Hide elements not meant for the printed copy (footer buttons etc.) during capture
-  const hiddenEls = [];
-  target.querySelectorAll('.no-print').forEach(el => {
-    hiddenEls.push([el, el.style.display]);
-    el.style.display = 'none';
-  });
-  const prevBodyOverflow = document.body.style.overflow;
-  document.body.style.overflow = 'visible';
-  // Disable the trigger buttons during generation
-  const allBtns = document.querySelectorAll('.preview-footer .btn');
+  // Disable ONLY the PDF trigger buttons (never Submit) to block double-taps.
+  const allBtns = document.querySelectorAll('.preview-footer .btn-outline, .preview-footer .btn-footer-email');
   const origLabels = [];
   allBtns.forEach(b => { origLabels.push([b, b.innerHTML, b.disabled]); b.disabled = true; });
 
   // B&W PDF mode — drop colors, use bold borders + type weight for structure.
   // Targeted at B&W printer output (Jeff's reps print on B&W hardware).
-  const captureCss = document.createElement('style');
-  captureCss.id = '__pdf_capture_css__';
-  captureCss.textContent = `
+  // NOTE: applied ONLY to html2canvas's cloned document — never the live page.
+  const captureCssText = `
     #previewPage, #previewPage * {
       color: #000000 !important;
       background: #ffffff !important;
@@ -12519,19 +12520,41 @@ async function _buildUpgradePdf({ openInNewTab = false } = {}) {
     #previewPage h1, #previewPage h2, #previewPage h3 { font-weight: 700 !important; }
     #previewPage em, #previewPage i { font-style: italic !important; }
   `;
-  document.head.appendChild(captureCss);
 
   try {
-    const canvas = await html2canvas(target, {
-      scale: 2.5,
+    const cssW = target.scrollWidth;
+    const cssH = target.scrollHeight;
+
+    // iPad Safari silently fails (or hangs) on canvases above ~16.7M pixels.
+    const MAX_CANVAS_AREA = 16777216; // = 4096 × 4096, safe on every iPad
+    const scale = Math.min(2.5, Math.sqrt(MAX_CANVAS_AREA / (cssW * cssH)));
+
+    const renderPromise = html2canvas(target, {
+      scale,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       letterRendering: true,
       logging: false,
-      windowWidth: target.scrollWidth,
-      windowHeight: target.scrollHeight,
+      windowWidth: cssW,
+      windowHeight: cssH,
+      onclone: (clonedDoc) => {
+        // Apply the B&W capture stylesheet to the CLONE only — the live
+        // page (and its footer buttons) is never modified.
+        const style = clonedDoc.createElement('style');
+        style.textContent = captureCssText;
+        clonedDoc.head.appendChild(style);
+        if (clonedDoc.body) clonedDoc.body.style.overflow = 'visible';
+      },
     });
+
+    // Watchdog — if Safari's renderer hangs, fail loudly and restore the
+    // buttons instead of leaving the rep with a dead footer.
+    const canvas = await Promise.race([
+      renderPromise,
+      new Promise((_, reject) => setTimeout(
+        () => reject(new Error('PDF generation timed out. Please try again.')), 40000)),
+    ]);
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
@@ -12560,21 +12583,23 @@ async function _buildUpgradePdf({ openInNewTab = false } = {}) {
     const filename = `Xfinity-Upgrade-Quote_${customer}_${datePart}.pdf`
       .replace(/[^A-Za-z0-9._-]/g, '_');
 
-    if (openInNewTab) {
+    if (returnBlob) {
+      // Caller (Email PDF) wants the raw file to hand to the share sheet.
+      return { blob: pdf.output('blob'), filename };
+    } else if (openInNewTab) {
       const blobUrl = pdf.output('bloburl');
       window.open(blobUrl, '_blank');
     } else {
       pdf.save(filename);
     }
+    return null;
   } catch (err) {
     console.error('PDF generation failed:', err);
     alert('PDF generation failed: ' + err.message);
+    return null;
   } finally {
-    hiddenEls.forEach(([el, d]) => { el.style.display = d; });
-    document.body.style.overflow = prevBodyOverflow;
+    // The live page was never modified — just re-enable the trigger buttons.
     origLabels.forEach(([b, label, disabled]) => { b.innerHTML = label; b.disabled = disabled; });
-    const tmp = document.getElementById('__pdf_capture_css__');
-    if (tmp) tmp.remove();
   }
 }
 
@@ -12592,9 +12617,84 @@ function _validateForExport() {
   return true;
 }
 
-function handleSavePDF() {
+// ── EMAIL PDF — opens the iPad share sheet with the quote PDF attached ──
+// Replaces "Save as PDF" (Jeff's request, 2026-06-10). Uses the Web Share API
+// so the rep picks Outlook / Gmail / Mail and the PDF is already attached.
+// Two-tap flow when needed: the browser only allows the share sheet to open
+// within a moment of a user tap, and PDF generation can take several seconds
+// on an iPad. The first tap generates + caches the PDF and TRIES to share
+// immediately; if the browser says the tap "expired", the button turns into
+// a green "📤 Tap to Send" and the second tap opens the share sheet instantly
+// from the cache. Falls back to download + pre-filled email on browsers
+// without file-share support.
+let _emailPdfCache = null; // { file, filename, ts }
+
+async function handleEmailPDF() {
+  const btn = document.querySelector('.btn-footer-email');
   if (!_validateForExport()) return;
-  _buildUpgradePdf({ openInNewTab: false });
+
+  // Second tap with a fresh cached PDF → open the share sheet right away.
+  if (_emailPdfCache && (Date.now() - _emailPdfCache.ts) < 120000) {
+    await _sharePdf(_emailPdfCache, btn);
+    return;
+  }
+  _emailPdfCache = null;
+
+  if (btn) btn.innerHTML = '⏳ Preparing…';
+  const result = await _buildUpgradePdf({ returnBlob: true });
+  if (btn) btn.innerHTML = '📧 Email PDF';
+  if (!result) return; // generation failed — _buildUpgradePdf already alerted
+
+  const file = new File([result.blob], result.filename, { type: 'application/pdf' });
+  _emailPdfCache = { file, filename: result.filename, ts: Date.now() };
+  await _sharePdf(_emailPdfCache, btn);
+}
+
+async function _sharePdf(cache, btn) {
+  const { file, filename } = cache;
+  const showTapToSend = () => {
+    if (btn) {
+      btn.innerHTML = '📤 Tap to Send';
+      btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
+    }
+  };
+  const resetEmailBtn = () => {
+    _emailPdfCache = null;
+    if (btn) { btn.innerHTML = '📧 Email PDF'; btn.style.background = ''; }
+  };
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Xfinity Upgrade Quote',
+        text: 'Your Xfinity upgrade quote is attached. Thank you!',
+      });
+      resetEmailBtn(); // shared successfully
+      return;
+    } catch (err) {
+      // AbortError: rep closed the share sheet — keep the cache for a re-tap.
+      // NotAllowedError: the tap "expired" during generation — ask for one more tap.
+      if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+        showTapToSend();
+        return;
+      }
+      console.error('Share failed, falling back to download:', err);
+    }
+  }
+
+  // Fallback (no Web Share file support): download the PDF and open a
+  // pre-filled email — the rep attaches the downloaded file manually.
+  resetEmailBtn();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  alert('This browser can\'t open the share sheet, so the PDF was downloaded instead.\n\nAttach it from Files/Downloads when your email opens.');
+  location.href = 'mailto:?subject=' + encodeURIComponent('Your Xfinity Upgrade Quote') +
+    '&body=' + encodeURIComponent('Hi,\n\nYour Xfinity upgrade quote is attached.\n\nThank you!');
 }
 
 function handlePrint() {
