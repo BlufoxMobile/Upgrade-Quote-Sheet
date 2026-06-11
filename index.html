@@ -1917,9 +1917,9 @@ const PROMO_MATRIX = {
     },
     {
       "tag": "smartwatch_300_platinum",
-      "active": true,
+      "active": false,
       "category": "membership_targeted",
-      "marketing_name": "Platinum members can get $300 off Apple, Samsung, and Google smartwatches",
+      "marketing_name": "Platinum members can get $300 off Apple, Samsung, and Google smartwatches (RETIRED 2026-06-06)",
       "discount_usd": 299.99,
       "discount_delivery": "applied equally over 36 months via bill credits",
       "line_type": "new_watch_line",
@@ -1939,8 +1939,8 @@ const PROMO_MATRIX = {
         "Google"
       ],
       "starts": "2026-06-03",
-      "ends": "2026-06-10",
-      "notes": "SHORT WINDOW: 8-day promo for Platinum members only (June 3-10). Distinct from the Diamond promo (smartwatch_300_diamond) which runs May 11-June 21. Same terms otherwise: $299.99 off as 36-month bill credits, $10/mo Smartwatch plan, new line, new device. OPERATIONAL: members must redeem their Xfinity Rewards before proceeding with the XM buy flow, and the offer code must be entered IN ALL CAPS during XM checkout to receive the discount."
+      "ends": "2026-06-06",
+      "notes": "RETIRED 2026-06-06 (was scheduled June 3\u201310, dropped early). Going forward, only Diamond members get the $300 watch discount via smartwatch_300_diamond. Kept with active:false for audit trail; do not route to this tag for quotes dated 2026-06-06 or later."
     },
     {
       "tag": "now_mobile_none",
@@ -1967,7 +1967,7 @@ const PROMO_MATRIX = {
     "upgrade_apple_motorola_200_always": "On an upgrade, Apple and Motorola devices get $200 regardless of trade-in: anytime_upgrade_200 with no trade (Plus/Premium), or plus_up_upgrade_apple_motorola_200 ($200 + trade value, any plan) when a trade is present.",
     "banner_fires_on_plan_and_line_counts": "The 'Current Promotions' panel must fire on plan + line counts in the cart, not on which specific device is selected.",
     "prepaid_mc_flat_200_no_stacking": "Effective 2026-06-03 through 2026-06-21: $200 Prepaid Mastercard for 2 new lines (one must be a new mobile phone line on Mobile Select or Mobile Plus; the second can be mobile/smartwatch/tablet on any data plan). Flat payout, does NOT stack with per-phone-on-DPP bonuses. No device or DPP requirement \u2014 BYOD/PIF/DPP all eligible. Big South Chicago qualifies as Retail. Both lines must be added same day and activated within 90 days.",
-    "smartwatch_300_promos_are_two_separate_deals": "There are TWO distinct smartwatch promos with DIFFERENT windows: (1) smartwatch_300_diamond runs May 11-June 21 for Diamond members; (2) smartwatch_300_platinum runs June 3-10 only (8 days) for Platinum members. They are not a single combined promo \u2014 eligibility AND timing differ. Quote sheet UI must check the customer's membership tier and the current date independently.",
+    "smartwatch_300_diamond_only": "As of 2026-06-06, the $300 smartwatch promo is Diamond-only via smartwatch_300_diamond (runs May 11\u2013June 21). The Platinum tier was briefly eligible June 3\u20136 via smartwatch_300_platinum but that promo was retired early; Platinum members no longer qualify. Quote sheet UI must NOT apply the watch discount to Platinum members.",
     "ipad_50_off_is_dpp_bill_credit": "The 'iPad 50% off' promo is actually $250 off the $499.99 MSRP delivered as $6.94/mo bill credits over a 36-month Tablet plan DPP, NOT a flat in-store discount. Customer who pays in full forfeits the discount. Requires new line activation on the Tablet plan."
   }
 };
@@ -11011,20 +11011,11 @@ function selectReward(btn) {
   document.getElementById('selectedTier').value = state.tier;
 
   // $300 smartwatch discount eligibility (per the xfinity-mobile-promotions skill matrix):
-  //   • smartwatch_300_diamond  — Diamond, May 11 – Jun 21 (full cycle)
-  //   • smartwatch_300_platinum — Platinum, Jun 3 – Jun 10 ONLY (8-day window)
-  // Both deliver the same $299.99 over 36-month DPP. The Platinum window is
-  // short, so we date-check it at runtime so the discount auto-disappears
-  // when the window closes — Diamond keeps applying through cycle end.
-  function isPromoActiveWindow(startISO, endISO) {
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const start = new Date(startISO + 'T00:00:00');
-    const end   = new Date(endISO   + 'T00:00:00');
-    return today >= start && today <= end;
-  }
-  const diamondWatchActive  = state.tier === 'diamond'  && isPromoActiveWindow('2026-05-11', '2026-06-21');
-  const platinumWatchActive = state.tier === 'platinum' && isPromoActiveWindow('2026-06-03', '2026-06-10');
-  const eligibleForWatchDiscount = diamondWatchActive || platinumWatchActive;
+  //   • smartwatch_300_diamond  — Diamond members ONLY, May 11 – Jun 21.
+  // Platinum was briefly eligible Jun 3–6 via the now-retired
+  // smartwatch_300_platinum promo; that branch was removed 2026-06-06 and
+  // Platinum members no longer qualify for any watch discount.
+  const eligibleForWatchDiscount = state.tier === 'diamond';
   state.membershipDiscount = eligibleForWatchDiscount ? 300 : 0;
   document.getElementById('selectedMembershipDiscount').value = state.membershipDiscount;
 
