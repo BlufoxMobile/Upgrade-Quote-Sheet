@@ -12548,24 +12548,29 @@ async function _buildUpgradePdf({ openInNewTab = false, returnBlob = false } = {
     ]);
 
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter' });
+    // compress:true (2026-06-11) — without it the embedded page images are
+    // stored raw and the PDF was too large to attach in Outlook/Gmail.
+    const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'letter', compress: true });
     const pageWidth  = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const imgWidth   = pageWidth;
     const imgHeight  = canvas.height * (imgWidth / canvas.width);
 
-    // Use PNG for max color fidelity (was JPEG which compresses gradients)
-    const imgData = canvas.toDataURL('image/png');
+    // JPEG instead of PNG (2026-06-11): the capture is B&W text on white
+    // (no gradients survive the B&W capture CSS), so JPEG at q0.85 is
+    // visually identical but ~10-20x smaller — keeps the PDF small enough
+    // to attach in Outlook/Gmail via Email PDF.
+    const imgData = canvas.toDataURL('image/jpeg', 0.85);
 
     // Multi-page slicing
     let position = 0;
     let remaining = imgHeight;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
     remaining -= pageHeight;
     while (remaining > 0) {
       position -= pageHeight;
       pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
       remaining -= pageHeight;
     }
 
