@@ -13057,6 +13057,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (storeEl && d.store) storeEl.value = d.store;
     if (phoneEl && d.phone) phoneEl.value = d.phone;
     if (emailEl && d.email) emailEl.value = d.email;
+    if (window.__syncRepEmailSelect) window.__syncRepEmailSelect();
     updatePreview();
   }
 
@@ -13408,6 +13409,87 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   try{ reorder(); }catch(e){}
   function boot(){ try{ reorder(); }catch(e){} setTimeout(go, 250); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
+<!-- BLUFOX_REP_EMAIL_DROPDOWN_V1 : store-aware rep email picker (auto-added) -->
+<script>
+(function(){
+  if (window.__BLUFOX_REPEMAIL__) return; window.__BLUFOX_REPEMAIL__ = true;
+  var CFG = { emailId:'repEmail', storeId:'storeName', fieldSel:'.intake-field', domain:'@blufoxmobile.com' };
+  var DIR = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/store-directory.json';
+  var TYPE = '__type__';
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function jget(u){ return fetch(u,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }
+
+  function init(){
+    var emailEl = document.getElementById(CFG.emailId);
+    var storeEl = document.getElementById(CFG.storeId);
+    if(!emailEl || document.getElementById('repEmailSelect')) return;
+    var field = (emailEl.closest && emailEl.closest(CFG.fieldSel)) || emailEl.parentNode;
+
+    var sel = document.createElement('select');
+    sel.id = 'repEmailSelect';
+    sel.setAttribute('autocomplete','email');
+    sel.innerHTML = '<option value="">— Select your email —</option>';
+    field.insertBefore(sel, emailEl);
+    emailEl.style.display = 'none';   // canonical value holder; shown only in type mode
+
+    var emails = [];          // directory emails (original case, de-duped)
+    var storeManagers = {};   // store -> manager email
+
+    function inList(v){ v=(v||'').toLowerCase(); for(var i=0;i<emails.length;i++){ if(emails[i].toLowerCase()===v) return emails[i]; } return null; }
+    function isBlank(v){ v=(v||'').trim().toLowerCase(); return !v || v===CFG.domain.toLowerCase(); }
+
+    function buildOptions(selVal){
+      var html = '<option value="">— Select your email —</option>';
+      emails.forEach(function(e){ html += '<option value="'+esc(e)+'"'+(selVal&&e.toLowerCase()===String(selVal).toLowerCase()?' selected':'')+'>'+esc(e)+'</option>'; });
+      html += '<option value="'+TYPE+'"'+(selVal===TYPE?' selected':'')+'>✏️ My email isn\'t listed — type it</option>';
+      sel.innerHTML = html;
+    }
+    function showType(focusIt){ emailEl.style.display=''; emailEl.style.marginTop='8px'; if(isBlank(emailEl.value)) emailEl.value=CFG.domain; if(focusIt){ try{ emailEl.focus(); }catch(e){} } }
+    function hideType(){ emailEl.style.display='none'; }
+    function fire(){ emailEl.dispatchEvent(new Event('input',{bubbles:true})); emailEl.dispatchEvent(new Event('change',{bubbles:true})); emailEl.dispatchEvent(new Event('blur',{bubbles:true})); }
+    function applyEmail(v){ emailEl.value=v; hideType(); fire(); }
+
+    function syncFromInput(){
+      var v = emailEl.value || '';
+      if(isBlank(v)){ buildOptions(''); hideType(); return; }
+      var m = inList(v);
+      if(m){ buildOptions(m); hideType(); } else { buildOptions(TYPE); showType(false); }
+    }
+    window.__syncRepEmailSelect = syncFromInput;
+
+    sel.addEventListener('change', function(){
+      var v = sel.value;
+      if(v===TYPE){ showType(true); }
+      else if(v===''){ applyEmail(''); }
+      else { applyEmail(v); }
+    });
+
+    function maybePrefillFromStore(){
+      if(!storeEl) return;
+      if(!isBlank(emailEl.value)) return;          // respect an existing choice
+      var mgr = storeManagers[storeEl.value];
+      if(mgr && inList(mgr)){ buildOptions(mgr); applyEmail(mgr); }
+    }
+    if(storeEl) storeEl.addEventListener('change', maybePrefillFromStore);
+
+    buildOptions(''); syncFromInput();
+
+    jget(DIR + '?d=' + new Date().toISOString().slice(0,10)).then(function(d){
+      var seen={}, out=[];
+      ((d&&d.managers)||[]).concat((d&&d.dms)||[]).forEach(function(e){ if(!e) return; var k=e.toLowerCase(); if(!seen[k]){ seen[k]=1; out.push(e); } });
+      out.sort(function(a,b){ return a.toLowerCase().localeCompare(b.toLowerCase()); });
+      emails = out;
+      storeManagers = (d&&d.storeManagers) || {};
+      syncFromInput();
+      maybePrefillFromStore();
+    }).catch(function(){ /* offline: type-it option still available */ });
+  }
+
+  function boot(){ setTimeout(init, 450); }   // after roster + persistence restore
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
