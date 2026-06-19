@@ -13413,7 +13413,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
-<!-- BLUFOX_REP_EMAIL_DROPDOWN_V1 : store-aware rep email picker (auto-added) -->
+<!-- BLUFOX_REP_EMAIL_DROPDOWN_V2 : store-filtered rep email picker (auto-added) -->
 <script>
 (function(){
   if (window.__BLUFOX_REPEMAIL__) return; window.__BLUFOX_REPEMAIL__ = true;
@@ -13432,20 +13432,28 @@ document.addEventListener('DOMContentLoaded', function() {
     var sel = document.createElement('select');
     sel.id = 'repEmailSelect';
     sel.setAttribute('autocomplete','email');
-    sel.innerHTML = '<option value="">— Select your email —</option>';
     field.insertBefore(sel, emailEl);
-    emailEl.style.display = 'none';   // canonical value holder; shown only in type mode
+    emailEl.style.display = 'none';   // canonical value holder; visible only in type mode
 
-    var emails = [];          // directory emails (original case, de-duped)
-    var storeManagers = {};   // store -> manager email
+    var byStore = {};   // store -> sorted unique email list (reps + manager + DM)
+    var loaded = false;
 
-    function inList(v){ v=(v||'').toLowerCase(); for(var i=0;i<emails.length;i++){ if(emails[i].toLowerCase()===v) return emails[i]; } return null; }
     function isBlank(v){ v=(v||'').trim().toLowerCase(); return !v || v===CFG.domain.toLowerCase(); }
+    function listFor(store){ return (store && byStore[store]) ? byStore[store] : []; }
+    function inList(store,v){ v=(v||'').toLowerCase(); var L=listFor(store); for(var i=0;i<L.length;i++){ if(L[i].toLowerCase()===v) return L[i]; } return null; }
+    function knownAnywhere(v){ var found=false; Object.keys(byStore).forEach(function(s){ if(inList(s,v)) found=true; }); return found; }
 
-    function buildOptions(selVal){
-      var html = '<option value="">— Select your email —</option>';
-      emails.forEach(function(e){ html += '<option value="'+esc(e)+'"'+(selVal&&e.toLowerCase()===String(selVal).toLowerCase()?' selected':'')+'>'+esc(e)+'</option>'; });
-      html += '<option value="'+TYPE+'"'+(selVal===TYPE?' selected':'')+'>✏️ My email isn\'t listed — type it</option>';
+    function buildOptions(){
+      var store = storeEl ? storeEl.value : '';
+      var cur = emailEl.value || '';
+      if(!store){ sel.innerHTML = '<option value="">— Select your store first —</option>'; sel.disabled = true; return; }
+      sel.disabled = false;
+      var L = listFor(store);
+      var matched = inList(store, cur);
+      var typeMode = (!isBlank(cur) && !matched);
+      var html = '<option value=""'+(isBlank(cur)?' selected':'')+'>— Select your email —</option>';
+      L.forEach(function(e){ html += '<option value="'+esc(e)+'"'+(matched&&e.toLowerCase()===cur.toLowerCase()?' selected':'')+'>'+esc(e)+'</option>'; });
+      html += '<option value="'+TYPE+'"'+(typeMode?' selected':'')+'>✏️ My email isn\'t listed — type it</option>';
       sel.innerHTML = html;
     }
     function showType(focusIt){ emailEl.style.display=''; emailEl.style.marginTop='8px'; if(isBlank(emailEl.value)) emailEl.value=CFG.domain; if(focusIt){ try{ emailEl.focus(); }catch(e){} } }
@@ -13453,11 +13461,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function fire(){ emailEl.dispatchEvent(new Event('input',{bubbles:true})); emailEl.dispatchEvent(new Event('change',{bubbles:true})); emailEl.dispatchEvent(new Event('blur',{bubbles:true})); }
     function applyEmail(v){ emailEl.value=v; hideType(); fire(); }
 
+    // Reflect select state for whatever #repEmail currently holds (rep-name autofill / restore)
     function syncFromInput(){
-      var v = emailEl.value || '';
-      if(isBlank(v)){ buildOptions(''); hideType(); return; }
-      var m = inList(v);
-      if(m){ buildOptions(m); hideType(); } else { buildOptions(TYPE); showType(false); }
+      buildOptions();
+      var store = storeEl ? storeEl.value : '';
+      var cur = emailEl.value || '';
+      if(!store || isBlank(cur)){ hideType(); return; }
+      if(inList(store,cur)){ hideType(); } else { showType(false); }
     }
     window.__syncRepEmailSelect = syncFromInput;
 
@@ -13468,28 +13478,35 @@ document.addEventListener('DOMContentLoaded', function() {
       else { applyEmail(v); }
     });
 
-    function maybePrefillFromStore(){
-      if(!storeEl) return;
-      if(!isBlank(emailEl.value)) return;          // respect an existing choice
-      var mgr = storeManagers[storeEl.value];
-      if(mgr && inList(mgr)){ buildOptions(mgr); applyEmail(mgr); }
-    }
-    if(storeEl) storeEl.addEventListener('change', maybePrefillFromStore);
+    // Store change: rebuild list. Keep a still-valid pick or a custom typed value;
+    // clear a leftover pick that belonged to the previous store.
+    if(storeEl) storeEl.addEventListener('change', function(){
+      var store = storeEl.value;
+      var cur = emailEl.value || '';
+      if(loaded && !isBlank(cur) && !inList(store,cur) && knownAnywhere(cur)){ applyEmail(''); }
+      syncFromInput();
+    });
 
-    buildOptions(''); syncFromInput();
+    buildOptions(); syncFromInput();
 
     jget(DIR + '?d=' + new Date().toISOString().slice(0,10)).then(function(d){
-      var seen={}, out=[];
-      ((d&&d.managers)||[]).concat((d&&d.dms)||[]).forEach(function(e){ if(!e) return; var k=e.toLowerCase(); if(!seen[k]){ seen[k]=1; out.push(e); } });
-      out.sort(function(a,b){ return a.toLowerCase().localeCompare(b.toLowerCase()); });
-      emails = out;
-      storeManagers = (d&&d.storeManagers) || {};
+      var emp = (d&&d.storeEmployees) || {};
+      var mgr = (d&&d.storeManagers) || {};
+      var dm  = (d&&d.storeDMs) || {};
+      var stores = {};
+      [emp,mgr,dm].forEach(function(o){ Object.keys(o).forEach(function(s){ stores[s]=1; }); });
+      Object.keys(stores).forEach(function(s){
+        var seen={}, out=[];
+        (emp[s]||[]).concat([mgr[s]],[dm[s]]).forEach(function(e){ if(!e) return; var k=String(e).toLowerCase(); if(!seen[k]){ seen[k]=1; out.push(e); } });
+        out.sort(function(a,b){ return a.toLowerCase().localeCompare(b.toLowerCase()); });
+        byStore[s]=out;
+      });
+      loaded = true;
       syncFromInput();
-      maybePrefillFromStore();
-    }).catch(function(){ /* offline: type-it option still available */ });
+    }).catch(function(){ loaded = true; /* offline: type-it remains usable once a store is chosen */ });
   }
 
-  function boot(){ setTimeout(init, 450); }   // after roster + persistence restore
+  function boot(){ setTimeout(init, 450); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
