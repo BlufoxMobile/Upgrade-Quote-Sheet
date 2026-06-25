@@ -202,6 +202,10 @@
   .auto-display-value{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--xfinity-purple);}
   .auto-badge{font-size:10px;font-weight:600;color:var(--text-muted);background:white;border:1px solid var(--border);border-radius:4px;padding:2px 7px;}
   .auto-display-sub{font-size:11px;color:var(--text-muted);margin-top:4px;}
+  /* Editable "New Mobile Bill" box with inline AUTO/MANUAL badge */
+  .bill-card-body .dollar-wrap-auto input{padding-right:74px;}
+  .dollar-wrap-auto .auto-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;}
+  .auto-badge.badge-manual{color:var(--xfinity-purple);border-color:var(--xfinity-purple-light);background:var(--surface-3);}
 
   /* RUNNING SAVINGS TALLY — fixed top banner (matches Mobile Quote Sheet design) */
   .savings-tally-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#12022a 0%,#2d0a5e 50%,#12022a 100%);border-bottom:2px solid rgba(150,80,255,0.4);box-shadow:0 4px 24px rgba(103,19,210,0.35);padding:10px 24px;display:flex;align-items:center;justify-content:center;transform:translateY(-100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);}
@@ -958,12 +962,9 @@
         </div>
         <div class="bill-card-arrow">↓ After Upgrade &amp; Bundle</div>
         <div class="bill-card-field">
-          <label class="bill-card-label">New Mobile Bill <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(auto)</span></label>
-          <div class="auto-display" id="newMobileAutoDisplay">
-            <div class="auto-display-row"><span class="auto-display-value" id="newMobileAutoValue">$— (add upgrade above)</span><span class="auto-badge">AUTO</span></div>
-            <div class="auto-display-sub" id="newMobileAutoSub"></div>
-          </div>
-
+          <label class="bill-card-label">New Mobile Bill <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(auto · editable)</span></label>
+          <div class="dollar-wrap dollar-wrap-auto"><span class="dollar-sign">$</span><input type="number" id="newMobileBill" placeholder="0.00" min="0" step="0.01" oninput="calcBillingComparison()"><span class="auto-badge" id="newMobileBadge">AUTO</span></div>
+          <div class="auto-display-sub" id="newMobileAutoSub"></div>
         </div>
       </div>
     </div>
@@ -1313,47 +1314,6 @@
 
   </div>
 
-  <!-- ══ PLAN FEATURE COMPARISON ══ -->
-  <div style="padding:0 36px 28px;">
-    <div class="preview-section-title">⚡ Why Unlimited Premium Is the Best Choice</div>
-
-    <div class="feat-table">
-      <!-- Intro LEFT, Premium RIGHT — mirrors every other section -->
-      <div class="feat-col feat-col-intro">
-        <div class="feat-col-hd feat-hd-intro">
-          <div style="font-size:22px;margin-bottom:4px;">📱</div>
-          <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:white;">Unlimited Intro</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:3px;">Upgrade to Premium for TIPS savings</div>
-        </div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">📶</div><div class="feat-big intro">30 GB</div><div class="feat-desc">Priority data — then reduced speeds</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">🎬</div><div class="feat-big intro">480p SD</div><div class="feat-desc">Standard definition only</div></div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">📡</div><div class="feat-big intro">Unlimited</div><div class="feat-desc">Hotspot — reduced speeds after 30 GB</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">🌎</div><div class="feat-big intro">Basic Pass</div><div class="feat-desc">Mexico &amp; Canada — no roaming data</div></div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">🛡️</div><div class="feat-big intro">❌</div><div class="feat-desc">No Call Guard protection</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">💰</div><div class="feat-big intro">❌ Not Eligible</div><div class="feat-desc">Cannot use TIPS trade-in promotions</div></div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">🛜</div><div class="feat-big intro">✅</div><div class="feat-desc">Auto-connects to 20M+ Xfinity WiFi hotspots</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">📋</div><div class="feat-big intro">No Contract</div><div class="feat-desc">Cancel anytime — no commitment</div></div>
-      </div>
-
-      <div class="feat-col feat-col-premium">
-        <div class="feat-col-hd feat-hd-premium">
-          <div style="font-size:22px;margin-bottom:4px;">✨</div>
-          <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:white;">Unlimited Premium</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px;">Recommended — TIPS eligible</div>
-        </div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">📶</div><div class="feat-big premium">100 GB</div><div class="feat-desc">Full-speed priority data</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">🎬</div><div class="feat-big premium">4K Ultra HD</div><div class="feat-desc">Crystal-clear video streaming</div></div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">📡</div><div class="feat-big premium">30 GB</div><div class="feat-desc">5G mobile hotspot</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">🌎</div><div class="feat-big premium">✅ Plus Pass</div><div class="feat-desc">Mexico &amp; Canada — talk, text &amp; data</div></div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">🛡️</div><div class="feat-big premium">✅</div><div class="feat-desc">Xfinity Call Guard — auto-blocks spam &amp; robocalls</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">💰</div><div class="feat-big premium">✅ TIPS Eligible</div><div class="feat-desc">Up to $830 / $900 off with trade-in</div></div>
-        <div class="feat-cell feat-alt"><div class="feat-emoji">🛜</div><div class="feat-big premium">✅</div><div class="feat-desc">Auto-connects to 20M+ Xfinity WiFi hotspots</div></div>
-        <div class="feat-cell">      <div class="feat-emoji">📋</div><div class="feat-big premium">No Contract</div><div class="feat-desc">Cancel anytime — no commitment</div></div>
-      </div>
-    </div>
-
-    <div style="margin-top:12px;font-size:10px;color:var(--text-muted);text-align:center;">Pricing is estimated. All prices subject to change. Taxes &amp; fees not included. Visit xfinity.com/mobile for current pricing.</div>
-  </div>
 
 </div>  <!-- ── PREVIEW FOOTER ── -->
   <div class="preview-footer no-print">
@@ -11843,8 +11803,12 @@ function calcBillingComparison() {
   state.currentMobileBill = _cme ? parseFloat(_cme.value) || 0 : 0;
   state.newCoreBill       = _nce ? parseFloat(_nce.value)       || 0 : 0;
 
-  const isOverride = false; // manual override removed — always use auto calculation
-  state.newMobileBillOverride = 0;
+  // Manual override: rep can type a custom New Mobile Bill (plan line). Blank = auto.
+  const _nmbEl  = document.getElementById('newMobileBill');
+  const _nmbRaw = _nmbEl ? String(_nmbEl.value).trim() : '';
+  const _nmbVal = _nmbRaw === '' ? 0 : (parseFloat(_nmbRaw) || 0);
+  const isOverride = _nmbVal > 0;
+  state.newMobileBillOverride = isOverride ? _nmbVal : 0;
 
   const standardUpgrade = getStandardUpgradeMonthly(); // full price ÷ 36, no discount
   const autoNewMobile   = getAutoNewMobile();          // current mobile + discounted upgrade + accessories
@@ -11856,31 +11820,29 @@ function calcBillingComparison() {
       ? `$${standardUpgrade.toFixed(2)}/mo`
       : '$— (select phone above)';
   }
-  const autoDisplay = document.getElementById('newMobileAutoValue');
-  if (autoDisplay) {
-    if (autoNewMobile > state.currentMobileBill) {
-      // Build a breakdown hint
-      const phonePart  = state.phonePrice > 0
-        ? ` + $${(Math.max(0, state.phonePrice - state.promoAmt) / 36).toFixed(2)} phone` : '';
-      const watchPart  = state.watchPrice > 0
-        ? ` + $${(Math.max(0, state.watchPrice - state.membershipDiscount) / 36 + 10).toFixed(2)} watch` : '';
-      const tabletPart = state.tabletPrice > 0
-        ? ` + $${(getTabletNetPrice(state.tabletName, state.tabletPrice) / 36 + 20).toFixed(2)} tablet` : '';
-      autoDisplay.textContent = `$${autoNewMobile.toFixed(2)}/mo`;
-      const subEl = document.getElementById('newMobileAutoSub');
-      if (subEl) subEl.textContent = `Current mobile $${state.currentMobileBill.toFixed(2)}${phonePart}${watchPart}${tabletPart}`;
+  // Sync the editable "New Mobile Bill" box: auto plan-line as placeholder,
+  // flip the badge AUTO/MANUAL, and describe the auto value beneath it.
+  const autoPlanLine = getNewMobilePlanLineAuto();
+  const nmbBadge = document.getElementById('newMobileBadge');
+  const nmbSub   = document.getElementById('newMobileAutoSub');
+  if (_nmbEl) _nmbEl.placeholder = autoPlanLine > 0 ? autoPlanLine.toFixed(2) : '0.00';
+  if (nmbBadge) {
+    nmbBadge.textContent = isOverride ? 'MANUAL' : 'AUTO';
+    nmbBadge.classList.toggle('badge-manual', isOverride);
+  }
+  if (nmbSub) {
+    if (isOverride) {
+      nmbSub.textContent = autoPlanLine > 0 ? `Auto would be $${autoPlanLine.toFixed(2)}/mo` : 'Manual price';
     } else {
-      autoDisplay.textContent = state.currentMobileBill > 0
-        ? `$${state.currentMobileBill.toFixed(2)}/mo (no upgrade selected)`
-        : '$— (enter current mobile bill above)';
-      const subEl = document.getElementById('newMobileAutoSub');
-      if (subEl) subEl.textContent = '';
+      const _up = getPlanUpgradeTotal();
+      nmbSub.textContent = autoPlanLine > 0
+        ? `Current mobile $${state.currentMobileBill.toFixed(2)}${_up > 0 ? ` + $${_up}/mo Premium upgrade(s)` : ''}`
+        : 'Auto-fills from current mobile bill';
     }
   }
 
-  const effectiveNewMobile = isOverride && state.newMobileBillOverride > 0
-    ? state.newMobileBillOverride
-    : autoNewMobile;
+  // Full new mobile bill = effective plan line (override or auto) + device financing
+  const effectiveNewMobile = getEffectiveNewMobileFull();
 
   // BEFORE: current core + current mobile + full upgrade (no discount)
   const beforeTotal = state.currentCoreBill + state.currentMobileBill + standardUpgrade;
@@ -11950,18 +11912,36 @@ function calcBillingComparison() {
   } catch(e) { console.warn('calcBillingComparison error:', e); }
 }
 
-// Helper: new Xfinity mobile bill — sums all phone rows with per-row premium
-function getAutoNewMobile() {
-  var phoneTotalMon    = 0;
-  var planUpgradeTotal = 0;
+// Helper: $10/mo Premium upgrade fee per phone line marked Premium
+function getPlanUpgradeTotal() {
+  var t = 0;
+  for (var i = 1; i <= phoneCounts; i++) {
+    var d = getRowData('phone', i);
+    if (d.price > 0 && (d.premium || state.plan === 'premium')) t += 10;
+  }
+  return t;
+}
+
+// Helper: AUTO new Xfinity Mobile LINE price (plan only — no device financing)
+function getNewMobilePlanLineAuto() {
+  return state.currentMobileBill + getPlanUpgradeTotal();
+}
+
+// Helper: EFFECTIVE new mobile line — manual override (typed New Mobile Bill) wins, else auto
+function getEffectiveNewMobileLine() {
+  return state.newMobileBillOverride > 0
+    ? state.newMobileBillOverride
+    : getNewMobilePlanLineAuto();
+}
+
+// Helper: monthly device financing (phones + watches + tablets) — shown as separate rows
+function getMobileDeviceFinancing() {
+  var phoneTotalMon = 0;
   for (var i = 1; i <= phoneCounts; i++) {
     var d = getRowData('phone', i);
     if (d.price > 0) {
-      var isPrem = d.premium || state.plan === 'premium';
       var res = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, 'premium');
       phoneTotalMon += Math.max(0, d.price - res.promoAmt) / 36;
-      // +$10/mo upgrade fee whenever the rep marked this line for Premium upgrade
-      if (isPrem) planUpgradeTotal += 10;
     }
   }
   // Sum all watch rows — cap $300 discount at first 5 watches
@@ -11977,8 +11957,17 @@ function getAutoNewMobile() {
     var td = getRowData('tablet', ti);
     if (td.price > 0) tabletTotalMon += getTabletNetPrice(td.name, td.price) / 36 + 20;
   }
+  return phoneTotalMon + watchTotalMon + tabletTotalMon;
+}
 
-  return state.currentMobileBill + planUpgradeTotal + phoneTotalMon + watchTotalMon + tabletTotalMon;
+// Helper: AUTO full new mobile bill (plan line + device financing) — drives the auto display
+function getAutoNewMobile() {
+  return getNewMobilePlanLineAuto() + getMobileDeviceFinancing();
+}
+
+// Helper: EFFECTIVE full new mobile bill (override-aware plan line + device financing)
+function getEffectiveNewMobileFull() {
+  return getEffectiveNewMobileLine() + getMobileDeviceFinancing();
 }
 
 // Helper: before-side upgrade — full price ÷ 36 for ALL phones (no discount)
@@ -12311,10 +12300,15 @@ function updatePreview() {
     const promoCore = newCore > 0 ? newCore : currentCore;
     safeText('bill-promoCore', promoCore > 0 ? `$${promoCore.toFixed(2)}/mo` : '—');
 
-    safeText('bill-promoMobile', currentMobile > 0 ? `$${(currentMobile + totalPlanUpgradeCost).toFixed(2)}/mo` : '—');
-    safeText('bill-right-mobileSub', totalPlanUpgradeCost > 0
-      ? `Unlimited Premium · +$${totalPlanUpgradeCost}/mo upgrade(s)`
-      : `Unlimited Premium`);
+    // Effective new mobile LINE price: manual override (New Mobile Bill box) wins over auto
+    const _nmbOverride = (function(){ var e = document.getElementById('newMobileBill'); if (!e) return 0; var v = String(e.value).trim(); return v === '' ? 0 : (parseFloat(v) || 0); })();
+    const effNewMobileLine = _nmbOverride > 0 ? _nmbOverride : (currentMobile + totalPlanUpgradeCost);
+    safeText('bill-promoMobile', (currentMobile > 0 || effNewMobileLine > 0) ? `$${effNewMobileLine.toFixed(2)}/mo` : '—');
+    safeText('bill-right-mobileSub', _nmbOverride > 0
+      ? `Xfinity Mobile · custom plan price`
+      : (totalPlanUpgradeCost > 0
+          ? `Unlimited Premium · +$${totalPlanUpgradeCost}/mo upgrade(s)`
+          : `Unlimited Premium`));
 
     if (hasAnyPhone) {
       safeDisplay('bill-right-phoneBlock', 'block');
@@ -12390,7 +12384,7 @@ function updatePreview() {
     }
 
     // Right total = rebundled core + new mobile line (with plan upgrades) + all phones TIPS monthly + all watches + all tablets
-    const newMobileLineAmt = currentMobile + totalPlanUpgradeCost;
+    const newMobileLineAmt = effNewMobileLine;
     const allTIPSMonthlyForTotal = allPhoneData.reduce(function(s, p) {
       return s + Math.max(0, p.d.price - p.d.promoAmt) / 36;
     }, 0);
@@ -12766,7 +12760,7 @@ function resetForm() {
     var FIELDS_TO_CLEAR = [
       'customerFirstName', 'customerPhone',
       'currentCoreBill',   'newCoreBill',
-      'currentMobileBill',
+      'currentMobileBill', 'newMobileBill',
       'additionalNotes',
     ];
     FIELDS_TO_CLEAR.forEach(function(id) {
@@ -12941,9 +12935,9 @@ async function handleSubmit() {
       currentMobileBill:    state.currentMobileBill,
       currentTotalBill:     (state.currentCoreBill + state.currentMobileBill).toFixed(2),
       newCoreBill:          state.newCoreBill,
-      newMobileBill:        (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()).toFixed(2),
-      newTotalBill:         (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile())).toFixed(2),
-      monthlySavings:       Math.max(0, (state.currentCoreBill + state.currentMobileBill) - (state.newCoreBill + (state.newMobileBillOverride > 0 ? state.newMobileBillOverride : getAutoNewMobile()))).toFixed(2),
+      newMobileBill:        getEffectiveNewMobileFull().toFixed(2),
+      newTotalBill:         (state.newCoreBill + getEffectiveNewMobileFull()).toFixed(2),
+      monthlySavings:       Math.max(0, (state.currentCoreBill + state.currentMobileBill) - (state.newCoreBill + getEffectiveNewMobileFull())).toFixed(2),
       soldOnSpot:           state.soldOnSpot,
       notes:                elVal('additionalNotes'),
       submittedAt:          new Date().toISOString(),
