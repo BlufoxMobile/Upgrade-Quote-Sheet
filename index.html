@@ -13317,7 +13317,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (window.__BLUFOX_ROSTER__) return; window.__BLUFOX_ROSTER__ = true;
   var CFG = {"storeId": "storeName", "repId": "repName", "repNameAttr": null, "fieldSel": ".intake-field", "shortStores": false, "lsStore": "bfx_lastStore", "lsRep": "bfx_lastRep", "onStoreChange": null, "onRepChange": null};
   var DIR='https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/store-directory.json';
+  var DIRP='https://blufoxmobile.github.io/Daily-Sales-Report/data/store-directory.json';
   var RST='https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/rep-roster.json';
+  var RSTP='https://blufoxmobile.github.io/Daily-Sales-Report/data/rep-roster.json';
   function L(){try{return window.localStorage}catch(e){return null}}
   function gL(k){var s=L();try{return s?s.getItem(k):null}catch(e){return null}}
   function sL(k,v){var s=L();try{if(s)s.setItem(k,v)}catch(e){}}
@@ -13380,7 +13382,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if(!ready){ repPlaceholder('— Loading names… —'); return; }
       if(!rosterLoaded){ repFree(); return; }              // data unreachable -> type exact name
       // repList guarantees "New Hire" + "DM or Director Submission" at the bottom.
-      repList((roster[toFull(sv)]||[]).slice());
+      repList((roster[toFull(sv)]||roster[sv]||[]).slice());
     }
     function fillStores(fullStores){
       var keep=storeSel.value;
@@ -13399,9 +13401,18 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshRep(); call(CFG.onStoreChange);
 
     var bust='?d='+new Date().toISOString().slice(0,10);
-    jget(DIR+bust).then(function(d){ if(d&&d.stores&&d.stores.length){ fillStores(d.stores); refreshRep(); call(CFG.onStoreChange); } }).catch(function(){});
-    jget(RST+bust).then(function(r){ roster=(r&&r.byStore)||{}; ready=true; rosterLoaded=true; refreshRep(); call(CFG.onStoreChange); })
-                  .catch(function(){ ready=true; refreshRep(); call(CFG.onStoreChange); });
+    function settle(p){ return p.then(function(v){ return v; }, function(){ return null; }); }
+    jget(DIR+bust).catch(function(){ return jget(DIRP+bust); })
+      .then(function(d){ if(d&&d.stores&&d.stores.length){ fillStores(d.stores); refreshRep(); call(CFG.onStoreChange); } }).catch(function(){});
+    // The roster lives in two places: the git copy (raw.githubusercontent) and the
+    // GitHub Pages deploy copy. A workflow hiccup can leave either one stale, so
+    // fetch both and keep whichever has the newest updatedAt stamp.
+    Promise.all([settle(jget(RST+bust)), settle(jget(RSTP+bust))]).then(function(rs){
+      var best=null;
+      rs.forEach(function(r){ if(r&&r.byStore&&(!best||String(r.updatedAt||'')>String(best.updatedAt||''))) best=r; });
+      if(best){ roster=best.byStore||{}; rosterLoaded=true; }
+      ready=true; refreshRep(); call(CFG.onStoreChange);
+    });
   }
   // Put Store before Rep so reps pick their store first (runs immediately, no flicker).
   function reorder(){
@@ -13426,6 +13437,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (window.__BLUFOX_REPEMAIL__) return; window.__BLUFOX_REPEMAIL__ = true;
   var CFG = { emailId:'repEmail', storeId:'storeName', fieldSel:'.intake-field', domain:'@blufoxmobile.com' };
   var DIR = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/store-directory.json';
+  var DIRP = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/store-directory.json';
   var TYPE = '__type__';
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function jget(u){ return fetch(u,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }
@@ -13496,7 +13508,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     buildOptions(); syncFromInput();
 
-    jget(DIR + '?d=' + new Date().toISOString().slice(0,10)).then(function(d){
+    var bust = '?d=' + new Date().toISOString().slice(0,10);
+    jget(DIR + bust).catch(function(){ return jget(DIRP + bust); }).then(function(d){
       var emp = (d&&d.storeEmployees) || {};
       var mgr = (d&&d.storeManagers) || {};
       var dm  = (d&&d.storeDMs) || {};
