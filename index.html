@@ -13517,7 +13517,7 @@ document.addEventListener('DOMContentLoaded', function() {
       [emp,mgr,dm].forEach(function(o){ Object.keys(o).forEach(function(s){ stores[s]=1; }); });
       Object.keys(stores).forEach(function(s){
         var seen={}, out=[];
-        (emp[s]||[]).concat([mgr[s]],[dm[s]]).forEach(function(e){ if(!e) return; var k=String(e).toLowerCase(); if(!seen[k]){ seen[k]=1; out.push(e); } });
+        (emp[s]||[]).map(function(e){ return (e && typeof e==='object') ? (e.email||'') : e; }).concat([mgr[s]],[dm[s]]).forEach(function(e){ if(!e) return; var k=String(e).toLowerCase(); if(!seen[k]){ seen[k]=1; out.push(e); } });
         out.sort(function(a,b){ return a.toLowerCase().localeCompare(b.toLowerCase()); });
         byStore[s]=out;
       });
