@@ -1360,47 +1360,50 @@
 // ══════════════════════════════════════════════════
 const PHONES = [
   // Apple
-  { name:"Apple iPhone 17 Pro Max", price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1399.99},{gb:"1TB",price:1599.99},{gb:"2TB",price:1999.99}] },
-  { name:"Apple iPhone 17 Pro",     price:1099.99, storage:[{gb:"256GB",price:1099.99},{gb:"512GB",price:1299.99},{gb:"1TB",price:1499.99}] },
-  { name:"Apple iPhone 17",         price: 829.99, storage:[{gb:"256GB",price:829.99},{gb:"512GB",price:1029.99}] },
-  { name:"Apple iPhone Air",        price: 999.99, storage:[{gb:"256GB",price:999.99},{gb:"512GB",price:1199.99},{gb:"1TB",price:1399.99}] },
-  { name:"Apple iPhone 17e",        price: 599.99, storage:[{gb:"256GB",price:599.99},{gb:"512GB",price:799.99}] },
-  { name:"Apple iPhone 16 Plus",    price: 829.99, storage:[{gb:"128GB",price:829.99}] },
-  { name:"Apple iPhone 16",         price: 729.99, storage:[{gb:"128GB",price:729.99}] },
-  { name:"Apple iPhone 16e",        price: 499.99, storage:[{gb:"128GB",price:499.99}] },
-  { name:"Apple iPhone 15",         price: 629.99, storage:[{gb:"128GB",price:629.99}] },
+  { name: "Apple iPhone 17 Pro Max", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 }, { gb: "1TB", price: 1599.99 }, { gb: "2TB", price: 1999.99 } ] },
+  { name: "Apple iPhone 17 Pro", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1299.99 }, { gb: "1TB", price: 1499.99 } ] },
+  { name: "Apple iPhone 17", price: 829.99, storage: [ { gb: "256GB", price: 829.99 }, { gb: "512GB", price: 1029.99 } ] },
+  { name: "Apple iPhone Air", price: 999.99, storage: [ { gb: "256GB", price: 999.99 }, { gb: "512GB", price: 1199.99 }, { gb: "1TB", price: 1399.99 } ] },
+  { name: "Apple iPhone 17e", price: 599.99, storage: [ { gb: "256GB", price: 599.99 }, { gb: "512GB", price: 799.99 } ] },
+  { name: "Apple iPhone 16", price: 729.99, storage: [ { gb: "128GB", price: 729.99 } ] },
+  { name: "Apple iPhone 16e", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Apple iPhone 15", price: 629.99, storage: [ { gb: "128GB", price: 629.99 } ] },
   // Samsung
-  { name:"Samsung Galaxy S26 Ultra",price:1299.99, storage:[{gb:"256GB",price:1299.99},{gb:"512GB",price:1499.99}] },
-  { name:"Samsung Galaxy S26+",     price:1099.99, storage:[{gb:"256GB",price:1099.99},{gb:"512GB",price:1299.99}] },
-  { name:"Samsung Galaxy S26",      price: 899.99, storage:[{gb:"256GB",price:899.99},{gb:"512GB",price:1099.99}] },
-  { name:"Samsung Galaxy Z Fold7",  price:1999.99, storage:[{gb:"256GB",price:1999.99},{gb:"512GB",price:2119.99}] },
-  { name:"Samsung Galaxy Z Flip7",  price:1099.99, storage:[{gb:"256GB",price:1099.99},{gb:"512GB",price:1219.99}] },
-  { name:"Samsung Galaxy Z Flip7 FE",price:899.99, storage:[{gb:"128GB",price:899.99},{gb:"256GB",price:959.99}] },
-  { name:"Samsung Galaxy S25 Ultra",price:1199.99, storage:[{gb:"256GB",price:1199.99}] },
-  { name:"Samsung Galaxy S25 Edge", price: 899.99, storage:[{gb:"256GB",price:899.99}] },
-  { name:"Samsung Galaxy S25",      price: 799.99, storage:[{gb:"128GB",price:799.99}] },
-  { name:"Samsung Galaxy S25 FE",   price: 649.99, storage:[{gb:"128GB",price:649.99}] },
-  { name:"Samsung Galaxy A37 5G",   price: 449.99, storage:[{gb:"128GB",price:449.99}] },
-  { name:"Samsung Galaxy A36 5G",   price: 399.99, storage:[{gb:"128GB",price:399.99}] },
-  { name:"Samsung Galaxy A26 5G",   price: 299.99, storage:[{gb:"128GB",price:299.99}] },
-  { name:"Samsung Galaxy A17 5G",   price: 199.99, storage:[{gb:"128GB",price:199.99}] },
-  { name:"Samsung Galaxy A16 5G",   price: 179.99, storage:[{gb:"128GB",price:179.99}] },
+  { name: "Samsung Galaxy Z Fold8 Ultra", price: 2099.99, storage: [ { gb: "256GB", price: 2099.99 }, { gb: "512GB", price: 2299.99 } ] },
+  { name: "Samsung Galaxy Z Fold8", price: 1899.99, storage: [ { gb: "256GB", price: 1899.99 }, { gb: "512GB", price: 2099.99 } ] },
+  { name: "Samsung Galaxy Z Flip8", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 } ] },
+  { name: "Samsung Galaxy S26 Ultra", price: 1299.99, storage: [ { gb: "256GB", price: 1299.99 }, { gb: "512GB", price: 1499.99 } ] },
+  { name: "Samsung Galaxy S26+", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1299.99 } ] },
+  { name: "Samsung Galaxy S26", price: 899.99, storage: [ { gb: "256GB", price: 899.99 }, { gb: "512GB", price: 1099.99 } ] },
+  { name: "Samsung Galaxy S25 Ultra", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 } ] },
+  { name: "Samsung Galaxy S25 Edge", price: 899.99, storage: [ { gb: "256GB", price: 899.99 } ] },
+  { name: "Samsung Galaxy S25 FE", price: 649.99, storage: [ { gb: "128GB", price: 649.99 } ] },
+  { name: "Samsung Galaxy S25", price: 799.99, storage: [ { gb: "128GB", price: 799.99 } ] },
+  { name: "Samsung Galaxy Z Fold7", price: 1999.99, storage: [ { gb: "256GB", price: 1999.99 }, { gb: "512GB", price: 2119.99 } ] },
+  { name: "Samsung Galaxy Z Flip7", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1219.99 } ] },
+  { name: "Samsung Galaxy Z Flip7 FE", price: 899.99, storage: [ { gb: "128GB", price: 899.99 } ] },
+  { name: "Samsung Galaxy A37 5G", price: 449.99, storage: [ { gb: "128GB", price: 449.99 } ] },
+  { name: "Samsung Galaxy A36 5G", price: 399.99, storage: [ { gb: "128GB", price: 399.99 } ] },
+  { name: "Samsung Galaxy A27 5G", price: 349.99, storage: [ { gb: "128GB", price: 349.99 } ] },
+  { name: "Samsung Galaxy A26 5G", price: 299.99, storage: [ { gb: "128GB", price: 299.99 } ] },
+  { name: "Samsung Galaxy A17 5G", price: 199.99, storage: [ { gb: "128GB", price: 199.99 } ] },
   // Google
-  { name:"Google Pixel 10 Pro Fold",price:1799.99, storage:[{gb:"256GB",price:1799.99},{gb:"512GB",price:1919.99}] },
-  { name:"Google Pixel 10 Pro XL",  price:1199.99, storage:[{gb:"256GB",price:1199.99},{gb:"512GB",price:1319.99}] },
-  { name:"Google Pixel 10 Pro",     price: 999.99, storage:[{gb:"128GB",price:999.99},{gb:"256GB",price:1099.99}] },
-  { name:"Google Pixel 10",         price: 649.99, storage:[{gb:"128GB",price:649.99},{gb:"256GB",price:749.99}] },
-  { name:"Google Pixel 10a",        price: 499.99, storage:[{gb:"128GB",price:499.99}] },
-  { name:"Google Pixel 9",          price: 799.99, storage:[{gb:"128GB",price:799.99}] },
-  { name:"Google Pixel 9a",         price: 499.99, storage:[{gb:"128GB",price:499.99}] },
+  { name: "Google Pixel 10 Pro XL", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 } ] },
+  { name: "Google Pixel 10 Pro", price: 999.99, storage: [ { gb: "128GB", price: 999.99 }, { gb: "256GB", price: 1099.99 } ] },
+  { name: "Google Pixel 10 Pro Fold", price: 1799.99, storage: [ { gb: "256GB", price: 1799.99 }, { gb: "512GB", price: 1919.99 } ] },
+  { name: "Google Pixel 10", price: 799.99, storage: [ { gb: "128GB", price: 799.99 }, { gb: "256GB", price: 899.99 } ] },
+  { name: "Google Pixel 10a", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Google Pixel 9", price: 799.99, storage: [ { gb: "128GB", price: 799.99 } ] },
+  { name: "Google Pixel 9a", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
   // Motorola
-  { name:"Motorola razr - 2026",    price: 699.99, storage:[{gb:"128GB",price:699.99}] },
-  { name:"Motorola razr - 2025",    price: 599.99, storage:[{gb:"256GB",price:599.99}] },
-  { name:"Motorola moto g stylus - 2026", price: 499.99, storage:[{gb:"128GB",price:499.99}] },
-  { name:"Motorola edge",           price: 399.99, storage:[{gb:"256GB",price:399.99}] },
-  { name:"Motorola moto g stylus - 2025", price: 289.99, storage:[{gb:"128GB",price:289.99}] },
-  { name:"Motorola moto g - 2026",  price: 249.99, storage:[{gb:"128GB",price:249.99}] },
-  { name:"Motorola moto g play - 2026", price: 179.99, storage:[{gb:"64GB", price:179.99}] },
+  { name: "Motorola razr - 2026", price: 699.99, storage: [ { gb: "128GB", price: 699.99 } ] },
+  { name: "Motorola razr - 2025", price: 599.99, storage: [ { gb: "256GB", price: 599.99 } ] },
+  { name: "Motorola edge - 2026", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Motorola edge", price: 399.99, storage: [ { gb: "256GB", price: 399.99 } ] },
+  { name: "Motorola moto g stylus - 2026", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
+  { name: "Motorola moto g stylus - 2025", price: 289.99, storage: [ { gb: "128GB", price: 289.99 } ] },
+  { name: "Motorola moto g - 2026", price: 249.99, storage: [ { gb: "128GB", price: 249.99 } ] },
+  { name: "Motorola moto g play - 2026", price: 179.99, storage: [ { gb: "64GB", price: 179.99 } ] },
 ];
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1423,7 +1426,8 @@ const PHONES = [
 //  any discounts."
 // ══════════════════════════════════════════════════════════════════════
 const AUTO_DISCOUNT_PHONES = {
-  // $200 off — Apple iPhones (15 family, 16/16e/16 Plus, Air, 17 family) + select Motorola
+  // Re-keyed 2026-07-22 from DEALS18. $200 off — Apple + Motorola + Google Pixel
+  // (Google moved from the old $450 tier to $200 this cycle).
   200: [
     'Apple iPhone 15',
     'Apple iPhone 15 Plus',
@@ -1451,9 +1455,20 @@ const AUTO_DISCOUNT_PHONES = {
     'Motorola moto g stylus - 2025',
     'Motorola moto g - 2026',
     'Motorola moto g play - 2026',
+    'Google Pixel 9',
+    'Google Pixel 10',
+    'Google Pixel 10 Pro',
+    'Google Pixel 10 Pro XL',
+    'Google Pixel 10 Pro Fold',
+    'Google Pixel 9a',
+    'Google Pixel 10a',
   ],
-  // $450 off — Samsung Galaxy A/S/Z + Google Pixel 9/10 series
-  450: [
+  // $600 off — Samsung Galaxy A/S/Z (Upgrade Anytime $600 no-trade; Plus Up $600 + trade)
+  600: [
+    'Samsung Galaxy Z Fold8 Ultra',
+    'Samsung Galaxy Z Fold8',
+    'Samsung Galaxy Z Flip8',
+    'Samsung Galaxy A27',
     'Samsung Galaxy A16',
     'Samsung Galaxy A17',
     'Samsung Galaxy A26',
@@ -1470,13 +1485,6 @@ const AUTO_DISCOUNT_PHONES = {
     'Samsung Galaxy S26',
     'Samsung Galaxy S26+',
     'Samsung Galaxy S26 Ultra',
-    'Google Pixel 9',
-    'Google Pixel 10',
-    'Google Pixel 10 Pro',
-    'Google Pixel 10 Pro XL',
-    'Google Pixel 10 Pro Fold',
-    'Google Pixel 9a',
-    'Google Pixel 10a',
   ],
 };
 
@@ -1972,10 +1980,10 @@ const IPHONE17E_PRICE_799  = 799.99;
 //  ──────────────────────────────────────────────────────────────────────
 //  Total discount = AUTO-DISCOUNT  +  TRADE-IN VALUE
 //
-//  • Apple iPhone / Motorola list → $200, applied with OR without a trade-in.
-//  • Samsung Galaxy / Google Pixel list → $450, but ONLY when a trade-in is
-//    present. With no trade-in, those devices fall back to the flat $200.
-//    (The $450 and $200 are alternatives — they are never stacked.)
+//  • Apple / Google / Motorola list → $200, applied with OR without a trade-in.
+//  • Samsung Galaxy list → $600, applied with OR without a trade-in
+//    (Upgrade Anytime $600 no-trade; Plus Up $600 on top of trade value).
+//    Google moved to the $200 tier this cycle (DEALS18 2026-07-22).
 //  • Off-list phones get $0 discount.
 //  • TRADE-IN VALUE (from the Xfinity portal) is added on top of whichever
 //    auto-discount applies, via the button to the left of the input.
@@ -1992,13 +2000,10 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
   var tradeRaw = noTrade ? 0 : (parseFloat(tradeValue) || 0);
   if (tradeRaw < 0) tradeRaw = 0;
 
-  // The $450 tier (Samsung Galaxy / Google Pixel) requires a trade-in.
-  // With NO trade-in, those devices fall back to the flat $200 anytime-upgrade
-  // discount. Apple/Motorola devices always get $200 (trade or no trade).
-  // The $450 and $200 are alternatives — never stacked.
-  if (autoDiscount === 450 && tradeRaw <= 0) {
-    autoDiscount = 200;
-  }
+  // DEALS18 (2026-07-22): Samsung upgrades are $600 with OR without a trade-in
+  // (Upgrade Anytime $600 no-trade; Plus Up $600 on top of trade value).
+  // Apple/Google/Motorola are $200 either way (+ trade value via Plus Up when
+  // present). No trade-gated fallback anymore.
 
   var promoAmt = Math.min(autoDiscount + tradeRaw, phonePrice);
   var promoLabel = (tradeRaw > 0)
@@ -2022,6 +2027,9 @@ function getTabletDiscount(name, price) {
   var isIpadA16 = n.includes('ipad') && n.includes('(a16)');
   if (isIpadA16) {
     return { amount: price * 0.5, label: '50% off iPad (A16)', applies: true };
+  }
+  if (n.includes('galaxy tab a11')) {
+    return { amount: price * 0.5, label: '50% off Galaxy Tab A11+', applies: true };
   }
   return { amount: 0, label: '', applies: false };
 }
