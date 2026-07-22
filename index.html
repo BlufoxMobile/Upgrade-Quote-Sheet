@@ -1558,7 +1558,7 @@ const PROMO_MATRIX = {
       ],
       "values_source": "xfinity-tips-promotions:promo-830-apple-google-motorola.json",
       "ends": "2026-06-21",
-      "notes": "RETIRED 2026-06-23. The DEALS18 'Mobile deals' refresh defines only two new-line-with-trade TIPS tiers this cycle: $900 Samsung (tips_samsung_900) and $830 Apple/Google/Motorola (tips_nonsam_830). There is no $1,200 (or $1,000) Pixel bucket. The DEALS94 trade-in value tables also cap at $900 — Pixel 10 Pro XL and Pixel 10 Pro Fold top out at $900. ALL Google Pixel devices, including Pixel 10 Pro XL and Pixel 10 Pro Fold, now route to tips_nonsam_830. Kept with active:false for audit trail; do not route to this tag."
+      "notes": "RETIRED 2026-06-23. The DEALS18 'Mobile deals' refresh defines only two new-line-with-trade TIPS tiers this cycle: $900 Samsung (tips_samsung_1000) and $830 Apple/Google/Motorola (tips_nonsam_830). There is no $1,200 (or $1,000) Pixel bucket. The DEALS94 trade-in value tables also cap at $900 — Pixel 10 Pro XL and Pixel 10 Pro Fold top out at $900. ALL Google Pixel devices, including Pixel 10 Pro XL and Pixel 10 Pro Fold, now route to tips_nonsam_830. Kept with active:false for audit trail; do not route to this tag."
     },
     {
       "tag": "tips_pixel_1000",
@@ -1584,7 +1584,7 @@ const PROMO_MATRIX = {
       "notes": "RETIRED / never a distinct promo. As of the 2026-06-23 cycle there is no separate Pixel bucket at all — every Pixel routes to tips_nonsam_830 ($830). Kept with active:false for audit trail; do not route to this tag."
     },
     {
-      "tag": "tips_samsung_900",
+      "tag": "tips_samsung_1000",
       "active": true,
       "category": "new_line_with_trade",
       "marketing_name": "Up to $900 off select Samsung",
@@ -1932,8 +1932,8 @@ const PROMO_MATRIX = {
     "upgrade_with_trade_prefer_plus_up": "If the customer is upgrading and has a trade-in, PLUS UP is the default since it works on any plan and stacks the bonus on top of trade value.",
     "upgrade_no_trade_requires_plus_or_premium": "anytime_upgrade_200 is only available on Plus or Premium Unlimited. Customers on Select with no trade-in have no current upgrade device promo.",
     "pixel_all_route_to_830": "As of 2026-06-23 there is NO $1,200 (or $1,000) Pixel bucket. ALL Google Pixel devices — including Pixel 10 Pro XL and Pixel 10 Pro Fold — route to tips_nonsam_830 ($830 bucket) on a new line with trade-in. tips_pixel_1200 and tips_pixel_1000 are both retired (active:false). The DEALS94 trade-in value tables confirm this: every Pixel, including Pro XL and Pro Fold, caps at $900 trade value.",
-    "tips_routing_by_destination_phone": "TIPS bucket selection is keyed on the new phone the customer is BUYING, not the phone they're trading in. A Samsung purchase routes to tips_samsung_900 (up to $900); an Apple/Google/Motorola purchase routes to tips_nonsam_830 (up to $830). Quote-sheet UI must re-evaluate the trade-in value whenever the destination phone changes — the same trade-in model can be worth a different amount in the $900 Samsung bucket vs. the $830 Apple/Google/Motorola bucket.",
-    "samsung_new_line_with_trade_routes_to_900": "Samsung new-line with trade-in routes to tips_samsung_900. With no trade-in, routes to flat_samsung_500.",
+    "tips_routing_by_destination_phone": "TIPS bucket selection is keyed on the new phone the customer is BUYING, not the phone they're trading in. A Samsung purchase routes to tips_samsung_1000 (up to $900); an Apple/Google/Motorola purchase routes to tips_nonsam_830 (up to $830). Quote-sheet UI must re-evaluate the trade-in value whenever the destination phone changes — the same trade-in model can be worth a different amount in the $900 Samsung bucket vs. the $830 Apple/Google/Motorola bucket.",
+    "samsung_new_line_with_trade_routes_to_900": "Samsung new-line with trade-in routes to tips_samsung_1000. With no trade-in, routes to flat_samsung_500.",
     "upgrade_samsung_google_450_requires_trade": "On an upgrade, Samsung and Google devices get $450 ONLY when a trade-in is present (plus_up_upgrade_samsung_google_450, any plan, $450 + trade value). With no trade-in, a Samsung/Google upgrade falls back to anytime_upgrade_200 ($200, Plus/Premium). The $450 and $200 are alternatives — never stacked.",
     "upgrade_apple_motorola_200_always": "On an upgrade, Apple and Motorola devices get $200 regardless of trade-in: anytime_upgrade_200 with no trade (Plus/Premium), or plus_up_upgrade_apple_motorola_200 ($200 + trade value, any plan) when a trade is present.",
     "plus_up_window_opens_06_22": "Both PLUS UP deals run June 22 – July 21, 2026 and are sellable in XM360 as of 2026-06-23. The Samsung/Google bonus is $450 (an earlier $400 figure was a typo).",
@@ -2035,7 +2035,7 @@ function getTabletNetPrice(name, price) {
 // Three current TIPS promos, each keyed by the NEW phone being purchased:
 //   tips_nonsam_830  → select Apple, Google, Motorola devices  (up to $830)
 //                      (includes ALL Pixel models — Pro XL & Fold included)
-//   tips_samsung_900 → select Samsung devices                  (up to $900)
+//   tips_samsung_1000 → select Samsung devices                  (up to $1,000)
 //   (tips_pixel_1200 $1,200 Pixel bucket RETIRED 2026-06-23)
 // ══════════════════════════════════════════════════════════════════
 const TIPS_PROMOS = {
@@ -2044,11 +2044,11 @@ const TIPS_PROMOS = {
     "promo_title": "Up to $830 off select Apple, Google, Motorola",
     "max_value": 830,
     "timing": {
-      "start": "2026-05-11",
-      "end": "2026-07-21"
+      "start": "2026-07-22",
+      "end": "2026-08-25"
     },
     "applies_to_new_purchase": [
-      "Select new Apple, Google, and Motorola devices (see Xfinity carrier portal for current eligible list)"
+      "Select new Apple, Google, and Motorola devices (new lines) \u2014 see Xfinity carrier portal for current eligible list"
     ],
     "delivery": "36-month DPP bill credits",
     "trade_ins": [
@@ -2083,30 +2083,30 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 11 Pro Max",
+        "condition": "Good",
+        "tier": 4,
+        "value": 500
+      },
+      {
+        "model": "Apple iPhone 11 Pro Max",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 11 Pro Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 11 Pro",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Apple iPhone 12",
         "condition": "Good",
         "tier": 4,
@@ -2115,12 +2115,6 @@ const TIPS_PROMOS = {
       {
         "model": "Apple iPhone 12",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -2143,6 +2137,12 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 12",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 12 Pro",
         "condition": "Good",
         "tier": 4,
@@ -2151,12 +2151,6 @@ const TIPS_PROMOS = {
       {
         "model": "Apple iPhone 12 Pro",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Pro",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -2179,24 +2173,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Apple iPhone 13",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 13",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13",
+        "model": "Apple iPhone 12 Pro",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
+        "model": "Apple iPhone 13",
+        "condition": "Good",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Apple iPhone 13",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 13 Mini",
         "condition": "Good",
         "tier": 3,
@@ -2210,6 +2204,12 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Apple iPhone 13 Mini",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 13",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -2227,12 +2227,6 @@ const TIPS_PROMOS = {
         "value": 500
       },
       {
-        "model": "Apple iPhone 13 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Apple iPhone 13 Pro Max",
         "condition": "Good",
         "tier": 2,
@@ -2251,6 +2245,12 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 13 Pro",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 14",
         "condition": "Good",
         "tier": 3,
@@ -2263,61 +2263,61 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 14 PLUS",
+        "condition": "Good",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Apple iPhone 14 PLUS",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 14 PLUS",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 14",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone 14 Plus",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 14 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 Pro",
+        "model": "Apple iPhone 14 PRO",
         "condition": "Good",
         "tier": 2,
         "value": 700
       },
       {
-        "model": "Apple iPhone 14 Pro",
+        "model": "Apple iPhone 14 PRO",
         "condition": "Fair",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Apple iPhone 14 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 Pro Max",
+        "model": "Apple iPhone 14 PRO MAX",
         "condition": "Good",
         "tier": 2,
         "value": 700
       },
       {
-        "model": "Apple iPhone 14 Pro Max",
+        "model": "Apple iPhone 14 PRO MAX",
         "condition": "Fair",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Apple iPhone 14 Pro Max",
+        "model": "Apple iPhone 14 PRO MAX",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 14 PRO",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -2335,61 +2335,61 @@ const TIPS_PROMOS = {
         "value": 600
       },
       {
+        "model": "Apple iPhone 15 PLUS",
+        "condition": "Good",
+        "tier": 2,
+        "value": 700
+      },
+      {
+        "model": "Apple iPhone 15 PLUS",
+        "condition": "Fair",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Apple iPhone 15 PLUS",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 15",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone 15 Plus",
+        "model": "Apple iPhone 15 PRO",
         "condition": "Good",
-        "tier": 2,
-        "value": 700
+        "tier": 1,
+        "value": 830
       },
       {
-        "model": "Apple iPhone 15 Plus",
+        "model": "Apple iPhone 15 PRO",
         "condition": "Fair",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Apple iPhone 15 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15 Pro",
+        "model": "Apple iPhone 15 PRO MAX",
         "condition": "Good",
         "tier": 1,
         "value": 830
       },
       {
-        "model": "Apple iPhone 15 Pro",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 15 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15 Pro Max",
-        "condition": "Good",
-        "tier": 1,
-        "value": 830
-      },
-      {
-        "model": "Apple iPhone 15 Pro Max",
+        "model": "Apple iPhone 15 PRO MAX",
         "condition": "Fair",
         "tier": 2,
         "value": 700
       },
       {
-        "model": "Apple iPhone 15 Pro Max",
+        "model": "Apple iPhone 15 PRO MAX",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 15 PRO",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -2405,12 +2405,6 @@ const TIPS_PROMOS = {
         "condition": "Fair",
         "tier": 2,
         "value": 700
-      },
-      {
-        "model": "Apple iPhone 16",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
       },
       {
         "model": "Apple iPhone 16 Plus",
@@ -2431,6 +2425,12 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 16",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 16 Pro",
         "condition": "Good",
         "tier": 1,
@@ -2443,12 +2443,6 @@ const TIPS_PROMOS = {
         "value": 700
       },
       {
-        "model": "Apple iPhone 16 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Apple iPhone 16 Pro Max",
         "condition": "Good",
         "tier": 1,
@@ -2462,6 +2456,12 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Apple iPhone 16 Pro Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 16 Pro",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -2515,25 +2515,43 @@ const TIPS_PROMOS = {
         "value": 830
       },
       {
+        "model": "Apple iPhone 17 Pro Max",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Apple iPhone 17 Pro Max",
+        "condition": "Fair",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Apple iPhone 17 Pro Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 17 Pro",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone 17 Pro Max",
+        "model": "Apple iPhone 17e",
         "condition": "Good",
         "tier": 1,
         "value": 830
       },
       {
-        "model": "Apple iPhone 17 Pro Max",
+        "model": "Apple iPhone 17e",
         "condition": "Fair",
-        "tier": 1,
-        "value": 830
+        "tier": 3,
+        "value": 600
       },
       {
-        "model": "Apple iPhone 17 Pro Max",
+        "model": "Apple iPhone 17e",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -2547,12 +2565,6 @@ const TIPS_PROMOS = {
       {
         "model": "Apple iPhone 7",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -2575,24 +2587,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Apple iPhone 8",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8",
+        "model": "Apple iPhone 7",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
+        "model": "Apple iPhone 8",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 8",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 8 PLUS",
         "condition": "Good",
         "tier": 5,
@@ -2606,6 +2618,12 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Apple iPhone 8 PLUS",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 8",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -2713,30 +2731,30 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone XS Max",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone XS Max",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone XS Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone XS",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone XS Max",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS Max",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Google Pixel 10 5G",
         "condition": "Good",
         "tier": 2,
@@ -2773,19 +2791,19 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Google Pixel 10 Pro Fold",
+        "model": "Google Pixel 10 Pro Fold 5G",
         "condition": "Good",
         "tier": 1,
         "value": 830
       },
       {
-        "model": "Google Pixel 10 Pro Fold",
+        "model": "Google Pixel 10 Pro Fold 5G",
         "condition": "Fair",
         "tier": 1,
         "value": 830
       },
       {
-        "model": "Google Pixel 10 Pro Fold",
+        "model": "Google Pixel 10 Pro Fold 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -2809,6 +2827,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Google Pixel 10a 5G",
+        "condition": "Good",
+        "tier": 2,
+        "value": 700
+      },
+      {
+        "model": "Google Pixel 10a 5G",
+        "condition": "Fair",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Google Pixel 10a 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Google Pixel 4",
         "condition": "Good",
         "tier": 5,
@@ -2851,18 +2887,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Google Pixel 4A",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Google Pixel 4A 5G",
         "condition": "Good",
         "tier": 5,
@@ -2876,6 +2900,18 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Google Pixel 4A 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Google Pixel 4A",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Google Pixel 4A",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -3045,8 +3081,8 @@ const TIPS_PROMOS = {
       {
         "model": "Google Pixel 8 Pro 5G",
         "condition": "Good",
-        "tier": 3,
-        "value": 600
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Google Pixel 8 Pro 5G",
@@ -3169,6 +3205,42 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "LGIC LG V60 ThinQ 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LG V60 ThinQ 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LG V60 ThinQ 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LGIC V50 ThinQ 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LGIC V50 ThinQ 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LGIC V50 ThinQ 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "LGIC Stylo 6",
         "condition": "Good",
         "tier": 5,
@@ -3187,73 +3259,91 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "LGIC V50 ThinQ 5G",
+        "model": "Motorola Edge 70 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V50 ThinQ 5G",
+        "model": "Motorola Edge 70 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V50 ThinQ 5G",
+        "model": "Motorola Edge 70 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V60 ThinQ 5G",
+        "model": "Motorola Moto Edge 5G 2025",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V60 ThinQ 5G",
+        "model": "Motorola Moto Edge 5G 2025",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V60 ThinQ 5G",
+        "model": "Motorola Moto Edge 5G 2025",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Edge 5G 2025",
+        "model": "Motorola Moto G 5G 2026",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Edge 5G 2025",
+        "model": "Motorola Moto G 5G 2026",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Edge 5G 2025",
+        "model": "Motorola Moto G 5G 2026",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Moto G Play 2023",
+        "model": "Motorola Moto g play 2023",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Moto G Play 2023",
+        "model": "Motorola Moto g play 2023",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Moto G Play 2023",
+        "model": "Motorola Moto g play 2023",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto G Play 5G 2026",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto G Play 5G 2026",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto G Play 5G 2026",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -3277,37 +3367,37 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Motorola RAZR",
+        "model": "Motorola Moto Razr",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola RAZR",
+        "model": "Motorola Moto Razr 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto Razr 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola RAZR",
+        "model": "Motorola Moto Razr 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Razr 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G",
+        "model": "Motorola Moto Razr",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Razr 5G",
+        "model": "Motorola Moto Razr",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -3385,109 +3475,127 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 5G",
+        "model": "Motorola RAZR Ultra 5G 2025",
         "condition": "Good",
-        "tier": 5,
-        "value": 450
+        "tier": 3,
+        "value": 600
       },
       {
-        "model": "ONEPLUS 8 5G",
+        "model": "Motorola RAZR Ultra 5G 2025",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 5G",
+        "model": "Motorola RAZR Ultra 5G 2025",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 PRO 5G",
+        "model": "OnePlus ONEPLUS 8 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 PRO 5G",
+        "model": "OnePlus ONEPLUS 8 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 PRO 5G",
+        "model": "OnePlus ONEPLUS 8 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T",
+        "model": "OnePlus ONEPLUS 8 PRO 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T",
+        "model": "OnePlus ONEPLUS 8 PRO 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T",
+        "model": "OnePlus ONEPLUS 8 PRO 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T PLUS 5G",
+        "model": "OnePlus ONEPLUS 8T",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T PLUS 5G",
+        "model": "OnePlus ONEPLUS 8T",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T PLUS 5G",
+        "model": "OnePlus ONEPLUS 8T PLUS 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 8T PLUS 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 8T PLUS 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 5G",
+        "model": "OnePlus ONEPLUS 8T",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 PRO 5G",
+        "model": "OnePlus ONEPLUS 9 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 PRO 5G",
+        "model": "OnePlus ONEPLUS 9 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 PRO 5G",
+        "model": "OnePlus ONEPLUS 9 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 9 PRO 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 9 PRO 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 9 PRO 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -3542,6 +3650,24 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy A16 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A17 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A17 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A17 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -3673,6 +3799,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy A37 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A37 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A37 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy A42 5G",
         "condition": "Good",
         "tier": 5,
@@ -3715,18 +3859,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy A51",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy A51 5G",
         "condition": "Good",
         "tier": 5,
@@ -3740,6 +3872,18 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy A51 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A51",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A51",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -3823,6 +3967,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy A71 5G UW",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A71 5G UW",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A71 5G UW",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy A71",
         "condition": "Fair",
         "tier": 5,
@@ -3835,24 +3997,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy A72",
         "condition": "Good",
         "tier": 5,
@@ -3901,25 +4045,25 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Note 10",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Lite (6GB)",
+        "model": "Samsung Galaxy Note 10 Plus 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Note 10 Lite (6GB)",
+        "model": "Samsung Galaxy Note 10 Plus 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Note 10 Lite (6GB)",
+        "model": "Samsung Galaxy Note 10 Plus 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Note 10",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -4045,48 +4189,48 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S10 Lite",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Lite",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Lite",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Plus",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Plus",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Plus",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy S10",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy S10E",
         "condition": "Good",
         "tier": 5,
@@ -4123,24 +4267,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S20 5G UW",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 5G UW",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 5G UW",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy S20 Fan Edition 5G",
         "condition": "Good",
         "tier": 5,
@@ -4165,18 +4291,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S20 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy S20 Plus 5G",
         "condition": "Good",
         "tier": 5,
@@ -4190,6 +4304,18 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy S20 Plus 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S20 Plus",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S20 Plus",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -4429,19 +4555,19 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S24 FE 5G",
+        "model": "Samsung Galaxy S24 Fan Edition 5G",
         "condition": "Good",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Samsung Galaxy S24 FE 5G",
+        "model": "Samsung Galaxy S24 Fan Edition 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S24 FE 5G",
+        "model": "Samsung Galaxy S24 Fan Edition 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -4573,6 +4699,60 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S26 5G",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 5G",
+        "condition": "Fair",
+        "tier": 2,
+        "value": 700
+      },
+      {
+        "model": "Samsung Galaxy S26 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S26 Plus 5G",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Plus 5G",
+        "condition": "Fair",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Plus 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S26 Ultra 5G",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Ultra 5G",
+        "condition": "Fair",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Ultra 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy S8",
         "condition": "Good",
         "tier": 5,
@@ -4581,12 +4761,6 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S8",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -4609,6 +4783,12 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S8",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy S9",
         "condition": "Good",
         "tier": 5,
@@ -4617,12 +4797,6 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S9",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -4645,20 +4819,14 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S9",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy Z Flip",
         "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -4676,42 +4844,6 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy Z Flip 3 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G Thom Browne",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G Thom Browne",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G Thom Browne",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 Bespoke",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 Bespoke",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 Bespoke",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -4843,6 +4975,36 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy Z Flip",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Flip",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Fold 2 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Fold 2 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Fold 2 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy Z Fold 3 5G",
         "condition": "Good",
         "tier": 5,
@@ -4933,71 +5095,35 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Z Fold2 5G",
+        "model": "Samsung Galaxy Note 10 Lite",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Z Fold2 5G",
+        "model": "Samsung Galaxy Note 10 Lite",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Z Fold2 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus 5G",
+        "model": "Samsung Galaxy Note 10 Lite",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       }
     ]
   },
-  "tips_samsung_900": {
-    "promo_tag": "tips_samsung_900",
-    "promo_title": "Up to $900 off select Samsung",
-    "max_value": 900,
+  "tips_samsung_1000": {
+    "promo_tag": "tips_samsung_1000",
+    "promo_title": "Up to $1,000 off Samsung",
+    "max_value": 1000,
     "timing": {
-      "start": "2026-05-11",
-      "end": "2026-07-21"
+      "start": "2026-07-22",
+      "end": "2026-08-25"
     },
     "applies_to_new_purchase": [
-      "Select new Samsung devices (see Xfinity carrier portal for current eligible list)"
+      "Select new Samsung devices (new lines or existing-line upgrades) \u2014 see Xfinity carrier portal for current eligible list"
     ],
     "delivery": "36-month DPP bill credits",
     "trade_ins": [
@@ -5032,30 +5158,30 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 11 Pro Max",
+        "condition": "Good",
+        "tier": 4,
+        "value": 500
+      },
+      {
+        "model": "Apple iPhone 11 Pro Max",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 11 Pro Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 11 Pro",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Good",
-        "tier": 4,
-        "value": 500
-      },
-      {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 11 Pro Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Apple iPhone 12",
         "condition": "Good",
         "tier": 4,
@@ -5064,12 +5190,6 @@ const TIPS_PROMOS = {
       {
         "model": "Apple iPhone 12",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -5092,6 +5212,12 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 12",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 12 Pro",
         "condition": "Good",
         "tier": 4,
@@ -5100,12 +5226,6 @@ const TIPS_PROMOS = {
       {
         "model": "Apple iPhone 12 Pro",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 12 Pro",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -5128,24 +5248,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Apple iPhone 13",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 13",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 13",
+        "model": "Apple iPhone 12 Pro",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
+        "model": "Apple iPhone 13",
+        "condition": "Good",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Apple iPhone 13",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 13 Mini",
         "condition": "Good",
         "tier": 3,
@@ -5159,6 +5279,12 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Apple iPhone 13 Mini",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 13",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5176,12 +5302,6 @@ const TIPS_PROMOS = {
         "value": 500
       },
       {
-        "model": "Apple iPhone 13 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Apple iPhone 13 Pro Max",
         "condition": "Good",
         "tier": 2,
@@ -5200,6 +5320,12 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 13 Pro",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 14",
         "condition": "Good",
         "tier": 3,
@@ -5212,61 +5338,61 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 14 PLUS",
+        "condition": "Good",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Apple iPhone 14 PLUS",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 14 PLUS",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 14",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone 14 Plus",
-        "condition": "Good",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 14 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 Pro",
+        "model": "Apple iPhone 14 PRO",
         "condition": "Good",
         "tier": 2,
         "value": 700
       },
       {
-        "model": "Apple iPhone 14 Pro",
+        "model": "Apple iPhone 14 PRO",
         "condition": "Fair",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Apple iPhone 14 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 14 Pro Max",
+        "model": "Apple iPhone 14 PRO MAX",
         "condition": "Good",
         "tier": 2,
         "value": 700
       },
       {
-        "model": "Apple iPhone 14 Pro Max",
+        "model": "Apple iPhone 14 PRO MAX",
         "condition": "Fair",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Apple iPhone 14 Pro Max",
+        "model": "Apple iPhone 14 PRO MAX",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 14 PRO",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5284,61 +5410,61 @@ const TIPS_PROMOS = {
         "value": 600
       },
       {
+        "model": "Apple iPhone 15 PLUS",
+        "condition": "Good",
+        "tier": 2,
+        "value": 700
+      },
+      {
+        "model": "Apple iPhone 15 PLUS",
+        "condition": "Fair",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Apple iPhone 15 PLUS",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 15",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone 15 Plus",
+        "model": "Apple iPhone 15 PRO",
         "condition": "Good",
-        "tier": 2,
-        "value": 700
+        "tier": 1,
+        "value": 830
       },
       {
-        "model": "Apple iPhone 15 Plus",
+        "model": "Apple iPhone 15 PRO",
         "condition": "Fair",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Apple iPhone 15 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15 Pro",
+        "model": "Apple iPhone 15 PRO MAX",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
-        "model": "Apple iPhone 15 Pro",
-        "condition": "Fair",
-        "tier": 3,
-        "value": 600
-      },
-      {
-        "model": "Apple iPhone 15 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 15 Pro Max",
-        "condition": "Good",
-        "tier": 1,
-        "value": 900
-      },
-      {
-        "model": "Apple iPhone 15 Pro Max",
+        "model": "Apple iPhone 15 PRO MAX",
         "condition": "Fair",
         "tier": 2,
         "value": 700
       },
       {
-        "model": "Apple iPhone 15 Pro Max",
+        "model": "Apple iPhone 15 PRO MAX",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 15 PRO",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5347,25 +5473,19 @@ const TIPS_PROMOS = {
         "model": "Apple iPhone 16",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone 16",
         "condition": "Fair",
         "tier": 2,
         "value": 700
-      },
-      {
-        "model": "Apple iPhone 16",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
       },
       {
         "model": "Apple iPhone 16 Plus",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone 16 Plus",
@@ -5380,10 +5500,16 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone 16",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 16 Pro",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone 16 Pro",
@@ -5392,25 +5518,25 @@ const TIPS_PROMOS = {
         "value": 700
       },
       {
-        "model": "Apple iPhone 16 Pro",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Apple iPhone 16 Pro Max",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone 16 Pro Max",
         "condition": "Fair",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone 16 Pro Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 16 Pro",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5437,7 +5563,7 @@ const TIPS_PROMOS = {
         "model": "Apple iPhone 17",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone 17",
@@ -5455,13 +5581,31 @@ const TIPS_PROMOS = {
         "model": "Apple iPhone 17 Pro",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone 17 Pro",
         "condition": "Fair",
         "tier": 1,
-        "value": 900
+        "value": 830
+      },
+      {
+        "model": "Apple iPhone 17 Pro Max",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Apple iPhone 17 Pro Max",
+        "condition": "Fair",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Apple iPhone 17 Pro Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
       },
       {
         "model": "Apple iPhone 17 Pro",
@@ -5470,19 +5614,19 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Apple iPhone 17 Pro Max",
+        "model": "Apple iPhone 17e",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
-        "model": "Apple iPhone 17 Pro Max",
+        "model": "Apple iPhone 17e",
         "condition": "Fair",
-        "tier": 1,
-        "value": 900
+        "tier": 3,
+        "value": 600
       },
       {
-        "model": "Apple iPhone 17 Pro Max",
+        "model": "Apple iPhone 17e",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5496,12 +5640,6 @@ const TIPS_PROMOS = {
       {
         "model": "Apple iPhone 7",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 7",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -5524,24 +5662,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Apple iPhone 8",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone 8",
+        "model": "Apple iPhone 7",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
+        "model": "Apple iPhone 8",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 8",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone 8 PLUS",
         "condition": "Good",
         "tier": 5,
@@ -5555,6 +5693,12 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Apple iPhone 8 PLUS",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone 8",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5563,7 +5707,7 @@ const TIPS_PROMOS = {
         "model": "Apple iPhone Air",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Apple iPhone Air",
@@ -5662,30 +5806,30 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Apple iPhone XS Max",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone XS Max",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Apple iPhone XS Max",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Apple iPhone XS",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Apple iPhone XS Max",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS Max",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Apple iPhone XS Max",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Google Pixel 10 5G",
         "condition": "Good",
         "tier": 2,
@@ -5707,7 +5851,7 @@ const TIPS_PROMOS = {
         "model": "Google Pixel 10 Pro 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Google Pixel 10 Pro 5G",
@@ -5722,19 +5866,19 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Google Pixel 10 Pro Fold",
+        "model": "Google Pixel 10 Pro Fold 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
-        "model": "Google Pixel 10 Pro Fold",
+        "model": "Google Pixel 10 Pro Fold 5G",
         "condition": "Fair",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
-        "model": "Google Pixel 10 Pro Fold",
+        "model": "Google Pixel 10 Pro Fold 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5743,7 +5887,7 @@ const TIPS_PROMOS = {
         "model": "Google Pixel 10 Pro XL 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Google Pixel 10 Pro XL 5G",
@@ -5758,6 +5902,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Google Pixel 10a 5G",
+        "condition": "Good",
+        "tier": 2,
+        "value": 700
+      },
+      {
+        "model": "Google Pixel 10a 5G",
+        "condition": "Fair",
+        "tier": 3,
+        "value": 600
+      },
+      {
+        "model": "Google Pixel 10a 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Google Pixel 4",
         "condition": "Good",
         "tier": 5,
@@ -5800,18 +5962,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Google Pixel 4A",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Google Pixel 4A",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Google Pixel 4A 5G",
         "condition": "Good",
         "tier": 5,
@@ -5825,6 +5975,18 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Google Pixel 4A 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Google Pixel 4A",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Google Pixel 4A",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -5994,8 +6156,8 @@ const TIPS_PROMOS = {
       {
         "model": "Google Pixel 8 Pro 5G",
         "condition": "Good",
-        "tier": 3,
-        "value": 600
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Google Pixel 8 Pro 5G",
@@ -6067,7 +6229,7 @@ const TIPS_PROMOS = {
         "model": "Google Pixel 9 Pro Fold 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Google Pixel 9 Pro Fold 5G",
@@ -6118,6 +6280,42 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "LGIC LG V60 ThinQ 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LG V60 ThinQ 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LG V60 ThinQ 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LGIC V50 ThinQ 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LGIC V50 ThinQ 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "LGIC LGIC V50 ThinQ 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "LGIC Stylo 6",
         "condition": "Good",
         "tier": 5,
@@ -6136,73 +6334,91 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "LGIC V50 ThinQ 5G",
+        "model": "Motorola Edge 70 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V50 ThinQ 5G",
+        "model": "Motorola Edge 70 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V50 ThinQ 5G",
+        "model": "Motorola Edge 70 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V60 ThinQ 5G",
+        "model": "Motorola Moto Edge 5G 2025",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V60 ThinQ 5G",
+        "model": "Motorola Moto Edge 5G 2025",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "LGIC V60 ThinQ 5G",
+        "model": "Motorola Moto Edge 5G 2025",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Edge 5G 2025",
+        "model": "Motorola Moto G 5G 2026",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Edge 5G 2025",
+        "model": "Motorola Moto G 5G 2026",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Edge 5G 2025",
+        "model": "Motorola Moto G 5G 2026",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Moto G Play 2023",
+        "model": "Motorola Moto g play 2023",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Moto G Play 2023",
+        "model": "Motorola Moto g play 2023",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Moto G Play 2023",
+        "model": "Motorola Moto g play 2023",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto G Play 5G 2026",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto G Play 5G 2026",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto G Play 5G 2026",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -6226,37 +6442,37 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Motorola RAZR",
+        "model": "Motorola Moto Razr",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola RAZR",
+        "model": "Motorola Moto Razr 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Motorola Moto Razr 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola RAZR",
+        "model": "Motorola Moto Razr 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Razr 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Motorola Razr 5G",
+        "model": "Motorola Moto Razr",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Motorola Razr 5G",
+        "model": "Motorola Moto Razr",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -6334,109 +6550,127 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 5G",
+        "model": "Motorola RAZR Ultra 5G 2025",
         "condition": "Good",
-        "tier": 5,
-        "value": 450
+        "tier": 3,
+        "value": 600
       },
       {
-        "model": "ONEPLUS 8 5G",
+        "model": "Motorola RAZR Ultra 5G 2025",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 5G",
+        "model": "Motorola RAZR Ultra 5G 2025",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 PRO 5G",
+        "model": "OnePlus ONEPLUS 8 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 PRO 5G",
+        "model": "OnePlus ONEPLUS 8 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8 PRO 5G",
+        "model": "OnePlus ONEPLUS 8 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T",
+        "model": "OnePlus ONEPLUS 8 PRO 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T",
+        "model": "OnePlus ONEPLUS 8 PRO 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T",
+        "model": "OnePlus ONEPLUS 8 PRO 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T PLUS 5G",
+        "model": "OnePlus ONEPLUS 8T",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T PLUS 5G",
+        "model": "OnePlus ONEPLUS 8T",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 8T PLUS 5G",
+        "model": "OnePlus ONEPLUS 8T PLUS 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 8T PLUS 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 8T PLUS 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "ONEPLUS 9 5G",
+        "model": "OnePlus ONEPLUS 8T",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 PRO 5G",
+        "model": "OnePlus ONEPLUS 9 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 PRO 5G",
+        "model": "OnePlus ONEPLUS 9 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "ONEPLUS 9 PRO 5G",
+        "model": "OnePlus ONEPLUS 9 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 9 PRO 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 9 PRO 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "OnePlus ONEPLUS 9 PRO 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -6491,6 +6725,24 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy A16 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A17 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A17 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A17 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -6622,6 +6874,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy A37 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A37 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A37 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy A42 5G",
         "condition": "Good",
         "tier": 5,
@@ -6664,18 +6934,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy A51",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A51",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy A51 5G",
         "condition": "Good",
         "tier": 5,
@@ -6689,6 +6947,18 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy A51 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A51",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A51",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -6772,6 +7042,24 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy A71 5G UW",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A71 5G UW",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy A71 5G UW",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy A71",
         "condition": "Fair",
         "tier": 5,
@@ -6784,24 +7072,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy A71 5G UW",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy A72",
         "condition": "Good",
         "tier": 5,
@@ -6850,25 +7120,25 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Note 10",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Note 10 Lite (6GB)",
+        "model": "Samsung Galaxy Note 10 Plus 5G",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Note 10 Lite (6GB)",
+        "model": "Samsung Galaxy Note 10 Plus 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Note 10 Lite (6GB)",
+        "model": "Samsung Galaxy Note 10 Plus 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Note 10",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -6994,48 +7264,48 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S10 Lite",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Lite",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Lite",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Plus",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Plus",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S10 Plus",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy S10",
         "condition": "Poor",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Lite",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S10 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy S10E",
         "condition": "Good",
         "tier": 5,
@@ -7072,24 +7342,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S20 5G UW",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 5G UW",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 5G UW",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy S20 Fan Edition 5G",
         "condition": "Good",
         "tier": 5,
@@ -7114,18 +7366,6 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S20 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S20 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
         "model": "Samsung Galaxy S20 Plus 5G",
         "condition": "Good",
         "tier": 5,
@@ -7139,6 +7379,18 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy S20 Plus 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S20 Plus",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S20 Plus",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -7272,8 +7524,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S22 Ultra 5G",
         "condition": "Good",
-        "tier": 2,
-        "value": 700
+        "tier": 3,
+        "value": 600
       },
       {
         "model": "Samsung Galaxy S22 Ultra 5G",
@@ -7290,8 +7542,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S23 5G",
         "condition": "Good",
-        "tier": 2,
-        "value": 700
+        "tier": 3,
+        "value": 600
       },
       {
         "model": "Samsung Galaxy S23 5G",
@@ -7344,8 +7596,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S23 Ultra 5G",
         "condition": "Good",
-        "tier": 1,
-        "value": 900
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Samsung Galaxy S23 Ultra 5G",
@@ -7362,8 +7614,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S24 5G",
         "condition": "Good",
-        "tier": 1,
-        "value": 900
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Samsung Galaxy S24 5G",
@@ -7378,19 +7630,19 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S24 FE 5G",
+        "model": "Samsung Galaxy S24 Fan Edition 5G",
         "condition": "Good",
         "tier": 3,
         "value": 600
       },
       {
-        "model": "Samsung Galaxy S24 FE 5G",
+        "model": "Samsung Galaxy S24 Fan Edition 5G",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy S24 FE 5G",
+        "model": "Samsung Galaxy S24 Fan Edition 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -7398,8 +7650,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S24 Plus 5G",
         "condition": "Good",
-        "tier": 1,
-        "value": 900
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Samsung Galaxy S24 Plus 5G",
@@ -7417,7 +7669,7 @@ const TIPS_PROMOS = {
         "model": "Samsung Galaxy S24 Ultra 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Samsung Galaxy S24 Ultra 5G",
@@ -7434,8 +7686,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S25 5G",
         "condition": "Good",
-        "tier": 1,
-        "value": 900
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Samsung Galaxy S25 5G",
@@ -7453,7 +7705,7 @@ const TIPS_PROMOS = {
         "model": "Samsung Galaxy S25 Edge 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Samsung Galaxy S25 Edge 5G",
@@ -7489,7 +7741,7 @@ const TIPS_PROMOS = {
         "model": "Samsung Galaxy S25 Plus 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Samsung Galaxy S25 Plus 5G",
@@ -7507,7 +7759,7 @@ const TIPS_PROMOS = {
         "model": "Samsung Galaxy S25 Ultra 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Samsung Galaxy S25 Ultra 5G",
@@ -7522,6 +7774,60 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S26 5G",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 5G",
+        "condition": "Fair",
+        "tier": 2,
+        "value": 700
+      },
+      {
+        "model": "Samsung Galaxy S26 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S26 Plus 5G",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Plus 5G",
+        "condition": "Fair",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Plus 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy S26 Ultra 5G",
+        "condition": "Good",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Ultra 5G",
+        "condition": "Fair",
+        "tier": 1,
+        "value": 830
+      },
+      {
+        "model": "Samsung Galaxy S26 Ultra 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy S8",
         "condition": "Good",
         "tier": 5,
@@ -7530,12 +7836,6 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S8",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S8",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -7558,6 +7858,12 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S8",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy S9",
         "condition": "Good",
         "tier": 5,
@@ -7566,12 +7872,6 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy S9",
         "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy S9",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -7594,20 +7894,14 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
+        "model": "Samsung Galaxy S9",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
         "model": "Samsung Galaxy Z Flip",
         "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip",
-        "condition": "Poor",
         "tier": 5,
         "value": 450
       },
@@ -7625,42 +7919,6 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy Z Flip 3 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G Thom Browne",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G Thom Browne",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 5G Thom Browne",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 Bespoke",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 Bespoke",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Galaxy Z Flip 3 Bespoke",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -7759,7 +8017,7 @@ const TIPS_PROMOS = {
         "model": "Samsung Galaxy Z Flip 7 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Samsung Galaxy Z Flip 7 5G",
@@ -7776,8 +8034,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy Z Flip 7 FE 5G",
         "condition": "Good",
-        "tier": 1,
-        "value": 900
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Samsung Galaxy Z Flip 7 FE 5G",
@@ -7787,6 +8045,36 @@ const TIPS_PROMOS = {
       },
       {
         "model": "Samsung Galaxy Z Flip 7 FE 5G",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Flip",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Flip",
+        "condition": "Poor",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Fold 2 5G",
+        "condition": "Good",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Fold 2 5G",
+        "condition": "Fair",
+        "tier": 5,
+        "value": 450
+      },
+      {
+        "model": "Samsung Galaxy Z Fold 2 5G",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -7848,8 +8136,8 @@ const TIPS_PROMOS = {
       {
         "model": "Samsung Galaxy Z Fold 6 5G",
         "condition": "Good",
-        "tier": 1,
-        "value": 900
+        "tier": 2,
+        "value": 700
       },
       {
         "model": "Samsung Galaxy Z Fold 6 5G",
@@ -7867,7 +8155,7 @@ const TIPS_PROMOS = {
         "model": "Samsung Galaxy Z Fold 7 5G",
         "condition": "Good",
         "tier": 1,
-        "value": 900
+        "value": 830
       },
       {
         "model": "Samsung Galaxy Z Fold 7 5G",
@@ -7882,55 +8170,19 @@ const TIPS_PROMOS = {
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Z Fold2 5G",
+        "model": "Samsung Galaxy Note 10 Lite",
         "condition": "Good",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Z Fold2 5G",
+        "model": "Samsung Galaxy Note 10 Lite",
         "condition": "Fair",
         "tier": 5,
         "value": 450
       },
       {
-        "model": "Samsung Galaxy Z Fold2 5G",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus",
-        "condition": "Poor",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus 5G",
-        "condition": "Good",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus 5G",
-        "condition": "Fair",
-        "tier": 5,
-        "value": 450
-      },
-      {
-        "model": "Samsung Note 10 Plus 5G",
+        "model": "Samsung Galaxy Note 10 Lite",
         "condition": "Poor",
         "tier": 5,
         "value": 450
@@ -7939,7 +8191,7 @@ const TIPS_PROMOS = {
   },
   "tips_pixel_1200": {
     "promo_tag": "tips_pixel_1200",
-    "promo_title": "RETIRED 2026-06-23 — Pixel now routes to the $830 bucket (was: Up to $1,200 off Pixel 10 Pro XL and Pro Fold)",
+    "promo_title": "RETIRED 2026-06-23 \u2014 Pixel now routes to the $830 bucket (was: Up to $1,200 off Pixel 10 Pro XL and Pro Fold)",
     "max_value": 1200,
     "timing": {
       "start": "2026-05-11",
@@ -10894,7 +11146,7 @@ const TIPS_PROMOS = {
 function getTipsPromoForNewPhone(deviceName) {
   const name = (deviceName || '').toLowerCase();
   if (name.includes('samsung') || name.includes('galaxy')) {
-    return TIPS_PROMOS.tips_samsung_900;
+    return TIPS_PROMOS.tips_samsung_1000;
   }
   return TIPS_PROMOS.tips_nonsam_830;
 }
