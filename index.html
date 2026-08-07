@@ -13174,8 +13174,6 @@ async function handleSubmit() {
       rewardTier:           state.tier,
       repName,
       storeName,
-      asm:                  elVal('repAsm'),
-      storeManager:         elVal('repStoreManager'),
       phoneName:            state.phoneName,
       phonePrice:           state.phonePrice,
       promoApplied:         state.promoAmt,
@@ -13218,8 +13216,6 @@ async function handleSubmit() {
       rep_name:          payload.repName,
       rep_email:         '',
       rep_phone:         '',
-      asm:               payload.asm || '',
-      store_manager:     payload.storeManager || '',
       customer_name:     payload.customerFirstName,
       customer_phone:    payload.customerPhone,
       membership_tier:   payload.rewardTier,
@@ -13608,7 +13604,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<!-- BLUFOX_ROSTER_DIRECTORY_V3 : store + rep dropdowns driven by the FULL store directory (every rep, sales or not) with email auto-fill and auto-loaded ASM + Store Manager. Replaces V1 (which listed only reps who had sales, from rep-roster.json). -->
+<!-- BLUFOX_ROSTER_DIRECTORY_V3 : store + rep dropdowns driven by the FULL store directory. Each store's dropdown lists every rep PLUS that store's Store Manager and ASM, so managers/ASMs can select themselves and submit. Email auto-fills for whoever is picked. -->
 <script>
 (function(){
   if (window.__BLUFOX_ROSTER__) return; window.__BLUFOX_ROSTER__ = true;
@@ -13624,34 +13620,35 @@ document.addEventListener('DOMContentLoaded', function() {
   function toDisplay(full){return CFG.shortStores ? full.replace(/ Xfinity Store$/,'') : full;}
   function call(name){ if(name && typeof window[name]==='function'){ try{window[name]()}catch(e){} } }
 
-  // Roster maps built from store-directory.json (the Admin-Panel-Directory data).
-  var repsByStore={};    // full store -> [{name,email}]  (ALL reps, regardless of sales)
-  var mgrByStore={};     // full store -> Store Manager name
-  var asmByStore={};     // full store -> ASM name (resolved from email) or ASM email
-  var email2name={};     // email(lower) -> person name (reps + store managers)
+  // full store -> [{name,email}] : every rep + that store's Store Manager + ASM (deduped, sorted)
+  var peopleByStore={};
 
   function buildMaps(d){
     var emp=(d&&d.storeEmployees)||{}, smn=(d&&d.storeManagerNames)||{},
         sm=(d&&d.storeManagers)||{}, am=(d&&d.storeAMs)||{}, amn=(d&&d.storeAMNames)||{};
-    email2name={};
+    // email -> name (reps + store managers) to resolve any ASM that has an email but no name
+    var email2name={};
     Object.keys(emp).forEach(function(s){ (emp[s]||[]).forEach(function(r){
       if(r&&r.email){ var nm=((r.first||'')+' '+(r.last||'')).trim(); if(nm) email2name[String(r.email).toLowerCase()]=nm; }
     });});
     Object.keys(sm).forEach(function(s){ if(sm[s]&&smn[s]) email2name[String(sm[s]).toLowerCase()]=smn[s]; });
-    repsByStore={}; mgrByStore={}; asmByStore={};
-    Object.keys(emp).forEach(function(s){
+
+    peopleByStore={};
+    var storeSet={};
+    [emp,smn,am,amn].forEach(function(o){ Object.keys(o).forEach(function(s){ storeSet[s]=1; }); });
+    Object.keys(storeSet).forEach(function(s){
       var seen={}, list=[];
+      function push(name,email){ name=(name||'').trim(); if(!name) return; var k=name.toLowerCase(); if(seen[k]) return; seen[k]=1; list.push({name:name,email:email||''}); }
       (emp[s]||[]).forEach(function(r){
-        var nm = (r && typeof r==='object') ? ((r.first||'')+' '+(r.last||'')).trim() : String(r||'').trim();
-        if(!nm) return; var k=nm.toLowerCase(); if(seen[k]) return; seen[k]=1;
-        list.push({ name:nm, email:(r&&r.email)||'' });
+        var nm=(r&&typeof r==='object')?((r.first||'')+' '+(r.last||'')).trim():String(r||'').trim();
+        push(nm, (r&&r.email)||'');
       });
+      if(smn[s]) push(smn[s], sm[s]||'');                                   // Store Manager
+      var asmName = amn[s] || (am[s] ? (email2name[String(am[s]).toLowerCase()]||'') : '');
+      if(asmName) push(asmName, am[s]||'');                                 // ASM
       list.sort(function(a,b){ return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
-      repsByStore[s]=list;
+      peopleByStore[s]=list;
     });
-    Object.keys(smn).forEach(function(s){ mgrByStore[s]=smn[s]||''; });
-    var amStores={}; Object.keys(am).forEach(function(s){amStores[s]=1;}); Object.keys(amn).forEach(function(s){amStores[s]=1;});
-    Object.keys(amStores).forEach(function(s){ var e=am[s]; asmByStore[s]= amn[s] ? amn[s] : (e ? (email2name[String(e).toLowerCase()]||e) : ''); });
   }
 
   function go(){
@@ -13675,36 +13672,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if(CFG.shortStores || /xfinity store$/i.test(v)) fallback.push(v); else special.push(v);
     });
 
-    // ── Inject read-only ASM + Store Manager fields after the rep-email field ──
-    function injectMetaFields(){
-      if(document.getElementById('repStoreManager')) return;
-      var emailEl=document.getElementById('repEmail');
-      var wrap = (emailEl && emailEl.closest && emailEl.closest(CFG.fieldSel)) || field;
-      if(!wrap || !wrap.parentNode) return;
-      var exLabel = wrap.querySelector('label');
-      var inputClass = emailEl ? emailEl.className : '';
-      function make(id, text){
-        var div=document.createElement('div');
-        div.className = wrap.className;
-        var lab=document.createElement('label'); lab.textContent=text; if(exLabel) lab.className=exLabel.className;
-        var inp=document.createElement('input'); inp.id=id; inp.type='text'; inp.readOnly=true; inp.tabIndex=-1;
-        inp.className=inputClass; inp.setAttribute('placeholder','—');
-        inp.style.background='#f4f4f6'; inp.style.cursor='default';
-        div.appendChild(lab); div.appendChild(inp); return div;
-      }
-      var mgrDiv=make('repStoreManager','Store Manager');
-      var asmDiv=make('repAsm','ASM (Assistant Store Manager)');
-      wrap.parentNode.insertBefore(mgrDiv, wrap.nextSibling);
-      wrap.parentNode.insertBefore(asmDiv, mgrDiv.nextSibling);
-    }
-    function updateMeta(){
-      var full=toFull(storeSel.value||'');
-      var asmEl=document.getElementById('repAsm'), mgrEl=document.getElementById('repStoreManager');
-      var special = isSpecial(storeSel.value||'');
-      if(mgrEl) mgrEl.value = (!special && mgrByStore[full]) ? mgrByStore[full] : '';
-      if(asmEl) asmEl.value = (!special && asmByStore[full]) ? asmByStore[full] : '';
-    }
-
     function nameAttr(){ return CFG.repNameAttr ? (' name="'+CFG.repNameAttr+'"') : ''; }
     function buildRep(inner){ field.innerHTML = labelHtml + inner; return document.getElementById(CFG.repId); }
     function autofillEmail(el){
@@ -13722,7 +13689,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }catch(e){}
     }
     function attach(el){
-      function onch(){ var v=(el.value||'').trim(); if(v) sL(CFG.lsRep,v); autofillEmail(el); updateMeta(); call(CFG.onRepChange); }
+      function onch(){ var v=(el.value||'').trim(); if(v) sL(CFG.lsRep,v); autofillEmail(el); call(CFG.onRepChange); }
       el.addEventListener('change', onch);
       el.addEventListener('input',  onch);
     }
@@ -13730,10 +13697,10 @@ document.addEventListener('DOMContentLoaded', function() {
       var el=buildRep('<select id="'+CFG.repId+'"'+nameAttr()+' autocomplete="name"><option value="">'+esc(text)+'</option></select>');
       el.disabled=true; if(repClass) el.className=repClass; attach(el);
     }
-    function repList(reps){
-      reps = reps.filter(function(r){ return r.name!==NEW_HIRE && r.name!==DM_OPT; });
+    function repList(people){
+      people = people.filter(function(r){ return r.name!==NEW_HIRE && r.name!==DM_OPT; });
       var opts='<option value="">— Select your name —</option>';
-      reps.forEach(function(r){ opts+='<option data-email="'+esc(r.email||'')+'"'+(r.name===lastRep?' selected':'')+'>'+esc(r.name)+'</option>'; });
+      people.forEach(function(r){ opts+='<option data-email="'+esc(r.email||'')+'"'+(r.name===lastRep?' selected':'')+'>'+esc(r.name)+'</option>'; });
       opts+='<option>'+esc(NEW_HIRE)+'</option><option>'+esc(DM_OPT)+'</option>';
       var el=buildRep('<select id="'+CFG.repId+'"'+nameAttr()+' autocomplete="name">'+opts+'</select>');
       el.disabled=false; if(repClass) el.className=repClass; attach(el);
@@ -13745,12 +13712,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function isSpecial(v){ return special.indexOf(v)!==-1; }
     function refreshRep(){
       var sv=storeSel.value;
-      if(!sv){ repPlaceholder('— Select your store first —'); updateMeta(); return; }
-      if(isSpecial(sv)){ repFree(); updateMeta(); return; }
+      if(!sv){ repPlaceholder('— Select your store first —'); return; }
+      if(isSpecial(sv)){ repFree(); return; }
       if(!ready){ repPlaceholder('— Loading names… —'); return; }
-      if(!rosterLoaded){ repFree(); updateMeta(); return; }
-      repList((repsByStore[toFull(sv)]||repsByStore[sv]||[]).slice());
-      updateMeta();
+      if(!rosterLoaded){ repFree(); return; }
+      repList((peopleByStore[toFull(sv)]||peopleByStore[sv]||[]).slice());
     }
     function fillStores(fullStores){
       var keep=storeSel.value;
@@ -13762,9 +13728,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if(want){ storeSel.value=want; if(storeSel.value!==want) storeSel.value=''; }
     }
 
-    storeSel.addEventListener('change', function(){ sL(CFG.lsStore, storeSel.value); refreshRep(); updateMeta(); call(CFG.onStoreChange); });
+    storeSel.addEventListener('change', function(){ sL(CFG.lsStore, storeSel.value); refreshRep(); call(CFG.onStoreChange); });
 
-    injectMetaFields();
     fillStores(CFG.shortStores ? fallback.map(toFull) : fallback.slice());
     refreshRep(); call(CFG.onStoreChange);
 
@@ -13772,11 +13737,11 @@ document.addEventListener('DOMContentLoaded', function() {
     jget(DIR+bust).catch(function(){ return jget(DIRP+bust); })
       .then(function(d){
         buildMaps(d);
-        rosterLoaded = Object.keys(repsByStore).length>0;
+        rosterLoaded = Object.keys(peopleByStore).length>0;
         ready=true;
-        var stores = (d&&d.stores&&d.stores.length) ? d.stores : Object.keys(repsByStore);
+        var stores = (d&&d.stores&&d.stores.length) ? d.stores : Object.keys(peopleByStore);
         if(stores&&stores.length){ fillStores(stores); }
-        refreshRep(); updateMeta(); call(CFG.onStoreChange);
+        refreshRep(); call(CFG.onStoreChange);
       })
       .catch(function(){ ready=true; refreshRep(); });
   }
