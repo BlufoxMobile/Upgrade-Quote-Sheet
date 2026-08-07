@@ -13174,6 +13174,8 @@ async function handleSubmit() {
       rewardTier:           state.tier,
       repName,
       storeName,
+      asm:                  elVal('repAsm'),
+      storeManager:         elVal('repStoreManager'),
       phoneName:            state.phoneName,
       phonePrice:           state.phonePrice,
       promoApplied:         state.promoAmt,
@@ -13216,6 +13218,8 @@ async function handleSubmit() {
       rep_name:          payload.repName,
       rep_email:         '',
       rep_phone:         '',
+      asm:               payload.asm || '',
+      store_manager:     payload.storeManager || '',
       customer_name:     payload.customerFirstName,
       customer_phone:    payload.customerPhone,
       membership_tier:   payload.rewardTier,
@@ -13488,57 +13492,93 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<!-- BLUFOX_SUBMISSION_OUTBOX_V1 : durable submission outbox (auto-added) -->
+<!-- BLUFOX_SUBMISSION_OUTBOX_V2 : durable submission outbox — exponential backoff, single in-flight send, cross-tab leader lock. Replaces V1, which retried failed items with zero backoff, flushed all items in parallel, and ran an interval in every open tab — together producing the Apps Script simultaneous-execution storm. Live submits still fire immediately; only background RETRIES are throttled. -->
 <script>
 (function(){
   if (window.__blufoxOutboxReady) return; window.__blufoxOutboxReady = true;
-  var KEY = 'blufox_outbox_v1';
-  var AWAIT_MS = 8000;       // how long a submit waits for confirmation (raised 2026-06-03 — 6s was cutting off slow connections too aggressively)
-  var COOLDOWN_MS = 5000;    // min gap before re-sending a still-pending item (lowered 2026-06-03 — 15s left stranded items waiting too long)
+  var KEY  = 'blufox_outbox_v1';          // keep key so any already-queued items carry over
+  var LKEY = 'blufox_outbox_leader_v1';   // cross-tab leader lock
+  var AWAIT_MS   = 8000;                   // how long a live submit waits for confirmation
+  var BASE_MS    = 8000;                   // base retry backoff (doubles per attempt)
+  var MAX_MS     = 5 * 60 * 1000;          // cap retry backoff at 5 min
+  var MAX_AGE_MS = 24 * 60 * 60 * 1000;    // drop items older than 24h (poison protection)
+  var TICK_MS    = 30000;                  // background retry tick (leader only)
+  var LEADER_TTL = 20000;                  // a leader heartbeat older than this is stale
+  var TAB = Math.random().toString(36).slice(2);
+
   function L(){ try { return window.localStorage; } catch(e){ return null; } }
   function load(){ try { return JSON.parse(L().getItem(KEY)) || []; } catch(e){ return []; } }
   function save(a){ try { L().setItem(KEY, JSON.stringify(a)); } catch(e){} }
   function uid(){ return 'sub_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9); }
   function add(it){ var a = load(); a.push(it); save(a); }
   function remove(id){ save(load().filter(function(x){ return x.id !== id; })); }
-  function touch(id){ var a = load(); a.forEach(function(x){ if(x.id===id) x.lastTry = Date.now(); }); save(a); }
 
-  // no-cors POST: resolves when the request completes (opaque), rejects only on a
-  // network-layer failure (offline / connection reset) -> the safe signal to retry.
+  // Drop stale/poison items so nothing can retry forever.
+  function prune(){
+    var now = Date.now(), a = load(), b = a.filter(function(x){ return (now - (x.ts || 0)) < MAX_AGE_MS; });
+    if (b.length !== a.length) save(b);
+  }
+
+  // Cross-tab leader election: only ONE open tab runs background retries at a time.
+  // A leader whose heartbeat is older than LEADER_TTL is considered gone (tab closed/crashed),
+  // and any other tab may take over — so retries never stop, but never run K-fold in parallel.
+  function leaderInfo(){ try { return JSON.parse(L().getItem(LKEY)); } catch(e){ return null; } }
+  function isLeader(){
+    var l = leaderInfo(), now = Date.now();
+    if (!l || (now - (l.ts || 0)) > LEADER_TTL) {
+      try { L().setItem(LKEY, JSON.stringify({ tab: TAB, ts: now })); } catch(e){}
+      l = leaderInfo();
+    }
+    if (l && l.tab === TAB) {
+      try { L().setItem(LKEY, JSON.stringify({ tab: TAB, ts: now })); } catch(e){}
+      return true;
+    }
+    return false;
+  }
+
+  // no-cors POST: resolves on completion (opaque), rejects only on a network-layer failure.
   function post(url, body){
     return fetch(url, { method:'POST', mode:'no-cors',
       headers:{ 'Content-Type':'text/plain;charset=UTF-8' }, body: body });
   }
   function timeout(ms){ return new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, ms); }); }
-
-  // Deliver one item. The Apps Script POST is the one that feeds the T-Sheet site,
-  // so its completion is what we treat as "delivered".
   function sendItem(it){
     if (it.zapUrl && it.zapBody) post(it.zapUrl, it.zapBody).catch(function(){});
     return post(it.appsUrl, it.appsBody);
   }
-  function retryable(id){ var a = load(); a.forEach(function(x){ if(x.id===id) x.lastTry = 0; }); save(a); }
-  function flushItem(it, awaitMs){
-    touch(it.id);
+  function backoff(attempts){
+    var d = Math.min(BASE_MS * Math.pow(2, attempts || 0), MAX_MS);
+    return d * (0.75 + Math.random() * 0.5);   // +/-25% jitter to de-sync tabs
+  }
+  // Reserve the item for the duration of an in-flight attempt so no other trigger/tab
+  // double-sends it; if this tab dies mid-send it frees up after the attempt window.
+  function markSending(id){ var a = load(); a.forEach(function(x){ if(x.id===id) x.nextTry = Date.now() + AWAIT_MS + 2000; }); save(a); }
+  function markFail(id){ var a = load(); a.forEach(function(x){ if(x.id===id){ x.attempts = (x.attempts||0)+1; x.nextTry = Date.now() + backoff(x.attempts); } }); save(a); }
+
+  function deliver(it, awaitMs){
+    markSending(it.id);
     var p = sendItem(it)
       .then(function(){ remove(it.id); return { delivered:true }; })
-      // network reject = request definitively failed -> make it instantly retry-eligible.
-      .catch(function(){ retryable(it.id); return { delivered:false }; });
+      .catch(function(){ markFail(it.id); return { delivered:false }; });  // network reject -> back off, do NOT hammer
     if (!awaitMs) return p;
     return Promise.race([ p, timeout(awaitMs).then(function(){ return { delivered:false }; }) ]);
   }
-  var busy = {};
+
+  // Background flusher: leader-only, ONE item in flight at a time, backoff-gated.
+  var flushing = false;
   function flushAll(){
-    var now = Date.now();
-    load().forEach(function(it){
-      if (busy[it.id]) return;
-      if (it.lastTry && (now - it.lastTry) < COOLDOWN_MS) return;
-      busy[it.id] = true;
-      flushItem(it, 0).then(function(){ delete busy[it.id]; }).catch(function(){ delete busy[it.id]; });
-    });
+    if (flushing) return;
+    prune();
+    if (!isLeader()) return;
+    var now = Date.now(), a = load(), next = null;
+    for (var i = 0; i < a.length; i++){ if (now >= (a[i].nextTry || 0)) { next = a[i]; break; } }
+    if (!next) return;
+    flushing = true;
+    var done = function(){ flushing = false; setTimeout(flushAll, 500); };  // walk the queue serially
+    deliver(next, 0).then(done, done);
   }
 
-  // Public API used by handleSubmit()
+  // Public API used by handleSubmit() — unchanged signature/return.
   window.__blufoxDeliver = function(o){
     var sid = uid();
     function stamp(obj){ var c = {}; for (var k in obj) c[k] = obj[k]; c.submission_id = sid; return c; }
@@ -13548,22 +13588,19 @@ document.addEventListener('DOMContentLoaded', function() {
       appsBody: JSON.stringify(stamp(o.appsPayload || {})),
       zapUrl:  o.zapierUrl,
       zapBody: JSON.stringify(stamp(o.zapierPayload || {})),
-      ts: Date.now(), lastTry: 0
+      ts: Date.now(), attempts: 0, nextTry: 0
     };
     add(it);
-    return flushItem(it, AWAIT_MS);
+    return deliver(it, AWAIT_MS);   // live submit fires immediately; retries handled by the leader
   };
   window.__blufoxOutboxPending = function(){ return load().length; };
 
-  // Retry triggers: shortly after load, when connectivity returns, when
-  // the tab regains focus (rep reopens after a context switch), and on a
-  // timer.
-  window.addEventListener('load', function(){ setTimeout(flushAll, 1500); });
+  // Retry triggers: after load, on reconnect, on tab focus, and a jittered self-scheduling
+  // timer (replaces the fixed 15s interval). Every path routes through the leader + backoff gate.
+  window.addEventListener('load', function(){ setTimeout(flushAll, 1500 + Math.random()*1000); });
   window.addEventListener('online', flushAll);
-  document.addEventListener('visibilitychange', function(){
-    if (!document.hidden) flushAll();
-  });
-  setInterval(flushAll, 15000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) flushAll(); });
+  (function loop(){ setTimeout(function(){ flushAll(); loop(); }, TICK_MS * (0.8 + Math.random()*0.4)); })();
 })();
 </script>
 
@@ -13571,15 +13608,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<!-- BLUFOX_ROSTER_DROPDOWNS_V1 : roster-driven Store + Rep dropdowns (auto-added) -->
+<!-- BLUFOX_ROSTER_DIRECTORY_V3 : store + rep dropdowns driven by the FULL store directory (every rep, sales or not) with email auto-fill and auto-loaded ASM + Store Manager. Replaces V1 (which listed only reps who had sales, from rep-roster.json). -->
 <script>
 (function(){
   if (window.__BLUFOX_ROSTER__) return; window.__BLUFOX_ROSTER__ = true;
   var CFG = {"storeId": "storeName", "repId": "repName", "repNameAttr": null, "fieldSel": ".intake-field", "shortStores": false, "lsStore": "bfx_lastStore", "lsRep": "bfx_lastRep", "onStoreChange": null, "onRepChange": null};
   var DIR='https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/store-directory.json';
   var DIRP='https://blufoxmobile.github.io/Daily-Sales-Report/data/store-directory.json';
-  var RST='https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/rep-roster.json';
-  var RSTP='https://blufoxmobile.github.io/Daily-Sales-Report/data/rep-roster.json';
   function L(){try{return window.localStorage}catch(e){return null}}
   function gL(k){var s=L();try{return s?s.getItem(k):null}catch(e){return null}}
   function sL(k,v){var s=L();try{if(s)s.setItem(k,v)}catch(e){}}
@@ -13589,11 +13624,41 @@ document.addEventListener('DOMContentLoaded', function() {
   function toDisplay(full){return CFG.shortStores ? full.replace(/ Xfinity Store$/,'') : full;}
   function call(name){ if(name && typeof window[name]==='function'){ try{window[name]()}catch(e){} } }
 
+  // Roster maps built from store-directory.json (the Admin-Panel-Directory data).
+  var repsByStore={};    // full store -> [{name,email}]  (ALL reps, regardless of sales)
+  var mgrByStore={};     // full store -> Store Manager name
+  var asmByStore={};     // full store -> ASM name (resolved from email) or ASM email
+  var email2name={};     // email(lower) -> person name (reps + store managers)
+
+  function buildMaps(d){
+    var emp=(d&&d.storeEmployees)||{}, smn=(d&&d.storeManagerNames)||{},
+        sm=(d&&d.storeManagers)||{}, am=(d&&d.storeAMs)||{}, amn=(d&&d.storeAMNames)||{};
+    email2name={};
+    Object.keys(emp).forEach(function(s){ (emp[s]||[]).forEach(function(r){
+      if(r&&r.email){ var nm=((r.first||'')+' '+(r.last||'')).trim(); if(nm) email2name[String(r.email).toLowerCase()]=nm; }
+    });});
+    Object.keys(sm).forEach(function(s){ if(sm[s]&&smn[s]) email2name[String(sm[s]).toLowerCase()]=smn[s]; });
+    repsByStore={}; mgrByStore={}; asmByStore={};
+    Object.keys(emp).forEach(function(s){
+      var seen={}, list=[];
+      (emp[s]||[]).forEach(function(r){
+        var nm = (r && typeof r==='object') ? ((r.first||'')+' '+(r.last||'')).trim() : String(r||'').trim();
+        if(!nm) return; var k=nm.toLowerCase(); if(seen[k]) return; seen[k]=1;
+        list.push({ name:nm, email:(r&&r.email)||'' });
+      });
+      list.sort(function(a,b){ return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+      repsByStore[s]=list;
+    });
+    Object.keys(smn).forEach(function(s){ mgrByStore[s]=smn[s]||''; });
+    var amStores={}; Object.keys(am).forEach(function(s){amStores[s]=1;}); Object.keys(amn).forEach(function(s){amStores[s]=1;});
+    Object.keys(amStores).forEach(function(s){ var e=am[s]; asmByStore[s]= amn[s] ? amn[s] : (e ? (email2name[String(e).toLowerCase()]||e) : ''); });
+  }
+
   function go(){
     var storeSel=document.getElementById(CFG.storeId);
     var repEl=document.getElementById(CFG.repId);
     if(!storeSel||!repEl) return;
-    var roster={}, ready=false, rosterLoaded=false;
+    var ready=false, rosterLoaded=false;
     var NEW_HIRE='New Hire';
     var DM_OPT='DM or Director Submission';
     var lastStore = gL(CFG.lsStore) || storeSel.value || '';
@@ -13603,7 +13668,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var labelEl = field.querySelector('label');
     var labelHtml = labelEl ? labelEl.outerHTML : '';
 
-    // Separate existing store options into real stores (fallback) vs special entries (e.g. "DM Submission")
     var fallback=[], special=[];
     Array.prototype.slice.call(storeSel.options).forEach(function(o){
       var v=(o.value||o.textContent||'').trim();
@@ -13611,22 +13675,66 @@ document.addEventListener('DOMContentLoaded', function() {
       if(CFG.shortStores || /xfinity store$/i.test(v)) fallback.push(v); else special.push(v);
     });
 
+    // ── Inject read-only ASM + Store Manager fields after the rep-email field ──
+    function injectMetaFields(){
+      if(document.getElementById('repStoreManager')) return;
+      var emailEl=document.getElementById('repEmail');
+      var wrap = (emailEl && emailEl.closest && emailEl.closest(CFG.fieldSel)) || field;
+      if(!wrap || !wrap.parentNode) return;
+      var exLabel = wrap.querySelector('label');
+      var inputClass = emailEl ? emailEl.className : '';
+      function make(id, text){
+        var div=document.createElement('div');
+        div.className = wrap.className;
+        var lab=document.createElement('label'); lab.textContent=text; if(exLabel) lab.className=exLabel.className;
+        var inp=document.createElement('input'); inp.id=id; inp.type='text'; inp.readOnly=true; inp.tabIndex=-1;
+        inp.className=inputClass; inp.setAttribute('placeholder','—');
+        inp.style.background='#f4f4f6'; inp.style.cursor='default';
+        div.appendChild(lab); div.appendChild(inp); return div;
+      }
+      var mgrDiv=make('repStoreManager','Store Manager');
+      var asmDiv=make('repAsm','ASM (Assistant Store Manager)');
+      wrap.parentNode.insertBefore(mgrDiv, wrap.nextSibling);
+      wrap.parentNode.insertBefore(asmDiv, mgrDiv.nextSibling);
+    }
+    function updateMeta(){
+      var full=toFull(storeSel.value||'');
+      var asmEl=document.getElementById('repAsm'), mgrEl=document.getElementById('repStoreManager');
+      var special = isSpecial(storeSel.value||'');
+      if(mgrEl) mgrEl.value = (!special && mgrByStore[full]) ? mgrByStore[full] : '';
+      if(asmEl) asmEl.value = (!special && asmByStore[full]) ? asmByStore[full] : '';
+    }
+
     function nameAttr(){ return CFG.repNameAttr ? (' name="'+CFG.repNameAttr+'"') : ''; }
     function buildRep(inner){ field.innerHTML = labelHtml + inner; return document.getElementById(CFG.repId); }
+    function autofillEmail(el){
+      try{
+        var opt = el.options && el.options[el.selectedIndex];
+        var em  = opt ? opt.getAttribute('data-email') : '';
+        if(em){
+          var ee=document.getElementById('repEmail');
+          if(ee){ ee.value=em;
+            ee.dispatchEvent(new Event('input',{bubbles:true}));
+            ee.dispatchEvent(new Event('change',{bubbles:true}));
+            if(typeof window.__syncRepEmailSelect==='function') window.__syncRepEmailSelect();
+          }
+        }
+      }catch(e){}
+    }
     function attach(el){
-      el.addEventListener('change', function(){ var v=(el.value||'').trim(); if(v) sL(CFG.lsRep,v); call(CFG.onRepChange); });
-      el.addEventListener('input',  function(){ var v=(el.value||'').trim(); if(v) sL(CFG.lsRep,v); call(CFG.onRepChange); });
+      function onch(){ var v=(el.value||'').trim(); if(v) sL(CFG.lsRep,v); autofillEmail(el); updateMeta(); call(CFG.onRepChange); }
+      el.addEventListener('change', onch);
+      el.addEventListener('input',  onch);
     }
     function repPlaceholder(text){
       var el=buildRep('<select id="'+CFG.repId+'"'+nameAttr()+' autocomplete="name"><option value="">'+esc(text)+'</option></select>');
       el.disabled=true; if(repClass) el.className=repClass; attach(el);
     }
     function repList(reps){
-      // Ensure the two catch-alls are always present at the very bottom, in order.
-      reps = reps.filter(function(n){ return n!==NEW_HIRE && n!==DM_OPT; });
-      reps.push(NEW_HIRE); reps.push(DM_OPT);
+      reps = reps.filter(function(r){ return r.name!==NEW_HIRE && r.name!==DM_OPT; });
       var opts='<option value="">— Select your name —</option>';
-      reps.forEach(function(n){ opts+='<option'+(n===lastRep?' selected':'')+'>'+esc(n)+'</option>'; });
+      reps.forEach(function(r){ opts+='<option data-email="'+esc(r.email||'')+'"'+(r.name===lastRep?' selected':'')+'>'+esc(r.name)+'</option>'; });
+      opts+='<option>'+esc(NEW_HIRE)+'</option><option>'+esc(DM_OPT)+'</option>';
       var el=buildRep('<select id="'+CFG.repId+'"'+nameAttr()+' autocomplete="name">'+opts+'</select>');
       el.disabled=false; if(repClass) el.className=repClass; attach(el);
     }
@@ -13637,12 +13745,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function isSpecial(v){ return special.indexOf(v)!==-1; }
     function refreshRep(){
       var sv=storeSel.value;
-      if(!sv){ repPlaceholder('— Select your store first —'); return; }
-      if(isSpecial(sv)){ repFree(); return; }              // e.g. "DM Submission"
+      if(!sv){ repPlaceholder('— Select your store first —'); updateMeta(); return; }
+      if(isSpecial(sv)){ repFree(); updateMeta(); return; }
       if(!ready){ repPlaceholder('— Loading names… —'); return; }
-      if(!rosterLoaded){ repFree(); return; }              // data unreachable -> type exact name
-      // repList guarantees "New Hire" + "DM or Director Submission" at the bottom.
-      repList((roster[toFull(sv)]||roster[sv]||[]).slice());
+      if(!rosterLoaded){ repFree(); updateMeta(); return; }
+      repList((repsByStore[toFull(sv)]||repsByStore[sv]||[]).slice());
+      updateMeta();
     }
     function fillStores(fullStores){
       var keep=storeSel.value;
@@ -13654,27 +13762,24 @@ document.addEventListener('DOMContentLoaded', function() {
       if(want){ storeSel.value=want; if(storeSel.value!==want) storeSel.value=''; }
     }
 
-    storeSel.addEventListener('change', function(){ sL(CFG.lsStore, storeSel.value); refreshRep(); call(CFG.onStoreChange); });
+    storeSel.addEventListener('change', function(){ sL(CFG.lsStore, storeSel.value); refreshRep(); updateMeta(); call(CFG.onStoreChange); });
 
-    // Initial render from existing/fallback options so the form works offline / pre-fetch
+    injectMetaFields();
     fillStores(CFG.shortStores ? fallback.map(toFull) : fallback.slice());
     refreshRep(); call(CFG.onStoreChange);
 
     var bust='?d='+new Date().toISOString().slice(0,10);
-    function settle(p){ return p.then(function(v){ return v; }, function(){ return null; }); }
     jget(DIR+bust).catch(function(){ return jget(DIRP+bust); })
-      .then(function(d){ if(d&&d.stores&&d.stores.length){ fillStores(d.stores); refreshRep(); call(CFG.onStoreChange); } }).catch(function(){});
-    // The roster lives in two places: the git copy (raw.githubusercontent) and the
-    // GitHub Pages deploy copy. A workflow hiccup can leave either one stale, so
-    // fetch both and keep whichever has the newest updatedAt stamp.
-    Promise.all([settle(jget(RST+bust)), settle(jget(RSTP+bust))]).then(function(rs){
-      var best=null;
-      rs.forEach(function(r){ if(r&&r.byStore&&(!best||String(r.updatedAt||'')>String(best.updatedAt||''))) best=r; });
-      if(best){ roster=best.byStore||{}; rosterLoaded=true; }
-      ready=true; refreshRep(); call(CFG.onStoreChange);
-    });
+      .then(function(d){
+        buildMaps(d);
+        rosterLoaded = Object.keys(repsByStore).length>0;
+        ready=true;
+        var stores = (d&&d.stores&&d.stores.length) ? d.stores : Object.keys(repsByStore);
+        if(stores&&stores.length){ fillStores(stores); }
+        refreshRep(); updateMeta(); call(CFG.onStoreChange);
+      })
+      .catch(function(){ ready=true; refreshRep(); });
   }
-  // Put Store before Rep so reps pick their store first (runs immediately, no flicker).
   function reorder(){
     var storeSel=document.getElementById(CFG.storeId);
     var repEl=document.getElementById(CFG.repId);
@@ -13682,7 +13787,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var sf=(storeSel.closest && storeSel.closest(CFG.fieldSel)) || storeSel.parentNode;
     var rf=(repEl.closest && repEl.closest(CFG.fieldSel)) || repEl.parentNode;
     if(sf && rf && sf!==rf && sf.parentNode && sf.parentNode===rf.parentNode){
-      rf.parentNode.insertBefore(sf, rf);   // store field now precedes rep field
+      rf.parentNode.insertBefore(sf, rf);
     }
   }
   try{ reorder(); }catch(e){}
