@@ -1366,7 +1366,6 @@ const PHONES = [
   { name: "Apple iPhone Air", price: 999.99, storage: [ { gb: "256GB", price: 999.99 }, { gb: "512GB", price: 1199.99 }, { gb: "1TB", price: 1399.99 } ] },
   { name: "Apple iPhone 17e", price: 599.99, storage: [ { gb: "256GB", price: 599.99 }, { gb: "512GB", price: 799.99 } ] },
   { name: "Apple iPhone 16", price: 729.99, storage: [ { gb: "128GB", price: 729.99 } ] },
-  { name: "Apple iPhone 16e", price: 499.99, storage: [ { gb: "128GB", price: 499.99 } ] },
   { name: "Apple iPhone 15", price: 629.99, storage: [ { gb: "128GB", price: 629.99 } ] },
   // Samsung
   { name: "Samsung Galaxy Z Fold8 Ultra", price: 2099.99, storage: [ { gb: "256GB", price: 2099.99 }, { gb: "512GB", price: 2299.99 } ] },
@@ -1375,7 +1374,6 @@ const PHONES = [
   { name: "Samsung Galaxy S26 Ultra", price: 1299.99, storage: [ { gb: "256GB", price: 1299.99 }, { gb: "512GB", price: 1499.99 } ] },
   { name: "Samsung Galaxy S26+", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1299.99 } ] },
   { name: "Samsung Galaxy S26", price: 899.99, storage: [ { gb: "256GB", price: 899.99 }, { gb: "512GB", price: 1099.99 } ] },
-  { name: "Samsung Galaxy S25 Ultra", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 } ] },
   { name: "Samsung Galaxy S25 Edge", price: 899.99, storage: [ { gb: "256GB", price: 899.99 } ] },
   { name: "Samsung Galaxy S25 FE", price: 649.99, storage: [ { gb: "128GB", price: 649.99 } ] },
   { name: "Samsung Galaxy S25", price: 799.99, storage: [ { gb: "128GB", price: 799.99 } ] },
@@ -1383,7 +1381,6 @@ const PHONES = [
   { name: "Samsung Galaxy Z Flip7", price: 1099.99, storage: [ { gb: "256GB", price: 1099.99 }, { gb: "512GB", price: 1219.99 } ] },
   { name: "Samsung Galaxy Z Flip7 FE", price: 899.99, storage: [ { gb: "128GB", price: 899.99 } ] },
   { name: "Samsung Galaxy A37 5G", price: 449.99, storage: [ { gb: "128GB", price: 449.99 } ] },
-  { name: "Samsung Galaxy A36 5G", price: 399.99, storage: [ { gb: "128GB", price: 399.99 } ] },
   { name: "Samsung Galaxy A27 5G", price: 349.99, storage: [ { gb: "128GB", price: 349.99 } ] },
   { name: "Samsung Galaxy A26 5G", price: 299.99, storage: [ { gb: "128GB", price: 299.99 } ] },
   { name: "Samsung Galaxy A17 5G", price: 199.99, storage: [ { gb: "128GB", price: 199.99 } ] },
@@ -1404,6 +1401,13 @@ const PHONES = [
   { name: "Motorola moto g stylus - 2025", price: 289.99, storage: [ { gb: "128GB", price: 289.99 } ] },
   { name: "Motorola moto g - 2026", price: 249.99, storage: [ { gb: "128GB", price: 249.99 } ] },
   { name: "Motorola moto g play - 2026", price: 179.99, storage: [ { gb: "64GB", price: 179.99 } ] },
+  // Google
+  { name: "Google Pixel 11", price: 899.00, storage: [ { gb: "256GB", price: 899.00 }, { gb: "512GB", price: 1019.00 } ] },
+  { name: "Google Pixel 11 Pro", price: 1099.00, storage: [ { gb: "256GB", price: 1099.00 }, { gb: "512GB", price: 1219.00 } ] },
+  { name: "Google Pixel 11 Pro XL", price: 1299.00, storage: [ { gb: "256GB", price: 1299.00 }, { gb: "512GB", price: 1419.00 } ] },
+  { name: "Google Pixel 11 Pro Fold", price: 1899.00, storage: [ { gb: "256GB", price: 1899.00 } ] },
+  // Motorola
+  { name: "Motorola razr fold - 2026", price: 1699.99, storage: [ { gb: "512GB", price: 1699.99 } ] },
 ];
 
 // ══════════════════════════════════════════════════════════════════════
@@ -1428,7 +1432,13 @@ const PHONES = [
 const AUTO_DISCOUNT_PHONES = {
   // Re-keyed 2026-07-22 from DEALS18. $200 off — Apple + Motorola + Google Pixel
   // (Google moved from the old $450 tier to $200 this cycle).
+  // NEW: Pixel 11 series + razr fold added to $200 upgrade-anytime tier
   200: [
+    'Google Pixel 11',
+    'Google Pixel 11 Pro',
+    'Google Pixel 11 Pro XL',
+    'Google Pixel 11 Pro Fold',
+    'Motorola razr fold - 2026',
     'Apple iPhone 15',
     'Apple iPhone 15 Plus',
     'Apple iPhone 15 Pro',
@@ -1993,6 +2003,20 @@ const IPHONE17E_PRICE_799  = 799.99;
 // ══════════════════════════════════════════════════════════════════════
 function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan) {
   if (phonePrice <= 0) return { promoAmt: 0, promoLabel: '' };
+
+  // Diamond-only iPhone 17 Pro / Pro Max (existing-line upgrades). TIPs w/ trade:
+  // iPhone 17 Pro 'On Us' or up to $1,100 off Pro Max. No trade: $400 off. Diamond only.
+  var _dn = (phoneName || '').toLowerCase();
+  var _isDiamond = (typeof state !== 'undefined' && state && String(state.tier).toLowerCase() === 'diamond');
+  if (_isDiamond && /iphone 17 pro/.test(_dn)) {
+    var _isMax = /pro max/.test(_dn);
+    var _tr = noTrade ? 0 : (parseFloat(tradeValue) || 0);
+    if (!noTrade) {
+      if (_isMax) { var _amt = Math.min(_tr > 0 ? _tr : 1100, 1100, phonePrice); return { promoAmt: _amt, promoLabel: 'Diamond TIPs: up to $1,100 off Pro Max (w/ trade-in)' }; }
+      return { promoAmt: phonePrice, promoLabel: "Diamond TIPs: iPhone 17 Pro 'On Us' (w/ trade-in)" };
+    }
+    return { promoAmt: Math.min(400, phonePrice), promoLabel: 'Diamond: $400 off iPhone 17 Pro/Pro Max (no trade-in)' };
+  }
 
   var autoDiscount = getAutoDiscount(phoneName);
   if (autoDiscount <= 0) return { promoAmt: 0, promoLabel: '' };
