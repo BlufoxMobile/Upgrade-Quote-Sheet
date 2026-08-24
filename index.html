@@ -546,7 +546,7 @@
   /* ── 8-BLOCK INFO BAR ── */
   .preview-info-bar-8 {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     border-bottom: 1px solid var(--border);
   }
   .preview-info-bar-8 .pib-block {
@@ -567,7 +567,7 @@
     .preview-info-bar-8 .pib-block:nth-child(n+7) { border-bottom: none; }
   }
   @media print {
-    .preview-info-bar-8 { grid-template-columns: repeat(4, 1fr); }
+    .preview-info-bar-8 { grid-template-columns: repeat(3, 1fr); }
   }
   .preview-section-title {
     font-family: 'Outfit', sans-serif;
@@ -852,10 +852,6 @@
   <div class="rep-info-rows">
     <div class="rep-info-row">
       <div class="intake-field">
-        <label>Rep Name <span style="color:#e53935;">*</span></label>
-        <input type="text" id="repName" autocomplete="off" placeholder="Your name">
-      </div>
-      <div class="intake-field">
         <label>Store Name <span style="color:#e53935;">*</span></label>
         <select id="storeName" onchange="updatePreview(); if(typeof persistRepData==='function') persistRepData();">
           <option value="">— Select your store —</option>
@@ -889,6 +885,10 @@
           <option>DM Submission</option>
         </select>
       </div>
+      <div class="intake-field">
+        <label>Rep Name <span style="color:#e53935;">*</span></label>
+        <input type="text" id="repName" autocomplete="off" placeholder="Your name">
+      </div>
     </div>
     <div class="rep-info-row">
       <div class="intake-field">
@@ -903,21 +903,12 @@
   </div>
 </div>
 
-<!-- CUSTOMER INFORMATION (mirrors Mobile Quote Sheet structure: rep-info-rows > rep-info-row > intake-field) -->
-<div class="intake-section" id="sec-customer">
-  <div class="intake-section-title">Customer Information</div>
-  <div class="rep-info-rows">
-    <div class="rep-info-row">
-      <div class="intake-field">
-        <label>Customer Name</label>
-        <input type="text" id="customerFirstName" placeholder="Full name (optional)" autocomplete="off" oninput="updatePreview()">
-      </div>
-      <div class="intake-field">
-        <label>Phone Number</label>
-        <input type="tel" id="customerPhone" placeholder="(XXX)XXX-XXXX" autocomplete="off" oninput="updatePreview()">
-      </div>
-    </div>
-  </div>
+<!-- Customer Information is no longer collected — reps shouldn't have to type
+     it. The inputs remain as hidden fields so existing JS and the submission
+     payload keep working; they simply always submit blank. -->
+<div class="intake-section" id="sec-customer" style="display:none;">
+  <input type="hidden" id="customerFirstName">
+  <input type="hidden" id="customerPhone">
   <!-- Today's date is auto-populated and submitted with the quote, but hidden from the rep's view to keep the form simple -->
   <input type="text" id="todayDate" class="readonly-date" style="display:none;" readonly>
 </div>
@@ -1113,16 +1104,18 @@
     <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:white;" id="previewCustomerName"></div>
   </div>
 
-  <!-- ── INFO BAR (8 blocks: customer info + rep info) ── -->
+  <!-- ── INFO BAR (6 visible blocks: rep info + tier/plan) ──
+       Customer name/phone are no longer collected; their value holders stay
+       in the DOM (hidden) so the existing JS that writes them keeps working. -->
   <div class="preview-info-bar-8">
-    <div class="pib-block"><div class="pib-label">👤 Customer</div><div class="pib-value" id="pib-customer">—</div></div>
-    <div class="pib-block"><div class="pib-label">📞 Phone</div><div class="pib-value" id="pib-phone">—</div></div>
-    <div class="pib-block"><div class="pib-label">⭐ Reward Tier</div><div class="pib-value" id="pib-tier">—</div></div>
-    <div class="pib-block"><div class="pib-label">📶 Current Plan</div><div class="pib-value" id="pib-plan">—</div></div>
-    <div class="pib-block"><div class="pib-label">🏷️ Rep Name</div><div class="pib-value" id="pib-repName">—</div></div>
+    <div class="pib-block" style="display:none;"><div class="pib-label">👤 Customer</div><div class="pib-value" id="pib-customer">—</div></div>
+    <div class="pib-block" style="display:none;"><div class="pib-label">📞 Phone</div><div class="pib-value" id="pib-phone">—</div></div>
     <div class="pib-block"><div class="pib-label">🏪 Store</div><div class="pib-value" id="pib-store">—</div></div>
+    <div class="pib-block"><div class="pib-label">🏷️ Rep Name</div><div class="pib-value" id="pib-repName">—</div></div>
+    <div class="pib-block"><div class="pib-label">⭐ Reward Tier</div><div class="pib-value" id="pib-tier">—</div></div>
     <div class="pib-block"><div class="pib-label">✉️ Rep Email</div><div class="pib-value" id="pib-repEmail">—</div></div>
     <div class="pib-block"><div class="pib-label">📱 Rep Phone</div><div class="pib-value" id="pib-repPhone">—</div></div>
+    <div class="pib-block"><div class="pib-label">📶 Current Plan</div><div class="pib-value" id="pib-plan">—</div></div>
   </div>
 
   <!-- ══════════════════════════════════════════════
