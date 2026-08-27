@@ -5098,7 +5098,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════
-   LIVE SUBMISSION TRACKER — added 2026-08-27
+   LIVE SUBMISSION TRACKER — added 2026-08-27, trigger reworked 2026-08-27
    ──────────────────────────────────────────────────────────────────────
    Shows how many t-sheets the selected store has logged today and MTD,
    broken out per rep, so the floor can see the count move as they submit.
@@ -5112,9 +5112,22 @@ document.addEventListener('DOMContentLoaded', function() {
    is ALL t-sheet submissions for the store (6th Gen + Upgrade combined).
    Both sheets therefore show the same number, by design.
 
-   Polling is deliberately gentle: one fetch on store select, then every
-   90s only while the tab is visible and a store is chosen, plus a nudge
-   after this rep submits. Apps Script has daily quotas — do not lower.
+   ── WHY THERE IS A VALUE WATCHER ──────────────────────────────────────
+   The first build keyed off a delegated 'change' listener on #storeName
+   and got stuck on whichever store was picked first. rep-picker.js
+   rebuilds the rep/store controls via outerHTML, which destroys and
+   recreates the node in the same tick the change event fires — so the
+   handler could read the half-rebuilt select, see an empty value, bail
+   out early and (worse) stop the refresh timer, leaving the panel frozen
+   on the previously painted store.
+
+   The fix does not rely on the event at all. A cheap 400ms watcher
+   compares the select's current value against the last store painted and
+   re-renders on any difference — immune to swallowed events, node
+   replacement, and values set programmatically by other code. The change
+   listener is kept only as an instant-feedback fast path, and the watcher
+   is a SEPARATE timer from the network poll so an empty read can never
+   stop it.
    ══════════════════════════════════════════════════════════════════════ */
 var SubTracker = (function () {
   'use strict';
@@ -5125,14 +5138,18 @@ var SubTracker = (function () {
     ? APPS_SCRIPT_URL
     : 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
 
-  var POLL_MS      = 90000;  // background refresh cadence while visible
-  var CACHE_MS     = 30000;  // reuse the last payload for this long (store switches are free)
+  var POLL_MS       = 90000; // background data refresh while visible
+  var WATCH_MS      = 400;   // store/rep value watcher (no network — string compare)
+  var CACHE_MS      = 30000; // reuse the last payload this long (store switches are free)
   var FETCH_TIMEOUT = 15000;
 
   var cache = null;          // last successful submissions array
   var cacheAt = 0;           // timestamp of that payload
   var inFlight = null;       // de-dupes concurrent fetches
-  var timer = null;
+  var pollTimer = null;      // network refresh
+  var watchTimer = null;     // value watcher — ALWAYS on, never stopped
+  var lastStore = null;      // last store actually painted
+  var lastRep = null;        // last rep name actually painted
   var lastError = false;
 
   // ── Store name normalization ───────────────────────────────────────
@@ -5145,6 +5162,7 @@ var SubTracker = (function () {
     var s = String(raw == null ? '' : raw).trim().replace(/\s+/g, ' ');
     if (!s) return '';
     s = s.replace(/\s*Xfinity\s+Store\s*$/i, '');
+    if (!s) return '';
     var low = s.toLowerCase();
     if (STORE_ALIASES[low]) s = STORE_ALIASES[low];
     return s + ' Xfinity Store';
@@ -5152,13 +5170,25 @@ var SubTracker = (function () {
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-
   function el(id) { return document.getElementById(id); }
-  function selectedStore() { var n = el('storeName'); return n ? normStore(n.value) : ''; }
-  function selectedRep() {
-    var n = el('repName');
-    return n ? String(n.value || '').trim().toLowerCase() : '';
+
+  // Read live from the DOM every time — the node may have been replaced.
+  function selectedStore() {
+    var n = el('storeName');
+    if (!n) return '';
+    var v = String(n.value || '').trim();
+    // Guard against placeholder rows like "— Select your store —".
+    if (!v || v.charAt(0) === '—' || v.charAt(0) === '-') return '';
+    return normStore(v);
   }
+  function selectedRepRaw() {
+    var n = el('repName');
+    if (!n) return '';
+    var v = String(n.value || '').trim();
+    if (!v || v.charAt(0) === '—' || v.charAt(0) === '-') return '';
+    return v;
+  }
+  function selectedRep() { return selectedRepRaw().toLowerCase(); }
 
   // ── Fetch (shared promise so a store change mid-flight doesn't double up) ──
   function load(force) {
@@ -5238,8 +5268,7 @@ var SubTracker = (function () {
   }
 
   function paint(counts, store) {
-    var section = el('sec-subtracker');
-    if (!section) return;
+    if (!el('sec-subtracker')) return;
 
     el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
 
@@ -5247,21 +5276,18 @@ var SubTracker = (function () {
     t.textContent = counts.today; t.className = 'subtrk-total-value' + (counts.today ? '' : ' zero');
     m.textContent = counts.mtd;   m.className = 'subtrk-total-value' + (counts.mtd   ? '' : ' zero');
 
-    var you = selectedRep();
+    var youRaw = selectedRepRaw();
+    var you = youRaw.toLowerCase();
     var names = Object.keys(counts.reps);
 
     // Always show the current rep, even at zero, so they can watch their own
     // number move the moment they submit.
-    var youDisplay = null;
-    if (you) {
-      var matched = null;
+    if (youRaw) {
+      var matched = false;
       for (var i = 0; i < names.length; i++) {
-        if (names[i].toLowerCase() === you) { matched = names[i]; break; }
+        if (names[i].toLowerCase() === you) { matched = true; break; }
       }
-      if (!matched) {
-        youDisplay = (el('repName').value || '').trim();
-        if (youDisplay) { names.push(youDisplay); counts.reps[youDisplay] = { today: 0, mtd: 0 }; }
-      }
+      if (!matched) { names.push(youRaw); counts.reps[youRaw] = { today: 0, mtd: 0 }; }
     }
 
     names.sort(function (a, b) {
@@ -5290,6 +5316,9 @@ var SubTracker = (function () {
     el('subtrk-sync').textContent = 'Updated ' + stamp.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
       + (lastError ? ' · reconnecting' : '');
     setStatus(lastError ? 'error' : 'ok', lastError ? 'Offline' : 'Live');
+
+    lastStore = store;
+    lastRep = you;
   }
 
   // ── Public API ─────────────────────────────────────────────────────
@@ -5298,35 +5327,63 @@ var SubTracker = (function () {
     if (!section) return;
 
     var store = selectedStore();
-    if (!store || store === ' Xfinity Store') { section.style.display = 'none'; stopPolling(); return; }
+    if (!store) {
+      section.style.display = 'none';
+      stopPolling();          // no data to refresh — the WATCHER keeps running
+      lastStore = null;
+      return;
+    }
     section.style.display = '';
+
+    // Repaint the header immediately so the card never shows the previous
+    // store's name while the numbers are still resolving.
+    el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
+    if (store !== lastStore) setStatus('loading', 'Syncing…');
 
     var btn = el('subtrk-refresh');
     if (btn) btn.disabled = true;
 
     load(force)
-      .then(function (rows) { paint(tally(rows, store), store); })
+      .then(function (rows) {
+        // Re-read: the rep may have switched stores again while this resolved.
+        var current = selectedStore() || store;
+        paint(tally(rows, current), current);
+      })
       .catch(function () {
-        // Render from the stale cache if we have one; otherwise show the shell.
-        if (cache) paint(tally(cache, store), store);
+        var current = selectedStore() || store;
+        if (cache) paint(tally(cache, current), current);
         else {
           el('subtrk-reps').innerHTML = '<div class="subtrk-empty">Can\'t reach the submission feed right now — the count will fill in once it reconnects.</div>';
           setStatus('error', 'Offline');
           el('subtrk-sync').textContent = 'Retrying…';
+          lastStore = store;
         }
       })
       .then(function () { if (btn) btn.disabled = false; startPolling(); });
   }
 
   function startPolling() {
-    if (timer) return;
-    timer = setInterval(function () {
-      if (document.hidden) return;          // don't burn quota on a backgrounded tab
+    if (pollTimer) return;
+    pollTimer = setInterval(function () {
+      if (document.hidden) return;      // don't burn quota on a backgrounded tab
       if (!selectedStore()) return;
       render(true);
     }, POLL_MS);
   }
-  function stopPolling() { if (timer) { clearInterval(timer); timer = null; } }
+  function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
+  // The watcher is the real trigger. It never stops, costs one string compare
+  // per tick, and only re-renders when the store or rep actually changed.
+  // Store change → re-render (served from cache, usually no network).
+  // Rep change   → repaint only, so the "You" highlight follows the name.
+  function startWatching() {
+    if (watchTimer) return;
+    watchTimer = setInterval(function () {
+      var store = selectedStore();
+      if (store !== lastStore) { render(false); return; }
+      if (store && selectedRep() !== lastRep && cache) paint(tally(cache, store), store);
+    }, WATCH_MS);
+  }
 
   // Called right after a confirmed submit. Apps Script needs a moment to append
   // the row, so nudge twice rather than racing it once.
@@ -5336,27 +5393,20 @@ var SubTracker = (function () {
   }
 
   function init() {
-    // NOTE: rep-picker.js REPLACES the #repName node when the store changes —
-    // it swaps the free-text input for a per-store <select> of that store's reps.
-    // Binding listeners to the node directly would lose them on the first swap,
-    // so both fields are handled by delegation on document, which survives it.
+    // Fast path only — the watcher above is what actually guarantees the
+    // update. Deferred a tick because rep-picker.js may still be swapping the
+    // control out via outerHTML when this fires.
     document.addEventListener('change', function (e) {
       var t = e.target;
       if (!t || !t.id) return;
-      if (t.id === 'storeName') render(false);
-      // Re-paint from cache so the "You" highlight follows the selected name.
-      else if (t.id === 'repName' && cache) render(false);
-    });
-    // 'focusout', not 'blur' — blur does not bubble, so it never reaches document.
-    document.addEventListener('focusout', function (e) {
-      if (e.target && e.target.id === 'repName' && cache) render(false);
+      if (t.id === 'storeName' || t.id === 'repName') setTimeout(function () { render(false); }, 0);
     });
 
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden && selectedStore() && (Date.now() - cacheAt) > CACHE_MS) render(true);
     });
 
-    // A store may already be restored by the rep-info persistence layer.
+    startWatching();
     if (selectedStore()) render(false);
   }
 
