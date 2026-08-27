@@ -797,7 +797,92 @@
      the row markup).
      ────────────────────────────────────────────────────────────────── */
   .upgrade-premium-toggle { display: none !important; }
-</style>
+
+  /* ══════════════════════════════════════════════════════════════
+     LIVE SUBMISSION TRACKER  (added 2026-08-27)
+     Store-scoped daily/MTD submission counts pulled from the
+     T-Sheet-Submissions Apps Script feed. Appears once a store is
+     selected in the Rep Information section above.
+     ══════════════════════════════════════════════════════════════ */
+  #sec-subtracker { margin-bottom: 36px; }
+  .subtrk-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .subtrk-head {
+    background: linear-gradient(135deg, var(--xfinity-purple-dark) 0%, var(--xfinity-purple) 100%);
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .subtrk-store {
+    font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700;
+    color: #fff; letter-spacing: 0.3px; line-height: 1.2;
+  }
+  .subtrk-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.85); }
+  .subtrk-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--xfinity-green); flex-shrink: 0; }
+  .subtrk-dot.loading { background: var(--xfinity-gold, #F5A623); animation: subtrkPulse 1s ease-in-out infinite; }
+  .subtrk-dot.error   { background: #e53935; }
+  @keyframes subtrkPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .subtrk-totals { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+  .subtrk-total { background: var(--surface-2); padding: 14px 18px; text-align: center; }
+  .subtrk-total-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 2px;
+  }
+  .subtrk-total-value {
+    font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 800;
+    color: var(--xfinity-purple); line-height: 1.05;
+  }
+  .subtrk-total-value.zero { color: var(--text-muted); }
+
+  .subtrk-reps { padding: 4px 0 6px; }
+  .subtrk-rep-head {
+    display: grid; grid-template-columns: 1fr 58px 58px; gap: 8px;
+    padding: 8px 18px 6px; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .subtrk-rep-row {
+    display: grid; grid-template-columns: 1fr 58px 58px; gap: 8px;
+    padding: 9px 18px; align-items: center; font-size: 13px;
+    border-bottom: 1px solid var(--surface-3);
+  }
+  .subtrk-rep-row:last-child { border-bottom: none; }
+  .subtrk-rep-row.is-you { background: var(--surface-3); }
+  .subtrk-rep-name { font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .subtrk-rep-row.is-you .subtrk-rep-name { color: var(--xfinity-purple); }
+  .subtrk-you-tag {
+    display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 50px;
+    background: var(--xfinity-purple); color: #fff; font-family: 'Outfit', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .subtrk-rep-num { text-align: center; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px; color: var(--text-primary); }
+  .subtrk-rep-num.zero { color: var(--text-muted); font-weight: 600; }
+  .subtrk-empty { padding: 18px; text-align: center; font-size: 13px; color: var(--text-muted); }
+  .subtrk-foot {
+    padding: 8px 18px; border-top: 1px solid var(--border); background: var(--surface-2);
+    font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  }
+  .subtrk-refresh {
+    background: none; border: none; color: var(--xfinity-purple); font-family: inherit;
+    font-size: 11px; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;
+  }
+  .subtrk-refresh:disabled { color: var(--text-muted); cursor: default; text-decoration: none; }
+  @media (max-width: 560px) {
+    .subtrk-totals { grid-template-columns: 1fr 1fr; }
+    .subtrk-total-value { font-size: 26px; }
+    .subtrk-rep-head, .subtrk-rep-row { grid-template-columns: 1fr 46px 46px; padding-left: 14px; padding-right: 14px; }
+  }
+
+  </style>
 <!-- PDF generation libs (used by handleEmailPDF / handlePrint for iPad-friendly sharing & downloads) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -906,6 +991,37 @@
 <!-- Customer Information is no longer collected — reps shouldn't have to type
      it. The inputs remain as hidden fields so existing JS and the submission
      payload keep working; they simply always submit blank. -->
+      <!-- ── LIVE SUBMISSION TRACKER (added 2026-08-27) ──
+           Hidden until a store is chosen above. Counts come from the
+           T-Sheet-Submissions Apps Script feed — the same endpoint this
+           sheet posts to — so the number moves as the store submits. -->
+      <div class="intake-section" id="sec-subtracker" style="display:none;">
+        <div class="intake-section-title">📊 Store Submissions</div>
+        <div class="subtrk-card">
+          <div class="subtrk-head">
+            <div class="subtrk-store" id="subtrk-store">—</div>
+            <div class="subtrk-status">
+              <span class="subtrk-dot loading" id="subtrk-dot"></span>
+              <span id="subtrk-status-text">Loading…</span>
+            </div>
+          </div>
+          <div class="subtrk-totals">
+            <div class="subtrk-total">
+              <div class="subtrk-total-label">Today</div>
+              <div class="subtrk-total-value zero" id="subtrk-today">0</div>
+            </div>
+            <div class="subtrk-total">
+              <div class="subtrk-total-label">Month to Date</div>
+              <div class="subtrk-total-value zero" id="subtrk-mtd">0</div>
+            </div>
+          </div>
+          <div class="subtrk-reps" id="subtrk-reps" aria-live="polite"></div>
+          <div class="subtrk-foot">
+            <span id="subtrk-sync">—</span>
+            <button type="button" class="subtrk-refresh" id="subtrk-refresh" onclick="SubTracker.refresh(true)">Refresh</button>
+          </div>
+        </div>
+      </div>
 <div class="intake-section" id="sec-customer" style="display:none;">
   <input type="hidden" id="customerFirstName">
   <input type="hidden" id="customerPhone">
@@ -4364,6 +4480,8 @@ async function handleSubmit() {
     if (btn) {
       if (result && result.delivered === true) {
         btn.innerHTML = '✅ Submitted!';
+        // Refresh the store submission tracker so the rep sees their count move.
+        try { SubTracker.bump(); } catch (e) {}
         btn.style.background = 'linear-gradient(135deg, #00C853, #00E676)';
         setTimeout(() => {
           resetBtn();
@@ -4975,6 +5093,277 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function boot(){ setTimeout(init, 450); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   LIVE SUBMISSION TRACKER — added 2026-08-27
+   ──────────────────────────────────────────────────────────────────────
+   Shows how many t-sheets the selected store has logged today and MTD,
+   broken out per rep, so the floor can see the count move as they submit.
+
+   DATA SOURCE: the same Google Apps Script web app this sheet POSTs to
+   (APPS_SCRIPT_URL). A GET returns { success, submissions: [ ... ] } where
+   each row carries { store, rep_name, timestamp, ... } — the identical
+   contract the T-Sheet-Submissions dashboard reads.
+
+   The feed does NOT tag which sheet a submission came from, so this count
+   is ALL t-sheet submissions for the store (6th Gen + Upgrade combined).
+   Both sheets therefore show the same number, by design.
+
+   Polling is deliberately gentle: one fetch on store select, then every
+   90s only while the tab is visible and a store is chosen, plus a nudge
+   after this rep submits. Apps Script has daily quotas — do not lower.
+   ══════════════════════════════════════════════════════════════════════ */
+var SubTracker = (function () {
+  'use strict';
+
+  // Reuse the submit endpoint when it is defined; the literal is a fallback
+  // so the tracker still works if the const is ever renamed or moved.
+  var FEED_URL = (typeof APPS_SCRIPT_URL === 'string' && APPS_SCRIPT_URL)
+    ? APPS_SCRIPT_URL
+    : 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
+
+  var POLL_MS      = 90000;  // background refresh cadence while visible
+  var CACHE_MS     = 30000;  // reuse the last payload for this long (store switches are free)
+  var FETCH_TIMEOUT = 15000;
+
+  var cache = null;          // last successful submissions array
+  var cacheAt = 0;           // timestamp of that payload
+  var inFlight = null;       // de-dupes concurrent fetches
+  var timer = null;
+  var lastError = false;
+
+  // ── Store name normalization ───────────────────────────────────────
+  // The dropdown emits the canonical "X Xfinity Store" form, but the live
+  // feed still carries legacy spellings (a bare "Machesney Park" and a
+  // pre-2026 "Skokie Xfinity Store"). Mirrors normalizeStoreName() in the
+  // T-Sheet-Submissions dashboard so both agree on which rows belong where.
+  var STORE_ALIASES = { 'skokie': 'South Skokie', 'knoxville': 'South Knoxville' };
+  function normStore(raw) {
+    var s = String(raw == null ? '' : raw).trim().replace(/\s+/g, ' ');
+    if (!s) return '';
+    s = s.replace(/\s*Xfinity\s+Store\s*$/i, '');
+    var low = s.toLowerCase();
+    if (STORE_ALIASES[low]) s = STORE_ALIASES[low];
+    return s + ' Xfinity Store';
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+
+  function el(id) { return document.getElementById(id); }
+  function selectedStore() { var n = el('storeName'); return n ? normStore(n.value) : ''; }
+  function selectedRep() {
+    var n = el('repName');
+    return n ? String(n.value || '').trim().toLowerCase() : '';
+  }
+
+  // ── Fetch (shared promise so a store change mid-flight doesn't double up) ──
+  function load(force) {
+    var fresh = cache && (Date.now() - cacheAt) < CACHE_MS;
+    if (fresh && !force) return Promise.resolve(cache);
+    if (inFlight) return inFlight;
+
+    setStatus('loading', 'Syncing…');
+
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var killer = setTimeout(function () { if (ctrl) ctrl.abort(); }, FETCH_TIMEOUT);
+
+    inFlight = fetch(FEED_URL + '?t=' + Date.now(), {
+      method: 'GET',
+      cache: 'no-store',
+      signal: ctrl ? ctrl.signal : undefined
+    })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        if (!data || data.success === false) throw new Error((data && data.error) || 'Feed error');
+        cache = Array.isArray(data.submissions) ? data.submissions : [];
+        cacheAt = Date.now();
+        lastError = false;
+        return cache;
+      })
+      .catch(function (err) {
+        lastError = true;
+        // Keep whatever numbers are already on screen rather than zeroing them —
+        // a blank tile during a blip reads as "nobody has submitted today".
+        console.warn('[SubTracker] feed unavailable:', err && err.message);
+        throw err;
+      })
+      .then(function (v) { clearTimeout(killer); inFlight = null; return v; },
+            function (e) { clearTimeout(killer); inFlight = null; throw e; });
+
+    return inFlight;
+  }
+
+  // ── Counting ───────────────────────────────────────────────────────
+  function tally(rows, store) {
+    var today = dayKey(new Date());
+    var now = new Date();
+    var out = { today: 0, mtd: 0, reps: {} };
+    if (!rows) return out;
+
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      if (!s || normStore(s.store) !== store) continue;
+
+      var d = new Date(s.timestamp);
+      if (isNaN(d.getTime())) continue;
+      if (d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) continue;
+
+      var isToday = dayKey(d) === today;
+      out.mtd++;
+      if (isToday) out.today++;
+
+      var rep = String(s.rep_name == null ? '' : s.rep_name).trim() || '(unknown)';
+      if (!out.reps[rep]) out.reps[rep] = { today: 0, mtd: 0 };
+      out.reps[rep].mtd++;
+      if (isToday) out.reps[rep].today++;
+    }
+    return out;
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────────
+  function setStatus(kind, text) {
+    var dot = el('subtrk-dot'), txt = el('subtrk-status-text');
+    if (dot) dot.className = 'subtrk-dot' + (kind === 'ok' ? '' : ' ' + kind);
+    if (txt) txt.textContent = text;
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function paint(counts, store) {
+    var section = el('sec-subtracker');
+    if (!section) return;
+
+    el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
+
+    var t = el('subtrk-today'), m = el('subtrk-mtd');
+    t.textContent = counts.today; t.className = 'subtrk-total-value' + (counts.today ? '' : ' zero');
+    m.textContent = counts.mtd;   m.className = 'subtrk-total-value' + (counts.mtd   ? '' : ' zero');
+
+    var you = selectedRep();
+    var names = Object.keys(counts.reps);
+
+    // Always show the current rep, even at zero, so they can watch their own
+    // number move the moment they submit.
+    var youDisplay = null;
+    if (you) {
+      var matched = null;
+      for (var i = 0; i < names.length; i++) {
+        if (names[i].toLowerCase() === you) { matched = names[i]; break; }
+      }
+      if (!matched) {
+        youDisplay = (el('repName').value || '').trim();
+        if (youDisplay) { names.push(youDisplay); counts.reps[youDisplay] = { today: 0, mtd: 0 }; }
+      }
+    }
+
+    names.sort(function (a, b) {
+      var A = counts.reps[a], B = counts.reps[b];
+      return (B.today - A.today) || (B.mtd - A.mtd) || a.localeCompare(b);
+    });
+
+    var box = el('subtrk-reps');
+    if (!names.length) {
+      box.innerHTML = '<div class="subtrk-empty">No submissions logged for this store yet this month.</div>';
+    } else {
+      var html = '<div class="subtrk-rep-head"><span>Rep</span><span style="text-align:center;">Today</span><span style="text-align:center;">MTD</span></div>';
+      for (var j = 0; j < names.length; j++) {
+        var n = names[j], c = counts.reps[n];
+        var mine = you && n.toLowerCase() === you;
+        html += '<div class="subtrk-rep-row' + (mine ? ' is-you' : '') + '">'
+              +   '<span class="subtrk-rep-name">' + esc(n) + (mine ? '<span class="subtrk-you-tag">You</span>' : '') + '</span>'
+              +   '<span class="subtrk-rep-num' + (c.today ? '' : ' zero') + '">' + c.today + '</span>'
+              +   '<span class="subtrk-rep-num' + (c.mtd   ? '' : ' zero') + '">' + c.mtd   + '</span>'
+              + '</div>';
+      }
+      box.innerHTML = html;
+    }
+
+    var stamp = new Date(cacheAt || Date.now());
+    el('subtrk-sync').textContent = 'Updated ' + stamp.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+      + (lastError ? ' · reconnecting' : '');
+    setStatus(lastError ? 'error' : 'ok', lastError ? 'Offline' : 'Live');
+  }
+
+  // ── Public API ─────────────────────────────────────────────────────
+  function render(force) {
+    var section = el('sec-subtracker');
+    if (!section) return;
+
+    var store = selectedStore();
+    if (!store || store === ' Xfinity Store') { section.style.display = 'none'; stopPolling(); return; }
+    section.style.display = '';
+
+    var btn = el('subtrk-refresh');
+    if (btn) btn.disabled = true;
+
+    load(force)
+      .then(function (rows) { paint(tally(rows, store), store); })
+      .catch(function () {
+        // Render from the stale cache if we have one; otherwise show the shell.
+        if (cache) paint(tally(cache, store), store);
+        else {
+          el('subtrk-reps').innerHTML = '<div class="subtrk-empty">Can\'t reach the submission feed right now — the count will fill in once it reconnects.</div>';
+          setStatus('error', 'Offline');
+          el('subtrk-sync').textContent = 'Retrying…';
+        }
+      })
+      .then(function () { if (btn) btn.disabled = false; startPolling(); });
+  }
+
+  function startPolling() {
+    if (timer) return;
+    timer = setInterval(function () {
+      if (document.hidden) return;          // don't burn quota on a backgrounded tab
+      if (!selectedStore()) return;
+      render(true);
+    }, POLL_MS);
+  }
+  function stopPolling() { if (timer) { clearInterval(timer); timer = null; } }
+
+  // Called right after a confirmed submit. Apps Script needs a moment to append
+  // the row, so nudge twice rather than racing it once.
+  function bump() {
+    setTimeout(function () { render(true); }, 2500);
+    setTimeout(function () { render(true); }, 9000);
+  }
+
+  function init() {
+    // NOTE: rep-picker.js REPLACES the #repName node when the store changes —
+    // it swaps the free-text input for a per-store <select> of that store's reps.
+    // Binding listeners to the node directly would lose them on the first swap,
+    // so both fields are handled by delegation on document, which survives it.
+    document.addEventListener('change', function (e) {
+      var t = e.target;
+      if (!t || !t.id) return;
+      if (t.id === 'storeName') render(false);
+      // Re-paint from cache so the "You" highlight follows the selected name.
+      else if (t.id === 'repName' && cache) render(false);
+    });
+    // 'focusout', not 'blur' — blur does not bubble, so it never reaches document.
+    document.addEventListener('focusout', function (e) {
+      if (e.target && e.target.id === 'repName' && cache) render(false);
+    });
+
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && selectedStore() && (Date.now() - cacheAt) > CACHE_MS) render(true);
+    });
+
+    // A store may already be restored by the rep-info persistence layer.
+    if (selectedStore()) render(false);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  return { refresh: render, bump: bump, render: render };
 })();
 </script>
 
