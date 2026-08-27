@@ -5112,22 +5112,26 @@ document.addEventListener('DOMContentLoaded', function() {
    is ALL t-sheet submissions for the store (6th Gen + Upgrade combined).
    Both sheets therefore show the same number, by design.
 
-   ── WHY THERE IS A VALUE WATCHER ──────────────────────────────────────
-   The first build keyed off a delegated 'change' listener on #storeName
-   and got stuck on whichever store was picked first. rep-picker.js
-   rebuilds the rep/store controls via outerHTML, which destroys and
-   recreates the node in the same tick the change event fires — so the
-   handler could read the half-rebuilt select, see an empty value, bail
-   out early and (worse) stop the refresh timer, leaving the panel frozen
-   on the previously painted store.
+   ── WHY THE TRIGGER LOOKS LIKE THIS ───────────────────────────────────
+   v1 keyed off a delegated 'change' listener and got stuck on the first
+   store picked. rep-picker.js rebuilds these controls via outerHTML,
+   destroying and recreating the node in the same tick the change fires,
+   so the handler could read a half-rebuilt select and bail out.
 
-   The fix does not rely on the event at all. A cheap 400ms watcher
-   compares the select's current value against the last store painted and
-   re-renders on any difference — immune to swallowed events, node
-   replacement, and values set programmatically by other code. The change
-   listener is kept only as an instant-feedback fast path, and the watcher
-   is a SEPARATE timer from the network poll so an empty read can never
-   stop it.
+   v2 replaced that with a 400ms value watcher. That fixed the switching
+   but pinned the main thread: it re-tallied the whole feed and rewrote
+   the rep list on every tick, and when no store was selected it compared
+   '' against null forever, so it never converged and the panel froze on
+   "Syncing…".
+
+   v3 (this one) binds listeners to the ACTUAL node and re-binds when the
+   node is replaced. ensureBound() runs every 2s, costs one lookup plus a
+   flag check, and re-attaches to whatever #storeName currently is. The
+   same tick does one cheap string compare as a fallback, but a tally only
+   runs when the value genuinely changed, so steady state is free.
+   Results are memoized per (store, payload) and render() is re-entrancy
+   guarded and fully try/caught, so the panel can never be left pinned on
+   "Syncing…" again.
    ══════════════════════════════════════════════════════════════════════ */
 var SubTracker = (function () {
   'use strict';
@@ -5139,7 +5143,7 @@ var SubTracker = (function () {
     : 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
 
   var POLL_MS       = 90000; // background data refresh while visible
-  var WATCH_MS      = 400;   // store/rep value watcher (no network — string compare)
+  var BIND_MS       = 2000;  // re-bind listeners if the control was replaced (cheap)
   var CACHE_MS      = 30000; // reuse the last payload this long (store switches are free)
   var FETCH_TIMEOUT = 15000;
 
@@ -5147,10 +5151,12 @@ var SubTracker = (function () {
   var cacheAt = 0;           // timestamp of that payload
   var inFlight = null;       // de-dupes concurrent fetches
   var pollTimer = null;      // network refresh
-  var watchTimer = null;     // value watcher — ALWAYS on, never stopped
-  var lastStore = null;      // last store actually painted
-  var lastRep = null;        // last rep name actually painted
+  var bindTimer = null;      // listener re-binder — ALWAYS on, never stopped
+  var lastStore = '';        // last store actually painted ('' = none; never null)
+  var lastRep = '';          // last rep name actually painted
   var lastError = false;
+  var rendering = false;     // re-entrancy guard
+  var memo = null;           // { store, at, counts } — avoids re-tallying the feed
 
   // ── Store name normalization ───────────────────────────────────────
   // The dropdown emits the canonical "X Xfinity Store" form, but the live
@@ -5254,6 +5260,15 @@ var SubTracker = (function () {
     return out;
   }
 
+  // Tallying walks the entire feed, so memoize per (store, payload). Repeat
+  // renders of the same store against the same payload cost nothing.
+  function countsFor(rows, store) {
+    if (memo && memo.store === store && memo.at === cacheAt) return memo.counts;
+    var c = tally(rows, store);
+    memo = { store: store, at: cacheAt, counts: c };
+    return c;
+  }
+
   // ── Rendering ──────────────────────────────────────────────────────
   function setStatus(kind, text) {
     var dot = el('subtrk-dot'), txt = el('subtrk-status-text');
@@ -5325,41 +5340,62 @@ var SubTracker = (function () {
   function render(force) {
     var section = el('sec-subtracker');
     if (!section) return;
+    if (rendering && !force) return;   // never stack renders
+    rendering = true;
 
-    var store = selectedStore();
-    if (!store) {
-      section.style.display = 'none';
-      stopPolling();          // no data to refresh — the WATCHER keeps running
-      lastStore = null;
-      return;
-    }
-    section.style.display = '';
+    try {
+      var store = selectedStore();
+      if (!store) {
+        section.style.display = 'none';
+        stopPolling();                 // no data to refresh — re-binding continues
+        lastStore = '';                // '' not null, so the fallback compare converges
+        rendering = false;
+        return;
+      }
+      section.style.display = '';
 
-    // Repaint the header immediately so the card never shows the previous
-    // store's name while the numbers are still resolving.
-    el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
-    if (store !== lastStore) setStatus('loading', 'Syncing…');
+      // Repaint the header immediately so the card never shows the previous
+      // store's name while the numbers are still resolving.
+      el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
+      if (store !== lastStore) setStatus('loading', 'Syncing…');
 
-    var btn = el('subtrk-refresh');
-    if (btn) btn.disabled = true;
+      var btn = el('subtrk-refresh');
+      if (btn) btn.disabled = true;
 
-    load(force)
-      .then(function (rows) {
-        // Re-read: the rep may have switched stores again while this resolved.
+      var done = function () {
+        rendering = false;
+        if (btn) btn.disabled = false;
+        startPolling();
+      };
+
+      // Paint is wrapped so a render error can never leave the panel pinned
+      // on "Syncing…" with no way back — that was the v2 failure mode.
+      var show = function (rows) {
         var current = selectedStore() || store;
-        paint(tally(rows, current), current);
-      })
-      .catch(function () {
-        var current = selectedStore() || store;
-        if (cache) paint(tally(cache, current), current);
-        else {
+        try {
+          paint(countsFor(rows, current), current);
+        } catch (err) {
+          console.error('[SubTracker] render failed:', err);
+          setStatus('error', 'Error');
+          el('subtrk-sync').textContent = 'Display error — tap Refresh';
+          lastStore = current;         // do NOT retry in a loop
+        }
+      };
+
+      load(force)
+        .then(show)
+        .catch(function () {
+          if (cache) { show(cache); return; }
           el('subtrk-reps').innerHTML = '<div class="subtrk-empty">Can\'t reach the submission feed right now — the count will fill in once it reconnects.</div>';
           setStatus('error', 'Offline');
           el('subtrk-sync').textContent = 'Retrying…';
           lastStore = store;
-        }
-      })
-      .then(function () { if (btn) btn.disabled = false; startPolling(); });
+        })
+        .then(done, done);
+    } catch (err) {
+      console.error('[SubTracker] render aborted:', err);
+      rendering = false;
+    }
   }
 
   function startPolling() {
@@ -5372,17 +5408,34 @@ var SubTracker = (function () {
   }
   function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 
-  // The watcher is the real trigger. It never stops, costs one string compare
-  // per tick, and only re-renders when the store or rep actually changed.
-  // Store change → re-render (served from cache, usually no network).
-  // Rep change   → repaint only, so the "You" highlight follows the name.
-  function startWatching() {
-    if (watchTimer) return;
-    watchTimer = setInterval(function () {
-      var store = selectedStore();
-      if (store !== lastStore) { render(false); return; }
-      if (store && selectedRep() !== lastRep && cache) paint(tally(cache, store), store);
-    }, WATCH_MS);
+  // Fires on the real controls. Deferred a tick because rep-picker.js may
+  // still be mid-swap when the event arrives.
+  function onFieldChange() { setTimeout(function () { syncFromDom(); }, 0); }
+
+  function syncFromDom() {
+    var store = selectedStore();
+    if (store !== lastStore) { render(false); return; }
+    // Same store — only the rep changed, so just move the "You" highlight.
+    if (store && cache && selectedRep() !== lastRep) {
+      try { paint(countsFor(cache, store), store); } catch (e) { console.error('[SubTracker]', e); }
+    }
+  }
+
+  // rep-picker.js REPLACES #storeName / #repName via outerHTML, which throws
+  // away any listener bound to the old node. Rather than poll values, re-bind
+  // to whatever the node currently is. A flag on the element makes this a
+  // no-op once bound, so the steady-state cost is two lookups every 2s.
+  function ensureBound() {
+    ['storeName', 'repName'].forEach(function (id) {
+      var n = el(id);
+      if (!n || n.__subtrkBound) return;
+      n.__subtrkBound = true;
+      n.addEventListener('change', onFieldChange);
+      n.addEventListener('input', onFieldChange);
+    });
+    // Cheap fallback: one string compare. A tally only runs if it actually
+    // differs, so this costs nothing when nothing changed.
+    syncFromDom();
   }
 
   // Called right after a confirmed submit. Apps Script needs a moment to append
@@ -5393,21 +5446,11 @@ var SubTracker = (function () {
   }
 
   function init() {
-    // Fast path only — the watcher above is what actually guarantees the
-    // update. Deferred a tick because rep-picker.js may still be swapping the
-    // control out via outerHTML when this fires.
-    document.addEventListener('change', function (e) {
-      var t = e.target;
-      if (!t || !t.id) return;
-      if (t.id === 'storeName' || t.id === 'repName') setTimeout(function () { render(false); }, 0);
-    });
-
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden && selectedStore() && (Date.now() - cacheAt) > CACHE_MS) render(true);
     });
-
-    startWatching();
-    if (selectedStore()) render(false);
+    ensureBound();
+    if (!bindTimer) bindTimer = setInterval(ensureBound, BIND_MS);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
