@@ -5142,15 +5142,31 @@ var SubTracker = (function () {
     ? APPS_SCRIPT_URL
     : 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
 
-  var POLL_MS       = 90000; // background data refresh while visible
-  var BIND_MS       = 2000;  // re-bind listeners if the control was replaced (cheap)
+  // ⚠️ REQUEST BUDGET — READ THIS BEFORE CHANGING ANY OF IT ⚠️
+  // This panel reads the SAME Apps Script that receives quote submissions.
+  // Apps Script has hard concurrency and daily-runtime limits, and this GET
+  // returns the ENTIRE submissions table (tens of thousands of rows), so it is
+  // an expensive call. When it was polling every 90s from every open sheet, the
+  // doGet traffic starved doPost and reps got "Submission failed / timeout" at
+  // the counter — the submit only waits 8s (AWAIT_MS) before giving up.
+  //
+  // Submissions ALWAYS win. The rules now:
+  //   • no background polling at all
+  //   • at most ONE automatic fetch per page load, and only once a store is picked
+  //   • nothing fetches during or after a submit
+  //   • everything else is on the rep tapping Refresh
+  // Set AUTO_FETCH = false to make the panel fully manual, or ENABLED = false to
+  // switch it off entirely without touching any other code.
+  var ENABLED       = true;
+  var AUTO_FETCH    = true;  // one fetch per page load, on first store selection
+  var BIND_MS       = 2000;  // re-bind listeners if the control was replaced (no network)
   var CACHE_MS      = 30000; // reuse the last payload this long (store switches are free)
   var FETCH_TIMEOUT = 15000;
+  var autoFetchUsed = false; // spends the single automatic fetch for this page load
 
   var cache = null;          // last successful submissions array
   var cacheAt = 0;           // timestamp of that payload
   var inFlight = null;       // de-dupes concurrent fetches
-  var pollTimer = null;      // network refresh
   var bindTimer = null;      // listener re-binder — ALWAYS on, never stopped
   var lastStore = '';        // last store actually painted ('' = none; never null)
   var lastRep = '';          // last rep name actually painted
@@ -5347,7 +5363,6 @@ var SubTracker = (function () {
       var store = selectedStore();
       if (!store) {
         section.style.display = 'none';
-        stopPolling();                 // no data to refresh — re-binding continues
         lastStore = '';                // '' not null, so the fallback compare converges
         rendering = false;
         return;
@@ -5365,7 +5380,6 @@ var SubTracker = (function () {
       var done = function () {
         rendering = false;
         if (btn) btn.disabled = false;
-        startPolling();
       };
 
       // Paint is wrapped so a render error can never leave the panel pinned
@@ -5382,7 +5396,22 @@ var SubTracker = (function () {
         }
       };
 
-      load(force)
+      // A fetch happens only when the rep asked for one (force), or on the single
+      // automatic load this page is allowed. Otherwise render from cache, or ask.
+      var mayFetch = force || (AUTO_FETCH && !autoFetchUsed);
+      if (!force && mayFetch) autoFetchUsed = true;
+
+      if (!mayFetch && !cache) {
+        el('subtrk-reps').innerHTML = '<div class="subtrk-empty">Tap <strong>Refresh</strong> to load this store\'s count.</div>';
+        setStatus('ok', 'Idle');
+        el('subtrk-sync').textContent = 'Not loaded yet';
+        lastStore = store;
+        done();
+        return;
+      }
+      if (!mayFetch) { show(cache); done(); return; }
+
+      load(true)
         .then(show)
         .catch(function () {
           if (cache) { show(cache); return; }
@@ -5397,16 +5426,6 @@ var SubTracker = (function () {
       rendering = false;
     }
   }
-
-  function startPolling() {
-    if (pollTimer) return;
-    pollTimer = setInterval(function () {
-      if (document.hidden) return;      // don't burn quota on a backgrounded tab
-      if (!selectedStore()) return;
-      render(true);
-    }, POLL_MS);
-  }
-  function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 
   // Fires on the real controls. Deferred a tick because rep-picker.js may
   // still be mid-swap when the event arrives.
@@ -5438,17 +5457,19 @@ var SubTracker = (function () {
     syncFromDom();
   }
 
-  // Called right after a confirmed submit. Apps Script needs a moment to append
-  // the row, so nudge twice rather than racing it once.
-  function bump() {
-    setTimeout(function () { render(true); }, 2500);
-    setTimeout(function () { render(true); }, 9000);
-  }
+  // Deliberately does NOTHING on the network. This used to fire two GETs right
+  // after a submit — precisely when the Apps Script needed to be free to accept
+  // the POST. The rep's own count updates on their next Refresh or page load.
+  // Do not reintroduce a fetch here.
+  function bump() { /* no-op by design — see the request budget note above */ }
 
   function init() {
-    document.addEventListener('visibilitychange', function () {
-      if (!document.hidden && selectedStore() && (Date.now() - cacheAt) > CACHE_MS) render(true);
-    });
+    if (!ENABLED) {
+      var sec = el('sec-subtracker');
+      if (sec) sec.style.display = 'none';
+      return;
+    }
+    // No visibilitychange refetch either — returning to a tab must not cost a call.
     ensureBound();
     if (!bindTimer) bindTimer = setInterval(ensureBound, BIND_MS);
   }
