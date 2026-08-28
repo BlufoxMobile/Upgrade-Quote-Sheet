@@ -5098,87 +5098,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════
-   LIVE SUBMISSION TRACKER — added 2026-08-27, trigger reworked 2026-08-27
+   LIVE SUBMISSION TRACKER — reads the static counts file (2026-08-28)
    ──────────────────────────────────────────────────────────────────────
    Shows how many t-sheets the selected store has logged today and MTD,
-   broken out per rep, so the floor can see the count move as they submit.
+   broken out per rep.
 
-   DATA SOURCE: the same Google Apps Script web app this sheet POSTs to
-   (APPS_SCRIPT_URL). A GET returns { success, submissions: [ ... ] } where
-   each row carries { store, rep_name, timestamp, ... } — the identical
-   contract the T-Sheet-Submissions dashboard reads.
+   DATA SOURCE — READ THIS BEFORE CHANGING IT
+   This panel reads a small pre-aggregated file published to GitHub Pages:
+       Daily-Sales-Report/data/tsheet-counts.json   (~1–5 KB, loads instantly)
+   A scheduled GitHub Action calls the Apps Script feed once every ~10
+   minutes for the whole company and commits that file.
 
-   The feed does NOT tag which sheet a submission came from, so this count
-   is ALL t-sheet submissions for the store (6th Gen + Upgrade combined).
-   Both sheets therefore show the same number, by design.
+   It must NOT call the Apps Script submissions endpoint on a timer. That
+   endpoint is the same one this sheet POSTs quotes to; it takes ~11s and
+   returns ~4 MB / 24,000+ rows (measured 2026-08-28). When every sheet
+   polled it directly, those reads starved the submit path and reps got
+   "Submission failed / timeout" at the counter — the live submit only
+   waits 8s (AWAIT_MS). Submissions always win.
 
-   ── WHY THE TRIGGER LOOKS LIKE THIS ───────────────────────────────────
-   v1 keyed off a delegated 'change' listener and got stuck on the first
-   store picked. rep-picker.js rebuilds these controls via outerHTML,
-   destroying and recreating the node in the same tick the change fires,
-   so the handler could read a half-rebuilt select and bail out.
-
-   v2 replaced that with a 400ms value watcher. That fixed the switching
-   but pinned the main thread: it re-tallied the whole feed and rewrote
-   the rep list on every tick, and when no store was selected it compared
-   '' against null forever, so it never converged and the panel froze on
-   "Syncing…".
-
-   v3 (this one) binds listeners to the ACTUAL node and re-binds when the
-   node is replaced. ensureBound() runs every 2s, costs one lookup plus a
-   flag check, and re-attaches to whatever #storeName currently is. The
-   same tick does one cheap string compare as a fallback, but a tally only
-   runs when the value genuinely changed, so steady state is free.
-   Results are memoized per (store, payload) and render() is re-entrancy
-   guarded and fully try/caught, so the panel can never be left pinned on
-   "Syncing…" again.
+   LIVE_FALLBACK below is a safety valve for the rollout window (before the
+   Action's first run, or if it breaks). It hits the heavy endpoint ONCE and
+   only when a rep taps Refresh — never automatically. Set it to false once
+   the counts file is publishing reliably.
    ══════════════════════════════════════════════════════════════════════ */
 var SubTracker = (function () {
   'use strict';
 
-  // Reuse the submit endpoint when it is defined; the literal is a fallback
-  // so the tracker still works if the const is ever renamed or moved.
-  var FEED_URL = (typeof APPS_SCRIPT_URL === 'string' && APPS_SCRIPT_URL)
-    ? APPS_SCRIPT_URL
-    : 'https://script.google.com/macros/s/AKfycbyQaa1yvggLJuw5dcme74vwAW3hSB3BvzCK40IhLThy-F8KZDFOF6gcyl8psNMd3yD-Cg/exec';
-
-  // ⚠️ REQUEST BUDGET — READ THIS BEFORE CHANGING ANY OF IT ⚠️
-  // This panel reads the SAME Apps Script that receives quote submissions.
-  // Apps Script has hard concurrency and daily-runtime limits, and this GET
-  // returns the ENTIRE submissions table (tens of thousands of rows), so it is
-  // an expensive call. When it was polling every 90s from every open sheet, the
-  // doGet traffic starved doPost and reps got "Submission failed / timeout" at
-  // the counter — the submit only waits 8s (AWAIT_MS) before giving up.
-  //
-  // Submissions ALWAYS win. The rules now:
-  //   • no background polling at all
-  //   • at most ONE automatic fetch per page load, and only once a store is picked
-  //   • nothing fetches during or after a submit
-  //   • everything else is on the rep tapping Refresh
-  // Set AUTO_FETCH = false to make the panel fully manual, or ENABLED = false to
-  // switch it off entirely without touching any other code.
   var ENABLED       = true;
-  var AUTO_FETCH    = true;  // one fetch per page load, on first store selection
-  var BIND_MS       = 2000;  // re-bind listeners if the control was replaced (no network)
-  var CACHE_MS      = 30000; // reuse the last payload this long (store switches are free)
-  var FETCH_TIMEOUT = 15000;
-  var autoFetchUsed = false; // spends the single automatic fetch for this page load
+  var COUNTS_URL    = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/tsheet-counts.json';
+  var LIVE_FALLBACK = true;   // manual Refresh only; see note above
+  var LIVE_URL      = (typeof APPS_SCRIPT_URL === 'string' && APPS_SCRIPT_URL) ? APPS_SCRIPT_URL : '';
 
-  var cache = null;          // last successful submissions array
-  var cacheAt = 0;           // timestamp of that payload
-  var inFlight = null;       // de-dupes concurrent fetches
-  var bindTimer = null;      // listener re-binder — ALWAYS on, never stopped
-  var lastStore = '';        // last store actually painted ('' = none; never null)
-  var lastRep = '';          // last rep name actually painted
+  var REFRESH_MS    = 180000; // 3 min — a static CDN file, so this is nearly free
+  var BIND_MS       = 2000;   // re-bind listeners if the control was replaced
+  var CACHE_MS      = 20000;
+  var COUNTS_TIMEOUT = 10000; // small file; if it's slow something is wrong
+  var LIVE_TIMEOUT   = 35000; // the heavy endpoint genuinely takes ~11s
+  var STALE_MS      = 1500000; // 25 min — warn that the Action may have stalled
+
+  var data = null;           // { generated_at, day, stores: { <store>: {today,mtd,reps} } }
+  var cacheAt = 0;
+  var inFlight = null;
+  var refreshTimer = null;
+  var bindTimer = null;
+  var lastStore = '';
+  var lastRep = '';
   var lastError = false;
-  var rendering = false;     // re-entrancy guard
-  var memo = null;           // { store, at, counts } — avoids re-tallying the feed
+  var rendering = false;
 
-  // ── Store name normalization ───────────────────────────────────────
-  // The dropdown emits the canonical "X Xfinity Store" form, but the live
-  // feed still carries legacy spellings (a bare "Machesney Park" and a
-  // pre-2026 "Skokie Xfinity Store"). Mirrors normalizeStoreName() in the
-  // T-Sheet-Submissions dashboard so both agree on which rows belong where.
   var STORE_ALIASES = { 'skokie': 'South Skokie', 'knoxville': 'South Knoxville' };
   function normStore(raw) {
     var s = String(raw == null ? '' : raw).trim().replace(/\s+/g, ' ');
@@ -5190,16 +5157,11 @@ var SubTracker = (function () {
     return s + ' Xfinity Store';
   }
 
-  function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   function el(id) { return document.getElementById(id); }
-
-  // Read live from the DOM every time — the node may have been replaced.
   function selectedStore() {
     var n = el('storeName');
     if (!n) return '';
     var v = String(n.value || '').trim();
-    // Guard against placeholder rows like "— Select your store —".
     if (!v || v.charAt(0) === '—' || v.charAt(0) === '-') return '';
     return normStore(v);
   }
@@ -5212,118 +5174,104 @@ var SubTracker = (function () {
   }
   function selectedRep() { return selectedRepRaw().toLowerCase(); }
 
-  // ── Fetch (shared promise so a store change mid-flight doesn't double up) ──
-  function load(force) {
-    var fresh = cache && (Date.now() - cacheAt) < CACHE_MS;
-    if (fresh && !force) return Promise.resolve(cache);
+  function fetchJson(url, timeoutMs) {
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var killer = setTimeout(function () { if (ctrl) ctrl.abort(); }, timeoutMs);
+    return fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now(),
+                 { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (v) { clearTimeout(killer); return v; },
+            function (e) { clearTimeout(killer); throw e; });
+  }
+
+  // Collapse the heavy raw feed into the same shape the counts file uses, so the
+  // rest of this module never has to care which source it came from.
+  function foldLiveFeed(payload) {
+    var rows = (payload && payload.submissions) || [];
+    var now = new Date();
+    function ymd(d) {
+      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+    var today = ymd(now), month = today.slice(0, 7), stores = {};
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i]; if (!r) continue;
+      var store = normStore(r.store); if (!store) continue;
+      var d = new Date(r.timestamp); if (isNaN(d.getTime())) continue;
+      var key = ymd(d); if (key.slice(0, 7) !== month) continue;
+      var isToday = key === today;
+      var s = stores[store] || (stores[store] = { today: 0, mtd: 0, reps: {} });
+      s.mtd++; if (isToday) s.today++;
+      var rep = String(r.rep_name == null ? '' : r.rep_name).trim() || '(unknown)';
+      var p = s.reps[rep] || (s.reps[rep] = { today: 0, mtd: 0 });
+      p.mtd++; if (isToday) p.today++;
+    }
+    return { generated_at: new Date().toISOString(), day: today, stores: stores, _live: true };
+  }
+
+  function load(force, allowLive) {
+    if (data && !force && (Date.now() - cacheAt) < CACHE_MS) return Promise.resolve(data);
     if (inFlight) return inFlight;
 
-    setStatus('loading', 'Syncing…');
+    setStatus('loading', 'Loading…');
 
-    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var killer = setTimeout(function () { if (ctrl) ctrl.abort(); }, FETCH_TIMEOUT);
-
-    inFlight = fetch(FEED_URL + '?t=' + Date.now(), {
-      method: 'GET',
-      cache: 'no-store',
-      signal: ctrl ? ctrl.signal : undefined
-    })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function (data) {
-        if (!data || data.success === false) throw new Error((data && data.error) || 'Feed error');
-        cache = Array.isArray(data.submissions) ? data.submissions : [];
-        cacheAt = Date.now();
-        lastError = false;
-        return cache;
+    inFlight = fetchJson(COUNTS_URL, COUNTS_TIMEOUT)
+      .then(function (json) {
+        if (!json || !json.stores) throw new Error('counts file malformed');
+        return json;
       })
       .catch(function (err) {
-        lastError = true;
-        // Keep whatever numbers are already on screen rather than zeroing them —
-        // a blank tile during a blip reads as "nobody has submitted today".
-        console.warn('[SubTracker] feed unavailable:', err && err.message);
-        throw err;
+        // The counts file is the only automatic source. Falling back to the heavy
+        // endpoint happens ONLY on an explicit Refresh, never on its own.
+        if (!(allowLive && LIVE_FALLBACK && LIVE_URL)) throw err;
+        console.warn('[SubTracker] counts file unavailable, using live feed once:', err && err.message);
+        var note = el('subtrk-sync');
+        if (note) note.textContent = 'Counts file unavailable — reading live (slow)…';
+        return fetchJson(LIVE_URL, LIVE_TIMEOUT).then(foldLiveFeed);
       })
-      .then(function (v) { clearTimeout(killer); inFlight = null; return v; },
-            function (e) { clearTimeout(killer); inFlight = null; throw e; });
+      .then(function (json) {
+        data = json; cacheAt = Date.now(); lastError = false;
+        inFlight = null; return data;
+      }, function (err) {
+        lastError = true; inFlight = null;
+        console.warn('[SubTracker] load failed:', err && err.message);
+        throw err;
+      });
 
     return inFlight;
   }
 
-  // ── Counting ───────────────────────────────────────────────────────
-  function tally(rows, store) {
-    var today = dayKey(new Date());
-    var now = new Date();
-    var out = { today: 0, mtd: 0, reps: {} };
-    if (!rows) return out;
-
-    for (var i = 0; i < rows.length; i++) {
-      var s = rows[i];
-      if (!s || normStore(s.store) !== store) continue;
-
-      var d = new Date(s.timestamp);
-      if (isNaN(d.getTime())) continue;
-      if (d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) continue;
-
-      var isToday = dayKey(d) === today;
-      out.mtd++;
-      if (isToday) out.today++;
-
-      var rep = String(s.rep_name == null ? '' : s.rep_name).trim() || '(unknown)';
-      if (!out.reps[rep]) out.reps[rep] = { today: 0, mtd: 0 };
-      out.reps[rep].mtd++;
-      if (isToday) out.reps[rep].today++;
-    }
-    return out;
-  }
-
-  // Tallying walks the entire feed, so memoize per (store, payload). Repeat
-  // renders of the same store against the same payload cost nothing.
-  function countsFor(rows, store) {
-    if (memo && memo.store === store && memo.at === cacheAt) return memo.counts;
-    var c = tally(rows, store);
-    memo = { store: store, at: cacheAt, counts: c };
-    return c;
-  }
-
-  // ── Rendering ──────────────────────────────────────────────────────
   function setStatus(kind, text) {
     var dot = el('subtrk-dot'), txt = el('subtrk-status-text');
     if (dot) dot.className = 'subtrk-dot' + (kind === 'ok' ? '' : ' ' + kind);
     if (txt) txt.textContent = text;
   }
-
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
 
-  function paint(counts, store) {
+  function paint(store) {
     if (!el('sec-subtracker')) return;
+    var entry = (data && data.stores && data.stores[store]) || { today: 0, mtd: 0, reps: {} };
 
     el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
-
     var t = el('subtrk-today'), m = el('subtrk-mtd');
-    t.textContent = counts.today; t.className = 'subtrk-total-value' + (counts.today ? '' : ' zero');
-    m.textContent = counts.mtd;   m.className = 'subtrk-total-value' + (counts.mtd   ? '' : ' zero');
+    t.textContent = entry.today; t.className = 'subtrk-total-value' + (entry.today ? '' : ' zero');
+    m.textContent = entry.mtd;   m.className = 'subtrk-total-value' + (entry.mtd   ? '' : ' zero');
 
-    var youRaw = selectedRepRaw();
-    var you = youRaw.toLowerCase();
-    var names = Object.keys(counts.reps);
+    var youRaw = selectedRepRaw(), you = youRaw.toLowerCase();
+    var reps = {};
+    for (var k in entry.reps) if (Object.prototype.hasOwnProperty.call(entry.reps, k)) reps[k] = entry.reps[k];
+    var names = Object.keys(reps);
 
-    // Always show the current rep, even at zero, so they can watch their own
-    // number move the moment they submit.
     if (youRaw) {
       var matched = false;
-      for (var i = 0; i < names.length; i++) {
-        if (names[i].toLowerCase() === you) { matched = true; break; }
-      }
-      if (!matched) { names.push(youRaw); counts.reps[youRaw] = { today: 0, mtd: 0 }; }
+      for (var i = 0; i < names.length; i++) if (names[i].toLowerCase() === you) { matched = true; break; }
+      if (!matched) { names.push(youRaw); reps[youRaw] = { today: 0, mtd: 0 }; }
     }
-
     names.sort(function (a, b) {
-      var A = counts.reps[a], B = counts.reps[b];
-      return (B.today - A.today) || (B.mtd - A.mtd) || a.localeCompare(b);
+      return (reps[b].today - reps[a].today) || (reps[b].mtd - reps[a].mtd) || a.localeCompare(b);
     });
 
     var box = el('subtrk-reps');
@@ -5332,8 +5280,7 @@ var SubTracker = (function () {
     } else {
       var html = '<div class="subtrk-rep-head"><span>Rep</span><span style="text-align:center;">Today</span><span style="text-align:center;">MTD</span></div>';
       for (var j = 0; j < names.length; j++) {
-        var n = names[j], c = counts.reps[n];
-        var mine = you && n.toLowerCase() === you;
+        var n = names[j], c = reps[n], mine = you && n.toLowerCase() === you;
         html += '<div class="subtrk-rep-row' + (mine ? ' is-you' : '') + '">'
               +   '<span class="subtrk-rep-name">' + esc(n) + (mine ? '<span class="subtrk-you-tag">You</span>' : '') + '</span>'
               +   '<span class="subtrk-rep-num' + (c.today ? '' : ' zero') + '">' + c.today + '</span>'
@@ -5343,81 +5290,56 @@ var SubTracker = (function () {
       box.innerHTML = html;
     }
 
-    var stamp = new Date(cacheAt || Date.now());
-    el('subtrk-sync').textContent = 'Updated ' + stamp.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-      + (lastError ? ' · reconnecting' : '');
-    setStatus(lastError ? 'error' : 'ok', lastError ? 'Offline' : 'Live');
+    // Surface how fresh the file is. If the Action stalls, reps should see that
+    // rather than quietly trusting an old number.
+    var gen = data && data.generated_at ? new Date(data.generated_at) : null;
+    var age = gen ? (Date.now() - gen.getTime()) : 0;
+    var stamp = gen ? gen.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—';
+    var label = 'Updated ' + stamp;
+    if (data && data._live) label += ' · live read';
+    if (gen && age > STALE_MS) label += ' · may be behind';
+    if (lastError) label += ' · reconnecting';
+    el('subtrk-sync').textContent = label;
+    setStatus(lastError ? 'error' : (gen && age > STALE_MS ? 'loading' : 'ok'),
+              lastError ? 'Offline' : (gen && age > STALE_MS ? 'Stale' : 'Live'));
 
-    lastStore = store;
-    lastRep = you;
+    lastStore = store; lastRep = you;
   }
 
-  // ── Public API ─────────────────────────────────────────────────────
   function render(force) {
     var section = el('sec-subtracker');
     if (!section) return;
-    if (rendering && !force) return;   // never stack renders
+    if (rendering && !force) return;
     rendering = true;
 
     try {
       var store = selectedStore();
-      if (!store) {
-        section.style.display = 'none';
-        lastStore = '';                // '' not null, so the fallback compare converges
-        rendering = false;
-        return;
-      }
+      if (!store) { section.style.display = 'none'; lastStore = ''; rendering = false; return; }
       section.style.display = '';
-
-      // Repaint the header immediately so the card never shows the previous
-      // store's name while the numbers are still resolving.
       el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
-      if (store !== lastStore) setStatus('loading', 'Syncing…');
 
       var btn = el('subtrk-refresh');
       if (btn) btn.disabled = true;
+      var done = function () { rendering = false; if (btn) btn.disabled = false; startRefresh(); };
 
-      var done = function () {
-        rendering = false;
-        if (btn) btn.disabled = false;
-      };
+      // Already have the file and only the store changed? Repaint, no network.
+      if (data && !force && (Date.now() - cacheAt) < CACHE_MS) { paint(store); done(); return; }
 
-      // Paint is wrapped so a render error can never leave the panel pinned
-      // on "Syncing…" with no way back — that was the v2 failure mode.
-      var show = function (rows) {
-        var current = selectedStore() || store;
-        try {
-          paint(countsFor(rows, current), current);
-        } catch (err) {
-          console.error('[SubTracker] render failed:', err);
-          setStatus('error', 'Error');
-          el('subtrk-sync').textContent = 'Display error — tap Refresh';
-          lastStore = current;         // do NOT retry in a loop
-        }
-      };
-
-      // A fetch happens only when the rep asked for one (force), or on the single
-      // automatic load this page is allowed. Otherwise render from cache, or ask.
-      var mayFetch = force || (AUTO_FETCH && !autoFetchUsed);
-      if (!force && mayFetch) autoFetchUsed = true;
-
-      if (!mayFetch && !cache) {
-        el('subtrk-reps').innerHTML = '<div class="subtrk-empty">Tap <strong>Refresh</strong> to load this store\'s count.</div>';
-        setStatus('ok', 'Idle');
-        el('subtrk-sync').textContent = 'Not loaded yet';
-        lastStore = store;
-        done();
-        return;
-      }
-      if (!mayFetch) { show(cache); done(); return; }
-
-      load(true)
-        .then(show)
+      load(force, !!force)
+        .then(function () {
+          try { paint(selectedStore() || store); }
+          catch (e) {
+            console.error('[SubTracker] render failed:', e);
+            setStatus('error', 'Error');
+            el('subtrk-sync').textContent = 'Display error — tap Refresh';
+            lastStore = store;
+          }
+        })
         .catch(function () {
-          if (cache) { show(cache); return; }
-          el('subtrk-reps').innerHTML = '<div class="subtrk-empty">Can\'t reach the submission feed right now — the count will fill in once it reconnects.</div>';
+          if (data) { paint(selectedStore() || store); return; }
+          el('subtrk-reps').innerHTML = '<div class="subtrk-empty">Counts aren\'t published yet — tap <strong>Refresh</strong> to try again. This does not affect submitting your quote.</div>';
           setStatus('error', 'Offline');
-          el('subtrk-sync').textContent = 'Retrying…';
+          el('subtrk-sync').textContent = 'Not loaded';
           lastStore = store;
         })
         .then(done, done);
@@ -5427,23 +5349,29 @@ var SubTracker = (function () {
     }
   }
 
-  // Fires on the real controls. Deferred a tick because rep-picker.js may
-  // still be mid-swap when the event arrives.
+  // Cheap because the counts file is a small static CDN object — this is the
+  // "live" feel Jeff wanted, without touching Apps Script.
+  function startRefresh() {
+    if (refreshTimer) return;
+    refreshTimer = setInterval(function () {
+      if (document.hidden || !selectedStore()) return;
+      load(true, false).then(function () { paint(selectedStore()); }).catch(function () {});
+    }, REFRESH_MS);
+  }
+
   function onFieldChange() { setTimeout(function () { syncFromDom(); }, 0); }
 
   function syncFromDom() {
     var store = selectedStore();
     if (store !== lastStore) { render(false); return; }
-    // Same store — only the rep changed, so just move the "You" highlight.
-    if (store && cache && selectedRep() !== lastRep) {
-      try { paint(countsFor(cache, store), store); } catch (e) { console.error('[SubTracker]', e); }
+    if (store && data && selectedRep() !== lastRep) {
+      try { paint(store); } catch (e) { console.error('[SubTracker]', e); }
     }
   }
 
-  // rep-picker.js REPLACES #storeName / #repName via outerHTML, which throws
-  // away any listener bound to the old node. Rather than poll values, re-bind
-  // to whatever the node currently is. A flag on the element makes this a
-  // no-op once bound, so the steady-state cost is two lookups every 2s.
+  // rep-picker.js replaces these controls via outerHTML, which discards any
+  // listener bound to the old node. Re-bind to whatever the node currently is;
+  // the flag makes it a no-op once bound.
   function ensureBound() {
     ['storeName', 'repName'].forEach(function (id) {
       var n = el(id);
@@ -5452,24 +5380,18 @@ var SubTracker = (function () {
       n.addEventListener('change', onFieldChange);
       n.addEventListener('input', onFieldChange);
     });
-    // Cheap fallback: one string compare. A tally only runs if it actually
-    // differs, so this costs nothing when nothing changed.
     syncFromDom();
   }
 
-  // Deliberately does NOTHING on the network. This used to fire two GETs right
-  // after a submit — precisely when the Apps Script needed to be free to accept
-  // the POST. The rep's own count updates on their next Refresh or page load.
-  // Do not reintroduce a fetch here.
-  function bump() { /* no-op by design — see the request budget note above */ }
+  // Submitting must never trigger a read. The count catches up on the next
+  // 3-minute refresh. Do not put a fetch here.
+  function bump() { /* intentionally empty */ }
 
   function init() {
-    if (!ENABLED) {
-      var sec = el('sec-subtracker');
-      if (sec) sec.style.display = 'none';
-      return;
-    }
-    // No visibilitychange refetch either — returning to a tab must not cost a call.
+    if (!ENABLED) { var sec = el('sec-subtracker'); if (sec) sec.style.display = 'none'; return; }
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && selectedStore() && (Date.now() - cacheAt) > REFRESH_MS) render(false);
+    });
     ensureBound();
     if (!bindTimer) bindTimer = setInterval(ensureBound, BIND_MS);
   }
