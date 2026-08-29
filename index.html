@@ -5257,13 +5257,40 @@ var SubTracker = (function () {
     });
   }
 
+  // "Today" per the counts file's timezone (America/Chicago), so every store
+  // compares against the same business day the builder used.
+  function _todayInFileTz_() {
+    var tz = (data && data.timezone) || 'America/Chicago';
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(new Date());
+    } catch (e) {
+      var d = new Date();
+      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+  }
+
   function paint(store) {
     if (!el('sec-subtracker')) return;
     var entry = (data && data.stores && data.stores[store]) || { today: 0, mtd: 0, reps: {} };
 
     el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
+    // A stale file still carries yesterday's `day`, and printing its `today: 0`
+    // reads as "your store has sold nothing" to a rep at 4pm. Never show a
+    // confident zero for a day the file has no data for — show an em dash.
+    // Compared in the file's own timezone so the Tennessee stores agree.
+    var fileDay = data && data.day;
+    var sameDay = !!fileDay && fileDay === _todayInFileTz_();
+
     var t = el('subtrk-today'), m = el('subtrk-mtd');
-    t.textContent = entry.today; t.className = 'subtrk-total-value' + (entry.today ? '' : ' zero');
+    if (sameDay) {
+      t.textContent = entry.today;
+      t.className = 'subtrk-total-value' + (entry.today ? '' : ' zero');
+    } else {
+      t.textContent = '—';
+      t.className = 'subtrk-total-value zero';
+    }
     m.textContent = entry.mtd;   m.className = 'subtrk-total-value' + (entry.mtd   ? '' : ' zero');
 
     var youRaw = selectedRepRaw(), you = youRaw.toLowerCase();
@@ -5287,9 +5314,10 @@ var SubTracker = (function () {
       var html = '<div class="subtrk-rep-head"><span>Rep</span><span style="text-align:center;">Today</span><span style="text-align:center;">MTD</span></div>';
       for (var j = 0; j < names.length; j++) {
         var n = names[j], c = reps[n], mine = you && n.toLowerCase() === you;
+        var todayCell = sameDay ? String(c.today) : '—';
         html += '<div class="subtrk-rep-row' + (mine ? ' is-you' : '') + '">'
               +   '<span class="subtrk-rep-name">' + esc(n) + (mine ? '<span class="subtrk-you-tag">You</span>' : '') + '</span>'
-              +   '<span class="subtrk-rep-num' + (c.today ? '' : ' zero') + '">' + c.today + '</span>'
+              +   '<span class="subtrk-rep-num' + (sameDay && c.today ? '' : ' zero') + '">' + todayCell + '</span>'
               +   '<span class="subtrk-rep-num' + (c.mtd   ? '' : ' zero') + '">' + c.mtd   + '</span>'
               + '</div>';
       }
@@ -5302,6 +5330,7 @@ var SubTracker = (function () {
     var age = gen ? (Date.now() - gen.getTime()) : 0;
     var stamp = gen ? gen.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—';
     var label = 'Updated ' + stamp;
+    if (!sameDay) label += ' · no data for today yet';
     if (data && data._live) label += ' · live read';
     if (gen && age > STALE_MS) label += ' · may be behind';
     if (lastError) label += ' · reconnecting';
