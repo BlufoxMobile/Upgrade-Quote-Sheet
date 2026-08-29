@@ -4792,7 +4792,13 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(function(){ remove(it.id); return { delivered:true }; })
       .catch(function(){ markFail(it.id); return { delivered:false }; });  // network reject -> back off, do NOT hammer
     if (!awaitMs) return p;
-    return Promise.race([ p, timeout(awaitMs).then(function(){ return { delivered:false }; }) ]);
+    // BUGFIX 2026-08-29: timeout() REJECTS, and .then() only handles fulfilment —
+    // so the rejection passed straight through Promise.race, handleSubmit threw,
+    // and the rep got "Submission failed / timeout / your quote was NOT saved"
+    // even though the item was safely queued in the outbox and retried. The
+    // amber "Saved — will deliver when online" path below could never run.
+    // .catch() is what turns a slow submit into that truthful state.
+    return Promise.race([ p, timeout(awaitMs).catch(function(){ return { delivered:false }; }) ]);
   }
 
   // Background flusher: leader-only, ONE item in flight at a time, backoff-gated.
