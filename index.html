@@ -934,7 +934,15 @@
     .subtrk-rep-head, .subtrk-rep-row { grid-template-columns: 1fr 46px 46px; padding-left: 14px; padding-right: 14px; }
   }
 
-  </style>
+  
+  /* Two promotions per row — halves the vertical space these take on a printout
+     (requested 2026-08-30). Single column on narrow screens so the chips stay
+     readable on a phone. */
+  .promo-list, .promo-banner-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-items:start;}
+  .promo-list > .pg-chip, .promo-banner-list > .pg-chip{margin:0;break-inside:avoid;}
+  .promo-list > li:only-child, .promo-banner-list > li:only-child{grid-column:1 / -1;}
+  @media(max-width:640px){.promo-list, .promo-banner-list{grid-template-columns:1fr;}}
+</style>
 <!-- PDF generation libs (used by handleEmailPDF / handlePrint for iPad-friendly sharing & downloads) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -6548,7 +6556,7 @@ async function handleSubmit() {
           try { resetForm(); } catch(e) { console.error('resetForm failed:', e); }
         }, 1500);
       } else {
-        btn.innerHTML = '✅ Saved — will deliver when online';
+        btn.innerHTML = '✅ Saved — sending…';
         btn.style.background = 'linear-gradient(135deg, #FFB300, #FFA000)';
         const pending = (typeof window.__blufoxOutboxPending === 'function')
           ? window.__blufoxOutboxPending() : 0;
@@ -6789,7 +6797,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (window.__blufoxOutboxReady) return; window.__blufoxOutboxReady = true;
   var KEY  = 'blufox_outbox_v1';          // keep key so any already-queued items carry over
   var LKEY = 'blufox_outbox_leader_v1';   // cross-tab leader lock
-  var AWAIT_MS   = 8000;                   // how long a live submit waits for confirmation
+  // 8s of dead time per quote on a slow store network, and reps are graded on
+  // volume. Delivery is guaranteed by the outbox either way, so stop making
+  // them wait for it — confirm at 3s and let retries finish in the background.
+  var AWAIT_MS   = 3000;                   // how long a live submit waits for confirmation
   var BASE_MS    = 8000;                   // base retry backoff (doubles per attempt)
   var MAX_MS     = 5 * 60 * 1000;          // cap retry backoff at 5 min
   var MAX_AGE_MS = 24 * 60 * 60 * 1000;    // drop items older than 24h (poison protection)
