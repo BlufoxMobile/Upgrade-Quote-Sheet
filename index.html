@@ -5,7 +5,7 @@
 <script src="https://blufoxmobile.github.io/Daily-Sales-Report/data/rep-picker.js"></script>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Upgrade Quote Sheet</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -225,6 +225,13 @@
   .stb-desc{width:100%;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:1px;}
   .stb-divider{width:1px;height:40px;background:rgba(255,255,255,0.12);flex-shrink:0;}
   /* Mobile responsive — narrower padding, smaller text */
+  /* Minimum 44px touch targets on phones/tablets (Apple HIG + Material) */
+  @media (hover: none) and (pointer: coarse) {
+    .wt-count-btn, .intake-reward-btn, .intake-plan-pill,
+    input[type="text"], input[type="number"], input[type="email"], input[type="tel"], select, .btn {
+      min-height: 44px;
+    }
+  }
   @media (max-width: 600px) {
     .savings-tally-bar{padding:8px 12px;}
     .stb-inner{gap:8px;}
@@ -5453,13 +5460,19 @@ function getEffectiveNewMobileLine() {
 }
 
 // Helper: monthly device financing (phones + watches + tablets) — shown as separate rows
+// XMC insurance is a real monthly add-on: the intake rows already show it in
+// each line's "/mo", but every customer-facing total below used to drop it, so
+// an insured quote presented a bill $15-19 per line LOWER than the customer
+// would actually be charged. One helper, used by every total, keeps them equal.
+function rowXmc(d) { return (d && d.xmcEnabled) ? (parseFloat(d.xmcRate) || 0) : 0; }
+
 function getMobileDeviceFinancing() {
   var phoneTotalMon = 0;
   for (var i = 1; i <= phoneCounts; i++) {
     var d = getRowData('phone', i);
     if (d.price > 0) {
       var res = calcSmartPromo(d.name, d.price, d.tradeValue, d.noTrade, 'premium');
-      phoneTotalMon += Math.max(0, d.price - res.promoAmt) / 36;
+      phoneTotalMon += Math.max(0, d.price - res.promoAmt) / 36 + rowXmc(d);
     }
   }
   // Sum all watch rows — cap $300 discount at first 5 watches
@@ -5467,13 +5480,13 @@ function getMobileDeviceFinancing() {
   for (var wi = 1; wi <= watchCounts; wi++) {
     var wd = getRowData('watch', wi);
     var wDiscApplied = wi <= 5 ? state.membershipDiscount : 0;
-    if (wd.price > 0) watchTotalMon += Math.max(0, wd.price - wDiscApplied) / 36 + 10;
+    if (wd.price > 0) watchTotalMon += Math.max(0, wd.price - wDiscApplied) / 36 + 10 + rowXmc(wd);
   }
   // Sum all tablet rows
   var tabletTotalMon = 0;
   for (var ti = 1; ti <= tabletCounts; ti++) {
     var td = getRowData('tablet', ti);
-    if (td.price > 0) tabletTotalMon += getTabletNetPrice(td.name, td.price) / 36 + 20;
+    if (td.price > 0) tabletTotalMon += getTabletNetPrice(td.name, td.price) / 36 + 20 + rowXmc(td);
   }
   return phoneTotalMon + watchTotalMon + tabletTotalMon;
 }
@@ -5693,7 +5706,10 @@ function updatePreview() {
       }
     }
 
-    // Left total = sum of all phones at full price
+    // Left total = phones at full retail ONLY — intentional.
+    // The pitch is "phone at full price" vs "discounted phone + the watch and
+    // tablet", so watches and tablets belong on the right side only. Do not
+    // add them here; the columns are deliberately not like-for-like.
     const leftTotalDevices = allPhoneData.reduce(function(s, p) { return s + p.d.price; }, 0);
     safeText('cmp-left-total', leftTotalDevices > 0 ? `$${leftTotalDevices.toFixed(2)}` : '$—');
 
@@ -5814,7 +5830,7 @@ function updatePreview() {
     // Totals — sum ALL phones, watches, tablets
     const allPhonesTIPSTotal = allPhoneData.reduce(function(s, p) { return s + Math.max(0, p.d.price - p.d.promoAmt); }, 0);
     var allWatchesNet = 0;
-    for (var wi2 = 1; wi2 <= watchCounts; wi2++) { var wd2 = getRowData('watch', wi2); var w2Disc = wi2 <= 2 ? state.membershipDiscount : 0; if (wd2.price) allWatchesNet += Math.max(0, wd2.price - w2Disc); }
+    for (var wi2 = 1; wi2 <= watchCounts; wi2++) { var wd2 = getRowData('watch', wi2); var w2Disc = wi2 <= 5 ? state.membershipDiscount : 0; if (wd2.price) allWatchesNet += Math.max(0, wd2.price - w2Disc); }
     var allTabletsTotal = 0;
     for (var ti2 = 1; ti2 <= tabletCounts; ti2++) { var td2 = getRowData('tablet', ti2); if (td2.price) allTabletsTotal += getTabletNetPrice(td2.name, td2.price); }
     const rightTotal = allPhonesTIPSTotal + allWatchesNet + allTabletsTotal;
@@ -5873,11 +5889,15 @@ function updatePreview() {
 
     if (hasAnyPhone) {
       safeDisplay('bill-right-phoneBlock', 'block');
+      const allPhoneXmc = allPhoneData.reduce(function(s, p) { return s + rowXmc(p.d); }, 0);
       const allTIPSMonthly = allPhoneData.reduce(function(s, p) {
         return s + Math.max(0, p.d.price - p.d.promoAmt) / 36;
-      }, 0);
+      }, 0) + allPhoneXmc;
       safeText('bill-right-phoneName', allPhoneData.length > 1 ? `${allPhoneData.length} Phone Upgrades (after TIPS)` : (firstPhone ? firstPhone.d.name : ''));
       safeText('bill-promoUpgrade', `$${allTIPSMonthly.toFixed(2)}/mo`);
+      safeText('bill-right-phoneSub', allPhoneXmc > 0
+        ? `TIPS price ÷ 36 months + $${allPhoneXmc.toFixed(2)}/mo XMC`
+        : `TIPS price ÷ 36 months`);
     } else {
       safeDisplay('bill-right-phoneBlock', 'none');
     }
@@ -5903,10 +5923,11 @@ function updatePreview() {
         var wbTierLbl = 'Diamond'  /* Diamond is the only tier that triggers wDisc > 0 now */;
         var wbNet     = Math.max(0, wbd.price - wbDisc);
         var wbLabel   = (watchCounts > 1 ? 'Watch ' + wbi + ': ' : '') + wbd.name + (wbDisc > 0 ? ` (−$${wbDisc} ${wbTierLbl})` : '');
-        var wbAmt   = (wbNet / 36 + 10).toFixed(2);
+        var wbXmc   = rowXmc(wbd);
+        var wbAmt   = (wbNet / 36 + 10 + wbXmc).toFixed(2);
         watchBillHTML += `<div class="cmp-item-block" id="bill-promoWatchRow-${wbi}">
           <div class="cmp-item-name">${wbLabel}</div>
-          <div class="cmp-item-sub">Watch financing ÷36 + $10/mo line fee</div>
+          <div class="cmp-item-sub">Watch financing ÷36 + $10/mo line fee${wbXmc > 0 ? ` + $${wbXmc.toFixed(2)}/mo XMC` : ''}</div>
           <div class="cmp-item-price green">$${wbAmt}/mo</div>
         </div>`;
       }
@@ -5933,10 +5954,11 @@ function updatePreview() {
         var tbDisc  = getTabletDiscount(tbd.name, tbd.price);
         var tbNet   = Math.max(0, tbd.price - tbDisc.amount);
         var tbLabel = (tabletCounts > 1 ? 'Tablet ' + tbi + ': ' : '') + tbd.name + (tbDisc.applies ? ` (−$${tbDisc.amount.toFixed(2)} ${tbDisc.label})` : '');
-        var tbAmt   = (tbNet / 36 + 20).toFixed(2);
+        var tbXmc   = rowXmc(tbd);
+        var tbAmt   = (tbNet / 36 + 20 + tbXmc).toFixed(2);
         tabletBillHTML += `<div class="cmp-item-block" id="bill-promoTabletRow-${tbi}">
           <div class="cmp-item-name">${tbLabel}</div>
-          <div class="cmp-item-sub">Tablet financing ÷36 + $20/mo line fee</div>
+          <div class="cmp-item-sub">Tablet financing ÷36 + $20/mo line fee${tbXmc > 0 ? ` + $${tbXmc.toFixed(2)}/mo XMC` : ''}</div>
           <div class="cmp-item-price green">$${tbAmt}/mo</div>
         </div>`;
       }
@@ -5947,12 +5969,12 @@ function updatePreview() {
     // Right total = rebundled core + new mobile line (with plan upgrades) + all phones TIPS monthly + all watches + all tablets
     const newMobileLineAmt = effNewMobileLine;
     const allTIPSMonthlyForTotal = allPhoneData.reduce(function(s, p) {
-      return s + Math.max(0, p.d.price - p.d.promoAmt) / 36;
+      return s + Math.max(0, p.d.price - p.d.promoAmt) / 36 + rowXmc(p.d);
     }, 0);
     var allWatchesMonthly = 0;
-    for (var wt = 1; wt <= watchCounts; wt++) { var wtd = getRowData('watch', wt); var wtDisc = wt <= 2 ? state.membershipDiscount : 0; if (wtd.price) allWatchesMonthly += Math.max(0, wtd.price - wtDisc) / 36 + 10; }
+    for (var wt = 1; wt <= watchCounts; wt++) { var wtd = getRowData('watch', wt); var wtDisc = wt <= 5 ? state.membershipDiscount : 0; if (wtd.price) allWatchesMonthly += Math.max(0, wtd.price - wtDisc) / 36 + 10 + rowXmc(wtd); }
     var allTabletsMonthly = 0;
-    for (var tt = 1; tt <= tabletCounts; tt++) { var ttd = getRowData('tablet', tt); if (ttd.price) allTabletsMonthly += getTabletNetPrice(ttd.name, ttd.price) / 36 + 20; }
+    for (var tt = 1; tt <= tabletCounts; tt++) { var ttd = getRowData('tablet', tt); if (ttd.price) allTabletsMonthly += getTabletNetPrice(ttd.name, ttd.price) / 36 + 20 + rowXmc(ttd); }
     const rightTotal = promoCore + newMobileLineAmt
                      + allTIPSMonthlyForTotal
                      + allWatchesMonthly
@@ -5962,6 +5984,10 @@ function updatePreview() {
     if (allPhoneData && allPhoneData.length > 0) rightParts.push('Phone');
     for (var rwi = 1; rwi <= watchCounts; rwi++)  { if (getRowData('watch',rwi).price)  { rightParts.push('Watch');  break; } }
     for (var rti = 1; rti <= tabletCounts; rti++) { if (getRowData('tablet',rti).price) { rightParts.push('Tablet'); break; } }
+    var anyXmc = allPhoneData.some(function(p){ return rowXmc(p.d) > 0; });
+    for (var xwi = 1; xwi <= watchCounts; xwi++)  if (rowXmc(getRowData('watch', xwi)))  { anyXmc = true; break; }
+    for (var xti = 1; xti <= tabletCounts; xti++) if (rowXmc(getRowData('tablet', xti))) { anyXmc = true; break; }
+    if (anyXmc) rightParts.push('XMC');
     safeText('bill-right-sub', rightParts.join(' + '));
 
   } else {
