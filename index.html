@@ -7207,10 +7207,24 @@ document.addEventListener('DOMContentLoaded', function() {
    broken out per rep.
 
    DATA SOURCE — READ THIS BEFORE CHANGING IT
-   This panel reads a small pre-aggregated file published to GitHub Pages:
+   This panel reads a small pre-aggregated file straight off the main branch:
        Daily-Sales-Report/data/tsheet-counts.json   (~1–5 KB, loads instantly)
    A scheduled GitHub Action calls the Apps Script feed once every ~10
    minutes for the whole company and commits that file.
+
+   RAW.GITHUBUSERCONTENT, NOT GITHUB PAGES — do not "fix" this back.
+   Pages serves whatever its last DEPLOY produced, and Daily-Sales-Report only
+   redeploys when update.yml runs (a weekday 14:15 UTC cron). The counts commit
+   carries [skip ci], so it never triggers a deploy of its own. Measured
+   2026-09-03: the Pages copy was 8 h 50 m behind main — reps were reading
+   yesterday's numbers on a panel labelled "live". raw.githubusercontent serves
+   the branch itself, so it is current within a minute of the commit.
+   It sends Access-Control-Allow-Origin: *, so the fetch below works from
+   github.io and from the cookcountycooks.com embed alike.
+
+   This applies to fetch()ed DATA only. rep-picker.js above is a <script src>
+   and must stay on Pages: raw.githubusercontent serves text/plain with
+   X-Content-Type-Options: nosniff, and the browser refuses to execute that.
 
    It must NOT call the Apps Script submissions endpoint on a timer. That
    endpoint is the same one this sheet POSTs quotes to; it takes ~11s and
@@ -7228,7 +7242,7 @@ var SubTracker = (function () {
   'use strict';
 
   var ENABLED       = true;
-  var COUNTS_URL    = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/tsheet-counts.json';
+  var COUNTS_URL    = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/tsheet-counts.json';
   var LIVE_FALLBACK = true;   // manual Refresh only; see note above
   var LIVE_URL      = (typeof APPS_SCRIPT_URL === 'string' && APPS_SCRIPT_URL) ? APPS_SCRIPT_URL : '';
 
