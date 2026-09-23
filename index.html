@@ -2849,10 +2849,16 @@ function getAppleTipsValue(tradeDevice, tradeCondition, phoneName) {
   for (var i = 0; i < rows.length; i++) {
     if (rows[i].condition.toLowerCase() === cond) return rows[i].value;
   }
-  // No row for that condition. DEALS94's Apple PDF publishes only ONE condition
-  // for two devices (Motorola RAZR = Poor only, Samsung Galaxy S8 = Good only),
-  // and the condition chips may not be set yet. Quote the LOWEST published row
-  // for the device rather than a tier the credit desk has not published.
+  // No condition chosen yet. Since 2026-09-23 the dropdown lists each device
+  // ONCE and the condition is a separate chip click, so this state is now
+  // reachable — and quoting anything here would put a number on the row that
+  // the rep never confirmed. Quote $0 until they pick, UNLESS the device
+  // publishes exactly one condition (DEALS94's Apple PDF does that for
+  // Motorola RAZR = Poor only and Samsung Galaxy S8 = Good only), in which
+  // case there is nothing to choose and that row is the answer.
+  if (!cond) return rows.length === 1 ? rows[0].value : 0;
+  // A condition WAS given but the device has no row for it: fall back to the
+  // lowest published row rather than a tier the credit desk has not published.
   return rows.reduce(function(lo, r) { return Math.min(lo, r.value); }, Infinity);
 }
 
@@ -3426,6 +3432,29 @@ const APPLE_TIPS = [
   { name: "Samsung Note 10 Plus 5G",                condition: "Fair",  tier: 5, value:  450 },
   { name: "Samsung Note 10 Plus 5G",                condition: "Poor",  tier: 5, value:  450 },
 ];
+
+/* ── TIPs device roster for the dropdown — added 2026-09-23 ──────────────
+   APPLE_TIPS carries one row PER CONDITION (139 devices x 3 = 413 rows).
+   Feeding that straight to the autocomplete meant the browse list (capped
+   at 60 rows) only ever reached 20 devices, so most of the roster was
+   unreachable without knowing the exact name to type. The dropdown now
+   lists each device ONCE — condition is chosen on the chips underneath,
+   which is also where the per-condition dollar value lives. `value` here is
+   the best-condition payout, shown as "up to $X" in the list.           */
+const APPLE_TIPS_DEVICES = (function() {
+  var byName = {};
+  var out = [];
+  APPLE_TIPS.forEach(function(r) {
+    if (!byName[r.name]) {
+      byName[r.name] = { name: r.name, value: r.value, best: true };
+      out.push(byName[r.name]);
+    } else if (r.value > byName[r.name].value) {
+      byName[r.name].value = r.value;
+    }
+  });
+  return out;
+})();
+
 
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -4489,14 +4518,16 @@ function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
     var numericPart = query.replace(/[$,\s]/g, '');
     var isValueQuery = numericPart.length > 0 && /^\d+(\.\d+)?$/.test(numericPart);
 
+    // Caps raised 60 -> 200 on 2026-09-23. 60 was fine for the ~47-row phone
+    // catalog but truncated the trade-in roster badly; the list is scrollable.
     var matches;
     if (query.length === 0) {
-      matches = dataset.slice(0, 60);
+      matches = dataset.slice(0, 200);
     } else {
       // 1) Always try name substring match first.
       matches = dataset
         .filter(function(d) { return d.name.toLowerCase().indexOf(query) !== -1; })
-        .slice(0, 60);
+        .slice(0, 200);
       // 2) Fall through to value search if numeric AND no name matches.
       if (matches.length === 0 && isValueQuery) {
         var target = parseFloat(numericPart);
@@ -4518,6 +4549,11 @@ function makeDfAutocomplete(inputEl, listEl, dataset, onSelect) {
       var priceStr = (item.condition && item.value != null)
         ? ('$' + Number(item.value).toLocaleString('en-US'))
         : (item.price != null ? ('$' + Number(item.price).toFixed(2)) : '');
+      // De-duplicated TIPs roster (APPLE_TIPS_DEVICES): one row per device,
+      // no condition, so show the best-condition payout as "up to $X".
+      if (!priceStr && item.best && item.value != null) {
+        priceStr = 'up to $' + Number(item.value).toLocaleString('en-US');
+      }
       var label = item.name + (item.condition ? ' \u2014 ' + item.condition : '');
       div.innerHTML = '<span>' + label + '</span><span class="item-price">' + priceStr + '</span>';
 
@@ -4741,18 +4777,33 @@ function buildRow(type, num) {
   if (type === 'phone') {
     extraFields = `
       <div class="df-field-group df-trade-section">
-        <div class="df-field-label">Trade-In Value (look up at Xfinity portal, then enter here)</div>
-        <div class="trade-input-row">
-          <a href="https://www.xfinity.com/mobile/trade-in/check-condition"
-             target="_blank" rel="noopener"
-             class="trade-portal-btn">
-            🔍 Look Up Trade-In Value ↗
-          </a>
-          <div class="trade-value-input-wrap">
-            <span class="trade-value-prefix">$</span>
-            <input type="number" id="${rowId}-trade-value" placeholder="0" min="0" step="1" aria-label="Trade-In Value">
+        <!-- ══ PLUS UP / PORTAL TRADE-IN ══════════════════════════════════
+             Wrapped in its own #${rowId}-portal-wrap as of 2026-09-23 so the
+             Apple TIPs flow can hide JUST this block (label + Xfinity lookup
+             link + value input) without also hiding the "No trade-in"
+             checkbox below, which every row needs. Visibility is owned by
+             updateTradeVisibility(num) — do not toggle it anywhere else. -->
+        <div id="${rowId}-portal-wrap">
+          <div class="df-field-label" id="${rowId}-portal-label">Trade-In Value (look up at Xfinity portal, then enter here)</div>
+          <div class="trade-input-row">
+            <a href="https://www.xfinity.com/mobile/trade-in/check-condition"
+               target="_blank" rel="noopener"
+               class="trade-portal-btn">
+              🔍 Look Up Trade-In Value ↗
+            </a>
+            <div class="trade-value-input-wrap">
+              <span class="trade-value-prefix">$</span>
+              <input type="number" id="${rowId}-trade-value" placeholder="0" min="0" step="1" aria-label="Trade-In Value">
+            </div>
           </div>
+          <div id="${rowId}-portal-note" style="display:none;font-size:11px;font-weight:600;color:var(--xfinity-purple-dark);margin-top:6px;"></div>
         </div>
+        <!-- Escape hatch: shown only while the portal block is hidden by the
+             TIPs flow, so a rep whose customer phone is NOT on the TIPs list
+             can still get to the Xfinity lookup (Plus Up path). -->
+        <button type="button" id="${rowId}-portal-escape" style="display:none;background:none;border:none;padding:0;margin-top:2px;font-size:11px;font-weight:700;color:var(--xfinity-purple);text-decoration:underline;cursor:pointer;text-align:left;">
+          Trade-in phone not on the list? Use the Xfinity portal value instead →
+        </button>
         <div class="df-no-trade-wrap" style="margin-top:8px;">
           <input type="checkbox" id="${rowId}-notrade">
           <label for="${rowId}-notrade">No trade-in</label>
@@ -4765,9 +4816,9 @@ function buildRow(type, num) {
            against Plus Up (portal value + $400) and quotes whichever pays more;
            they are not combinable. Shown/hidden in wireRowAutocomplete(). -->
       <div class="df-field-group df-tips-section" id="${rowId}-tips-wrap" style="display:none;">
-        <div class="df-field-label">Apple TIPs Trade-In (optional — pays up to $${APPLE_TIPS_MAX.toLocaleString('en-US')} instead of the portal value)</div>
+        <div class="df-field-label">Apple TIPs Trade-In (optional — pays up to $${APPLE_TIPS_MAX.toLocaleString('en-US')} instead of the portal value)<br><span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-secondary);">1. find the customer's phone &nbsp;·&nbsp; 2. pick its condition</span></div>
         <div class="df-autocomplete-wrap">
-          <input type="text" id="${rowId}-tips-device" placeholder="Search trade-in phones..." autocomplete="off">
+          <input type="text" id="${rowId}-tips-device" placeholder="Search trade-in phones (139 models)..." autocomplete="off">
           <div class="df-dropdown-list" id="${rowId}-tips-list"></div>
         </div>
         <div class="df-storage-picker" id="${rowId}-tips-cond" style="display:none;flex-wrap:wrap;gap:7px;margin-top:6px;"></div>
@@ -4844,6 +4895,7 @@ function wireRowAutocomplete(type, num) {
     d.tipsDevice = '';
     d.tipsCondition = '';
     d.noTrade = false;
+    d.portalOverride = false;   // new phone selected -> re-arm the smart hide
     // Clear trade-in value input + checkbox; re-enable both
     const tradeValEl = document.getElementById(`${type}-row-${num}-trade-value`);
     const noTradeEl  = document.getElementById(`${type}-row-${num}-notrade`);
@@ -4865,6 +4917,9 @@ function wireRowAutocomplete(type, num) {
       const tipsOn = eligible && isApplePurchase(item.name) && isAppleDealModel(item.name)
         && isOfferWindowOpen(APPLE_TIPS_WINDOW.start, APPLE_TIPS_WINDOW.end);
       if (tipsWrap) tipsWrap.style.display = tipsOn ? 'flex' : 'none';
+      // Portal block visibility depends on whether the TIPs picker is up, so
+      // it is decided here, after that display is settled (2026-09-23).
+      updateTradeVisibility(num);
     }
 
     // Storage picker (phones with variants)
@@ -4934,7 +4989,12 @@ function wireRowAutocomplete(type, num) {
     const tipsInp  = document.getElementById(`${rowId}-tips-device`);
     const tipsList = document.getElementById(`${rowId}-tips-list`);
     if (tipsInp && tipsList) {
-      makeDfAutocomplete(tipsInp, tipsList, APPLE_TIPS, (item) => {
+      // Fed APPLE_TIPS_DEVICES (one row per device) rather than APPLE_TIPS
+      // (one row per condition) as of 2026-09-23 — see that const. Condition
+      // is picked on the chips renderTipsConditions() draws underneath, and
+      // is deliberately NOT defaulted: a silently-assumed "Good" would
+      // over-quote every customer whose phone is scratched.
+      makeDfAutocomplete(tipsInp, tipsList, APPLE_TIPS_DEVICES, (item) => {
         const d = getRowData('phone', num);
         d.tipsDevice    = item.name;
         d.tipsCondition = item.condition || '';
@@ -4961,6 +5021,9 @@ function wireRowAutocomplete(type, num) {
           noTrade.checked = false;
           d.noTrade = false;
         }
+        // A value the rep actually typed pins the block open, so it can never
+        // vanish underneath them mid-entry.
+        if (v > 0) d.portalOverride = true;
         recalcRow('phone', num);
       });
     }
@@ -4986,7 +5049,22 @@ function wireRowAutocomplete(type, num) {
           }
           if (tipsInp) { tipsInp.disabled = false; tipsInp.style.opacity = '1'; }
         }
+        updateTradeVisibility(num);
         recalcRow('phone', num);
+      });
+    }
+
+    // ── Escape hatch: customer's phone is not on the TIPs roster, so the
+    //    Plus Up path is the only one available. Pins the portal block
+    //    (Xfinity lookup link + value input) open for this row.
+    const portalEsc = document.getElementById(`${rowId}-portal-escape`);
+    if (portalEsc) {
+      portalEsc.addEventListener('click', () => {
+        const d = getRowData('phone', num);
+        d.portalOverride = true;
+        updateTradeVisibility(num);
+        const tv = document.getElementById(`${rowId}-trade-value`);
+        if (tv && !tv.disabled) { try { tv.focus(); } catch (_) {} }
       });
     }
   }
@@ -5058,11 +5136,98 @@ function renderTipsConditions(num) {
   if (note) {
     const tipsVal = getAppleTipsValue(d.tipsDevice, d.tipsCondition, d.name);
     const plusUp  = getUpgradeCredit(d.name) + (d.noTrade ? 0 : (parseFloat(d.tradeValue) || 0));
-    note.textContent = tipsVal > 0
-      ? `TIPs $${tipsVal.toLocaleString('en-US')} vs Plus Up $${plusUp.toLocaleString('en-US')} — ` +
-        `sheet quotes ${tipsVal > plusUp ? 'TIPs' : 'Plus Up'} (not combinable)`
-      : '';
+    if (!d.tipsCondition) {
+      // Device chosen, condition not yet. Nothing is priced until they pick.
+      note.textContent = 'Pick the phone\u2019s condition above to price the TIPs trade-in.';  // chips sit directly above this note
+    } else if (tipsVal > 0) {
+      // Compare the way calcSmartPromo does: cap both at the phone price, and
+      // a tie goes to Plus Up. Comparing the raw numbers used to print
+      // "TIPs $1,300 vs Plus Up $1,200 - sheet quotes TIPs" on a $1,199.99
+      // phone while the row itself quoted Plus Up (fixed 2026-09-23).
+      const price     = Number(d.price) || 0;
+      const tipsAmt   = price ? Math.min(tipsVal, price) : tipsVal;
+      const plusUpAmt = price ? Math.min(plusUp, price)  : plusUp;
+      const capped    = price > 0 && (tipsAmt < tipsVal || plusUpAmt < plusUp);
+      note.textContent =
+        `TIPs $${tipsVal.toLocaleString('en-US')} vs Plus Up $${plusUp.toLocaleString('en-US')} \u2014 ` +
+        `sheet quotes ${tipsAmt > plusUpAmt ? 'TIPs' : 'Plus Up'} ` +
+        (capped ? '(capped at the phone price \u2014 not combinable)' : '(not combinable)');
+    } else {
+      note.textContent = '';
+    }
     note.style.display = note.textContent ? 'block' : 'none';
+  }
+  updateTradeVisibility(num);
+}
+
+/* ══ Portal-vs-TIPs visibility — added 2026-09-23 ═══════════════════════════
+   Apple upgrade rows can be paid two ways and they are NOT combinable:
+
+     TIPs     tiered trade-in, $450-$1,300 depending on device + condition
+     Plus Up  $400 flat (getUpgradeCredit) + the Xfinity portal value the rep
+              types into #<row>-trade-value
+
+   Two live trade-in inputs on one row is what was confusing reps, so:
+
+     - Non-Apple row (no TIPs picker)  -> portal block always visible.
+     - Apple row, nothing picked yet   -> portal hidden, escape-hatch link
+                                          shown for phones off the roster.
+     - Apple row, TIPs tier 1 ($1,300) -> portal stays hidden. Plus Up would
+                                          need a portal value over $900 to
+                                          catch it; that does not happen.
+     - Apple row, TIPs tier 2-5        -> portal REVEALED, Xfinity lookup link
+                                          and all, because Plus Up can and
+                                          often does win here (tier 5 pays
+                                          $450, so any portal value over $50
+                                          beats it).
+
+   The escape hatch sets d.portalOverride, which pins the block open for the
+   rest of that row. Nothing else may set display on #<row>-portal-wrap.     */
+function updateTradeVisibility(num) {
+  const rowId  = `phone-row-${num}`;
+  const d      = getRowData('phone', num);
+  const portal = document.getElementById(`${rowId}-portal-wrap`);
+  const esc    = document.getElementById(`${rowId}-portal-escape`);
+  const pnote  = document.getElementById(`${rowId}-portal-note`);
+  const tipsWrap = document.getElementById(`${rowId}-tips-wrap`);
+  if (!portal) return;
+
+  const tipsOn = !!tipsWrap && tipsWrap.style.display !== 'none';
+  if (!tipsOn) {
+    portal.style.display = '';
+    if (esc)   esc.style.display = 'none';
+    if (pnote) { pnote.style.display = 'none'; pnote.textContent = ''; }
+    return;
+  }
+
+  const tipsVal  = (d.tipsDevice && d.tipsCondition)
+    ? getAppleTipsValue(d.tipsDevice, d.tipsCondition, d.name) : 0;
+  const tipsMaxed = tipsVal >= APPLE_TIPS_MAX;
+  const show = !!d.portalOverride || (tipsVal > 0 && !tipsMaxed);
+
+  portal.style.display = show ? '' : 'none';
+  if (esc) esc.style.display = (show || d.noTrade) ? 'none' : 'block';
+
+  if (pnote) {
+    const credit = getUpgradeCredit(d.name);
+    if (!show || d.noTrade) {
+      pnote.textContent = '';
+      pnote.style.display = 'none';
+    } else if (tipsVal > 0) {
+      // Threshold is cap-aware and ties go to Plus Up, matching
+      // calcSmartPromo (which needs tipsAmt STRICTLY greater to quote TIPs).
+      const price  = Number(d.price) || 0;
+      const target = price ? Math.min(tipsVal, price) : tipsVal;
+      const beat   = Math.max(0, target - credit);
+      pnote.textContent = `Plus Up pays $${credit} + this portal value. ` +
+        `It takes over from the $${tipsVal.toLocaleString('en-US')} TIPs offer below once the portal ` +
+        `value reaches $${beat.toLocaleString('en-US')} \u2014 the sheet quotes whichever pays more.`;
+      pnote.style.display = 'block';
+    } else {
+      pnote.textContent = 'Plus Up path: $' + credit +
+        ' + the Xfinity portal value for this phone.';
+      pnote.style.display = 'block';
+    }
   }
 }
 
@@ -5078,6 +5243,7 @@ function resetTipsPicker(num) {
   if (inp)  inp.value = '';
   if (box)  { box.innerHTML = ''; box.style.display = 'none'; }
   if (note) { note.textContent = ''; note.style.display = 'none'; }
+  updateTradeVisibility(num);
 }
 
 // ── Recalculate a single row ──
