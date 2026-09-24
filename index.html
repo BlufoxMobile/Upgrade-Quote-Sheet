@@ -1170,9 +1170,10 @@ html.xf-cv .screen-wrapper > .intake-footer{display:none !important;}   /* audit
 #previewPage .cmp-item-sub.strikethrough,#previewPage .strikethrough{display:block;font-family:var(--xf-disp);font-weight:700;font-size:12px;color:var(--xf-txt3);
   text-decoration:line-through;text-decoration-color:var(--xf-red);text-decoration-thickness:1.5px;margin:1px 0 0}
 #previewPage .strikethrough:empty{display:none}
+/* "Was" price sits on its own line ABOVE the upgrade price, so every price in the
+   column stays centred on the same axis (Jeff, 2026-09-24). */
 @container xfsec (min-width:600px){
-  #previewPage .cmp-item-block .strikethrough{display:inline-block;margin:0 9px 0 0;font-size:13px}
-  #previewPage .cmp-item-block .cmp-item-price{display:inline-block}
+  #previewPage .cmp-item-block .strikethrough{display:block;margin:2px 0 0;font-size:13px}
 }
 #previewPage .cmp-item-price{font-family:var(--xf-disp);font-weight:900;font-size:26px;font-size:clamp(20px,3.5cqw,32px);line-height:1;letter-spacing:-.03em;
   color:var(--xf-price);margin:5px 0 0;white-space:nowrap}
