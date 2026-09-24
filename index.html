@@ -9053,5 +9053,33 @@ var SubTracker = (function () {
    filled from this page's own <option>s, so the form is usable at DOMContentLoaded. No-op when not framed. */
 (function(){function s(){try{if(window.parent!==window)window.parent.postMessage({source:'ccc-tool',state:'painted'},'*');}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',s,{once:true});else s();})();</script>
+<script>/* Perf (2026-09-24): framed in the cookcountycooks.com viewer, keys typed in here never reach the
+   site, so Escape "did nothing" and read as a frozen pop-up. Hand back only keys this page does not
+   use: Escape closes the viewer, Cmd-K / Ctrl-K opens the site's Find (site contract: {source:'ccc-tool',
+   action:'escape'|'find'}). Stands down while this page has something open (a promo sheet, a device or TIPs list, the rep-name list;
+   full screen; text in a search box), checked BEFORE this page's own key handlers run, and when a
+   handler here called preventDefault, mid-IME or on key repeat. No-op when not framed. */
+(function () {
+  if (window.parent === window) return;
+  var SEL = '[aria-modal="true"],dialog[open],.pg-modal,.df-dropdown-list.open,#repName+ul', busy = false;
+  function up(e) {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return true;
+    var t = e.target;
+    if (e.key === 'Escape' && t && t.tagName === 'INPUT' && t.type === 'search' && t.value) return true;
+    var n = document.querySelectorAll(SEL);
+    for (var i = 0; i < n.length; i++) if (n[i].getClientRects().length) return true;
+    return false;
+  }
+  addEventListener('keydown', function (e) { try { busy = up(e); } catch (x) { busy = true; } }, true);
+  addEventListener('keydown', function (e) {
+    if (busy || e.defaultPrevented || e.isComposing || e.repeat) return;
+    var k = e.key, a = '';
+    if (k === 'Escape' || k === 'Esc') a = 'escape';
+    else if ((k === 'k' || k === 'K') && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) a = 'find';
+    if (!a) return;
+    if (a === 'find') e.preventDefault();
+    try { window.parent.postMessage({ source: 'ccc-tool', action: a }, '*'); } catch (x) {}
+  });
+})();</script>
 </body>
 </html>
