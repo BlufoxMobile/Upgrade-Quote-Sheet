@@ -2838,6 +2838,20 @@ function getUpgradeCredit(phoneName) {
 // Returns 0 unless the TIPs window is open, the purchase is one of the nine
 // Apple SKUs, and the device is on the table. This value REPLACES the portal
 // trade-in value — calcSmartPromo() never adds the two together.
+// Best-paying published condition for a trade-in device, e.g. "Good".
+// Used to seed the condition the moment a device is picked so the row never
+// sits on the bare $400 upgrade credit while a trade-in is selected.
+function bestTipsCondition(deviceName) {
+  var want = String(deviceName || '').toLowerCase().trim();
+  var best = '', bestVal = -1;
+  for (var i = 0; i < APPLE_TIPS.length; i++) {
+    var r = APPLE_TIPS[i];
+    if (r.name.toLowerCase() !== want) continue;
+    if (r.value > bestVal) { bestVal = r.value; best = r.condition; }
+  }
+  return best;
+}
+
 function getAppleTipsValue(tradeDevice, tradeCondition, phoneName) {
   if (!tradeDevice) return 0;
   if (!isOfferWindowOpen(APPLE_TIPS_WINDOW.start, APPLE_TIPS_WINDOW.end)) return 0;
@@ -2856,7 +2870,9 @@ function getAppleTipsValue(tradeDevice, tradeCondition, phoneName) {
   // publishes exactly one condition (DEALS94's Apple PDF does that for
   // Motorola RAZR = Poor only and Samsung Galaxy S8 = Good only), in which
   // case there is nothing to choose and that row is the answer.
-  if (!cond) return rows.length === 1 ? rows[0].value : 0;
+  if (!cond) {
+    return rows.reduce(function(hi, r) { return Math.max(hi, r.value); }, 0);
+  }
   // A condition WAS given but the device has no row for it: fall back to the
   // lowest published row rather than a tier the credit desk has not published.
   return rows.reduce(function(lo, r) { return Math.min(lo, r.value); }, Infinity);
@@ -4997,12 +5013,20 @@ function wireRowAutocomplete(type, num) {
       makeDfAutocomplete(tipsInp, tipsList, APPLE_TIPS_DEVICES, (item) => {
         const d = getRowData('phone', num);
         d.tipsDevice    = item.name;
-        d.tipsCondition = item.condition || '';
+        // Land on the device's BEST published condition immediately (2026-09-24).
+        // Leaving it blank made the row keep quoting the bare $400 Anytime
+        // Upgrade after the rep had already picked the trade-in phone, which
+        // read as the trade-in being ignored. The chips below stay live so a
+        // scratched or cracked phone gets marked down to Fair/Poor.
+        d.tipsCondition = item.condition || bestTipsCondition(item.name);
         // Record the real traded device on the row (and so on the submitted
         // quote) instead of the generic "Customer trade-in".
         d.tradeName      = item.name;
-        d.tradeCondition = item.condition || '';
+        d.tradeCondition = d.tipsCondition;
         if (noTrade && noTrade.checked) { noTrade.checked = false; d.noTrade = false; }
+        // Show the seeded condition in the field, the same way a chip click
+        // does, so the rep can see WHICH grade the row just priced.
+        if (d.tipsCondition) tipsInp.value = `${d.tipsDevice} \u2014 ${d.tipsCondition}`;
         renderTipsConditions(num);
         recalcRow('phone', num);
       });
@@ -5024,6 +5048,11 @@ function wireRowAutocomplete(type, num) {
         // A value the rep actually typed pins the block open, so it can never
         // vanish underneath them mid-entry.
         if (v > 0) d.portalOverride = true;
+        // Re-render the TIPs comparison: its Plus Up figure is $400 + THIS
+        // value, so without this the note kept saying "sheet quotes TIPs"
+        // while the row had already switched to Plus Up (fixed 2026-09-24).
+        if (d.tipsDevice) renderTipsConditions(num);
+        else updateTradeVisibility(num);
         recalcRow('phone', num);
       });
     }
@@ -5137,8 +5166,10 @@ function renderTipsConditions(num) {
     const tipsVal = getAppleTipsValue(d.tipsDevice, d.tipsCondition, d.name);
     const plusUp  = getUpgradeCredit(d.name) + (d.noTrade ? 0 : (parseFloat(d.tradeValue) || 0));
     if (!d.tipsCondition) {
-      // Device chosen, condition not yet. Nothing is priced until they pick.
-      note.textContent = 'Pick the phone\u2019s condition above to price the TIPs trade-in.';  // chips sit directly above this note
+      // Should not happen now that selection seeds the best condition, but if
+      // it ever does the row still prices at that best condition rather than
+      // dropping back to the bare upgrade credit.
+      note.textContent = 'Confirm the phone\u2019s condition above.';
     } else if (tipsVal > 0) {
       // Compare the way calcSmartPromo does: cap both at the phone price, and
       // a tie goes to Plus Up. Comparing the raw numbers used to print
