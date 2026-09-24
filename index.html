@@ -9012,5 +9012,10 @@ var SubTracker = (function () {
 })();
 </script>
 
+<script>/* Perf (2026-09-24): tell the cookcountycooks.com viewer this page has drawn, so it can show the
+   form now instead of waiting for fonts and the PDF libraries (site contract C6). The store picker is
+   filled from this page's own <option>s, so the form is usable at DOMContentLoaded. No-op when not framed. */
+(function(){function s(){try{if(window.parent!==window)window.parent.postMessage({source:'ccc-tool',state:'painted'},'*');}catch(e){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',s,{once:true});else s();})();</script>
 </body>
 </html>
