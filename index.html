@@ -7,7 +7,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Upgrade Quote Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Perf (2026-09-24): the font sheet loads non-blocking, exactly as on the 6th Gen
+     sheet since 2026-09-02. A render-blocking stylesheet from a third-party host
+     stops the parser dead if that host HANGS (store guest wifi, captive portals) —
+     the page is blank until it answers. media="print" + onload lets the page paint
+     in the fallback sans and swap to Outfit/DM Sans the moment the sheet arrives.
+     If this comment is gone, an older copy of this file was re-uploaded. -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <style>
   :root {
     --xfinity-purple:#6713D2; --xfinity-purple-dark:#4A0F96; --xfinity-purple-light:#9B59F5;
@@ -956,8 +965,32 @@
   @media(max-width:640px){.promo-list, .promo-banner-list{grid-template-columns:1fr;}}
 </style>
 <!-- PDF generation libs (used by handleEmailPDF / handlePrint for iPad-friendly sharing & downloads) -->
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<!-- Perf (2026-09-24): html2canvas + jspdf (163 KB gzipped from jsDelivr) were
+     blocking <script> tags here, ahead of the whole body, but they are only used
+     inside _buildUpgradePdf(). They are now loaded by _loadPdfLibs() — the same
+     block the 6th Gen sheet has used since 2026-09-02: warmed up 3 s after the
+     page's load event, and fetched on demand the first time a rep taps
+     Print / Email PDF if that has not happened yet. Same library URLs/versions.
+     If this comment is gone, an older copy of this file was re-uploaded. -->
+<script>
+function _loadPdfLibs() {
+  if (window.html2canvas && window.jspdf) return Promise.resolve();
+  if (window._pdfLibsPromise) return window._pdfLibsPromise;
+  var load = function (src) {
+    return new Promise(function (res, rej) {
+      var el = document.createElement('script');
+      el.src = src; el.onload = res; el.onerror = function () { rej(new Error('failed ' + src)); };
+      document.head.appendChild(el);
+    });
+  };
+  window._pdfLibsPromise = Promise.all([
+    load('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'),
+    load('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js')
+  ]).catch(function (e) { window._pdfLibsPromise = null; throw e; });
+  return window._pdfLibsPromise;
+}
+window.addEventListener('load', function () { setTimeout(function () { _loadPdfLibs().catch(function () {}); }, 3000); });
+</script>
 <!-- ══ CUSTOMER VIEW — "Xfinity flyer" design (2026-09-24) ══
      Montserrat (display, all money) + Inter (body) for the customer view only.
      The intake page keeps Outfit / DM Sans from the link above. -->
@@ -7060,6 +7093,9 @@ function handlePreview() { showPreviewPage(); }
 // returnBlob:true so Email PDF can hand the file to the share sheet.
 async function _buildUpgradePdf({ openInNewTab = false, returnBlob = false } = {}) {
   const target = document.getElementById('previewPage');
+  // Perf (2026-09-24): the PDF libs are no longer loaded up front (see <head>);
+  // fetch them now if the post-load warm-up has not finished yet.
+  if (!window.html2canvas || !window.jspdf) { try { await _loadPdfLibs(); } catch (e) {} }
   if (!target || !window.html2canvas || !window.jspdf) {
     alert('PDF library not loaded yet. Please wait a moment and try again.');
     return null;
