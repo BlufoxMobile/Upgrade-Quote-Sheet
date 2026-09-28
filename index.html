@@ -7434,6 +7434,8 @@ async function handleEmailPDF() {
 // the frame caused is told apart by WebKit's message ("Third-party iframes are not allowed to
 // call share()…") or by the tap still being live when share() refused it; from then on this
 // page goes straight to the download + email fallback. Outside a frame nothing changes.
+// 2026-09-27: the site's viewer now lists "web-share", so the share sheet opens there;
+// this fallback stays for an older cached copy of the site or any frame that lacks it.
 let _shareBlocked = false;
 function _shareBlockedHere() {
   if (_shareBlocked) return true;
@@ -9213,7 +9215,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    use: Escape closes the viewer, Cmd-K / Ctrl-K opens the site's Find (site contract: {source:'ccc-tool',
    action:'escape'|'find'}). Stands down while this page has something open (a promo sheet, a device or TIPs list, the rep-name list;
    full screen; text in a search box), checked BEFORE this page's own key handlers run, and when a
-   handler here called preventDefault, mid-IME or on key repeat. No-op when not framed. */
+   handler here called preventDefault, mid-IME or on key repeat. No-op when not framed.
+   2026-09-27: Escape pressed while typing in a field (a text/number box, a dropdown, an editable
+   area) no longer reaches the viewer, so a stray Escape can't close it and drop an unsent quote.
+   It only takes focus off that field; a second Escape closes the viewer as before. */
 (function () {
   if (window.parent === window) return;
   var SEL = '[aria-modal="true"],dialog[open],.pg-modal,.df-dropdown-list.open,#repName+ul', busy = false;
@@ -9225,6 +9230,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     for (var i = 0; i < n.length; i++) if (n[i].getClientRects().length) return true;
     return false;
   }
+  var NOTYPE = /^(button|submit|reset|checkbox|radio|range|color|file|image|hidden)$/i;
+  function field(t) {
+    if (!t || t.nodeType !== 1) return false;
+    if (t.isContentEditable) return true;
+    var n = t.tagName;
+    if (n === 'TEXTAREA' || n === 'SELECT') return true;
+    return n === 'INPUT' && !NOTYPE.test(t.type || 'text');
+  }
   addEventListener('keydown', function (e) { try { busy = up(e); } catch (x) { busy = true; } }, true);
   addEventListener('keydown', function (e) {
     if (busy || e.defaultPrevented || e.isComposing || e.repeat) return;
@@ -9232,6 +9245,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if (k === 'Escape' || k === 'Esc') a = 'escape';
     else if ((k === 'k' || k === 'K') && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) a = 'find';
     if (!a) return;
+    if (a === 'escape' && field(e.target)) { try { e.target.blur(); } catch (x) {} return; }
     if (a === 'find') e.preventDefault();
     try { window.parent.postMessage({ source: 'ccc-tool', action: a }, '*'); } catch (x) {}
   });
