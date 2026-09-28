@@ -983,10 +983,35 @@
     font-size: 11px; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;
   }
   .subtrk-refresh:disabled { color: var(--text-muted); cursor: default; text-decoration: none; }
+  /* Monthly t-sheet goal (2026-09-27): from the Monthly Target Planner's latest upload. */
+  .subtrk-total-sub { margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .subtrk-total-sub b { color: var(--text-primary); font-weight: 700; }
+  .subtrk-goal {
+    padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--surface-2);
+    font-size: 12px; color: var(--text-secondary, var(--text-muted)); line-height: 1.45;
+  }
+  .subtrk-goal b { color: var(--text-primary); font-family: 'Outfit', sans-serif; font-weight: 800; }
+  .subtrk-goal-src { color: var(--text-muted); white-space: nowrap; }
+  .subtrk-goal-you {
+    margin: 10px 18px 4px; padding: 10px 12px; border-radius: 10px;
+    background: var(--surface-3); color: var(--text-primary); font-size: 13px; font-weight: 600; line-height: 1.4;
+    border-left: 4px solid var(--xfinity-purple);
+  }
+  .subtrk-goal-you b { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--xfinity-purple); }
+  .subtrk-goal-you.is-met { border-left-color: var(--xfinity-green, #00a651); }
+  .subtrk-goal-you.is-met b { color: var(--xfinity-green, #00a651); }
+  .subtrk-reps.has-goal .subtrk-rep-head,
+  .subtrk-reps.has-goal .subtrk-rep-row { grid-template-columns: 1fr 52px 52px 52px 60px; }
+  .subtrk-rep-num.togo { color: var(--xfinity-purple); }
+  .subtrk-rep-num.met { color: var(--xfinity-green, #00a651); font-size: 13px; }
   @media (max-width: 560px) {
     .subtrk-totals { grid-template-columns: 1fr 1fr; }
     .subtrk-total-value { font-size: 26px; }
     .subtrk-rep-head, .subtrk-rep-row { grid-template-columns: 1fr 46px 46px; padding-left: 14px; padding-right: 14px; }
+    .subtrk-reps.has-goal .subtrk-rep-head,
+    .subtrk-reps.has-goal .subtrk-rep-row { grid-template-columns: 1fr 38px 38px 40px 48px; gap: 4px; }
+    .subtrk-goal { padding-left: 14px; padding-right: 14px; }
+    .subtrk-goal-you { margin-left: 14px; margin-right: 14px; }
   }
 
   
@@ -1505,6 +1530,7 @@ html.xf-cv .screen-wrapper > .intake-footer{display:none !important;}   /* audit
             <div class="subtrk-total">
               <div class="subtrk-total-label">Month to Date</div>
               <div class="subtrk-total-value zero" id="subtrk-mtd">0</div>
+              <div class="subtrk-total-sub" id="subtrk-mtd-goal" hidden></div>
             </div>
           </div>
           <div class="subtrk-reps" id="subtrk-reps" aria-live="polite"></div>
@@ -8823,6 +8849,62 @@ var SubTracker = (function () {
   var lastError = false;
   var rendering = false;
 
+  /* ── MONTHLY T-SHEET GOAL (2026-09-27) ─────────────────────────────────
+     Goals come from the Monthly Target Planner (blufoxmobile.github.io/
+     Monthly-Target-Planner), which writes Daily-Sales-Report/data/
+     target-summary.json when the month's targets are uploaded. Per store it
+     holds targets.rep.tsheet (each rep's goal) and targets.store.tsheet. The
+     LATEST upload is used whatever month it is labelled (Jeff, 2026-09-27),
+     and the label is shown. "To go" runs to the end of the fiscal month (the
+     21st). Read from raw.githubusercontent for the same reason as the counts
+     file above; fetched once per open (and on Refresh), never on the timer.
+     If the file is missing or has no goal for the store, the panel looks
+     exactly as it did before. */
+  var GOALS_URL = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/target-summary.json';
+  var goals = null, goalsInFlight = null, goalsTried = false;
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function loadGoals(force) {
+    if (goalsInFlight) return goalsInFlight;
+    if (goalsTried && !force) return Promise.resolve(goals);
+    goalsTried = true;
+    goalsInFlight = fetchJson(GOALS_URL, COUNTS_TIMEOUT).then(function (j) {
+      goals = (j && j.stores && typeof j.stores === 'object') ? j : goals;
+      goalsInFlight = null; return goals;
+    }, function (e) {
+      console.warn('[SubTracker] goals unavailable:', e && e.message);
+      goalsInFlight = null; return goals;
+    });
+    return goalsInFlight;
+  }
+  function goalFor(store) {
+    if (!goals || !goals.stores) return null;
+    var want = String(store || '').replace(/\s*Xfinity\s+Store\s*$/i, '').trim().toLowerCase();
+    for (var k in goals.stores) {
+      if (!Object.prototype.hasOwnProperty.call(goals.stores, k)) continue;
+      if (String(k).trim().toLowerCase() !== want) continue;
+      var t = goals.stores[k] && goals.stores[k].targets;
+      var rep = Math.round(Number(t && t.rep && t.rep.tsheet) || 0);
+      var st = Math.round(Number(t && t.store && t.store.tsheet) || 0);
+      if (rep <= 0 && st <= 0) return null;
+      return { rep: rep > 0 ? rep : 0, store: st > 0 ? st : 0, month: String(goals.month || '').trim() };
+    }
+    return null;
+  }
+  // Last day ("YYYY-MM-21") of the fiscal cycle containing a YYYY-MM-DD day, and
+  // the days left in it counting today.
+  function cycleEndOf(ymd) {
+    var s = cycleStartOf(ymd), y = +s.slice(0, 4), m = +s.slice(5, 7) + 1;
+    if (m > 12) { m = 1; y += 1; }
+    return y + '-' + ('0' + m).slice(-2) + '-21';
+  }
+  function daysLeftIn(ymd) {
+    var e = cycleEndOf(ymd);
+    var a = Date.UTC(+ymd.slice(0, 4), +ymd.slice(5, 7) - 1, +ymd.slice(8, 10));
+    var b = Date.UTC(+e.slice(0, 4), +e.slice(5, 7) - 1, +e.slice(8, 10));
+    return Math.max(1, Math.round((b - a) / 86400000) + 1);
+  }
+  function endLabel(ymd) { var e = cycleEndOf(ymd); return MON[+e.slice(5, 7) - 1] + ' ' + (+e.slice(8, 10)); }
+
   var STORE_ALIASES = { 'skokie': 'South Skokie', 'knoxville': 'South Knoxville' };
   function normStore(raw) {
     var s = String(raw == null ? '' : raw).trim().replace(/\s+/g, ' ');
@@ -9035,6 +9117,18 @@ var SubTracker = (function () {
     }
     m.textContent = entry.mtd;   m.className = 'subtrk-total-value' + (entry.mtd   ? '' : ' zero');
 
+    var g = goalFor(store), today = _todayInFileTz_();
+    var left = daysLeftIn(today), ends = endLabel(today);
+    var mg = el('subtrk-mtd-goal');
+    if (mg) {
+      if (g && g.store) {
+        var sLeft = Math.max(0, g.store - (entry.mtd || 0));
+        mg.innerHTML = 'of <b>' + g.store.toLocaleString() + '</b> store goal · ' +
+          (sLeft ? '<b>' + sLeft.toLocaleString() + '</b> to go' : 'goal hit');
+        mg.hidden = false;
+      } else { mg.textContent = ''; mg.hidden = true; }
+    }
+
     var youRaw = selectedRepRaw(), you = youRaw.toLowerCase();
     var reps = {};
     for (var k in entry.reps) if (Object.prototype.hasOwnProperty.call(entry.reps, k)) reps[k] = entry.reps[k];
@@ -9050,17 +9144,41 @@ var SubTracker = (function () {
     });
 
     var box = el('subtrk-reps');
+    var repGoal = g && g.rep ? g.rep : 0;
+    box.className = 'subtrk-reps' + (repGoal ? ' has-goal' : '');
+    var top = '';
+    if (repGoal) {
+      top += '<div class="subtrk-goal">Monthly goal <b>' + repGoal + '</b> t-sheets per rep · <b>' + left + '</b> ' +
+             (left === 1 ? 'day' : 'days') + ' left (ends ' + ends + ')' +
+             (g.month ? ' <span class="subtrk-goal-src">· ' + esc(g.month) + ' targets</span>' : '') + '</div>';
+      if (youRaw) {
+        var mineMtd = 0;
+        for (var q = 0; q < names.length; q++) if (names[q].toLowerCase() === you) { mineMtd = reps[names[q]].mtd || 0; break; }
+        var need = Math.max(0, repGoal - mineMtd);
+        top += need
+          ? '<div class="subtrk-goal-you">You need <b>' + need + '</b> more by ' + ends + ' — about <b>' +
+            Math.ceil(need / left) + '</b> a day.</div>'
+          : '<div class="subtrk-goal-you is-met">You hit your goal — <b>' + (mineMtd - repGoal) + '</b> over. Keep going.</div>';
+      }
+    }
     if (!names.length) {
-      box.innerHTML = '<div class="subtrk-empty">No submissions logged for this store yet this month.</div>';
+      box.innerHTML = top + '<div class="subtrk-empty">No submissions logged for this store yet this month.</div>';
     } else {
-      var html = '<div class="subtrk-rep-head"><span>Rep</span><span style="text-align:center;">Today</span><span style="text-align:center;">MTD</span></div>';
+      var html = top + '<div class="subtrk-rep-head"><span>Rep</span><span style="text-align:center;">Today</span><span style="text-align:center;">MTD</span>' +
+        (repGoal ? '<span style="text-align:center;">Goal</span><span style="text-align:center;">To go</span>' : '') + '</div>';
       for (var j = 0; j < names.length; j++) {
         var n = names[j], c = reps[n], mine = you && n.toLowerCase() === you;
         var todayCell = sameDay ? String(c.today) : '—';
+        var toGo = repGoal ? Math.max(0, repGoal - (c.mtd || 0)) : 0;
         html += '<div class="subtrk-rep-row' + (mine ? ' is-you' : '') + '">'
               +   '<span class="subtrk-rep-name">' + esc(n) + (mine ? '<span class="subtrk-you-tag">You</span>' : '') + '</span>'
               +   '<span class="subtrk-rep-num' + (sameDay && c.today ? '' : ' zero') + '">' + todayCell + '</span>'
               +   '<span class="subtrk-rep-num' + (c.mtd   ? '' : ' zero') + '">' + c.mtd   + '</span>'
+              +   (repGoal
+                    ? '<span class="subtrk-rep-num zero">' + repGoal + '</span>' +
+                      (toGo ? '<span class="subtrk-rep-num togo">' + toGo + '</span>'
+                            : '<span class="subtrk-rep-num met" aria-label="goal hit">&#10003;</span>')
+                    : '')
               + '</div>';
       }
       box.innerHTML = html;
@@ -9095,6 +9213,15 @@ var SubTracker = (function () {
       if (!store) { section.style.display = 'none'; lastStore = ''; rendering = false; return; }
       section.style.display = '';
       el('subtrk-store').textContent = store.replace(/ Xfinity Store$/, '');
+
+      // Goals: once per open (and on Refresh). When they arrive after the counts,
+      // repaint so the goal shows up without another tap.
+      var hadGoals = !!goals;
+      loadGoals(!!force).then(function () {
+        if (goals && (!hadGoals || force) && data && selectedStore()) {
+          try { paint(selectedStore()); } catch (e) {}
+        }
+      });
 
       var btn = el('subtrk-refresh');
       if (btn) btn.disabled = true;
