@@ -2680,10 +2680,10 @@ function getAutoDiscount(phoneName) {
 // ══════════════════════════════════════════════════════════════
 const PROMO_MATRIX = {
   "cycle": {
-    "label": "DEALS18 'Mobile deals' \u2014 cycle verified 2026-09-12, second pass",
-    "refreshed": "2026-09-12",
-    "source": "Comcast Celestial Customer Deals page \u2014 DEALS18 (modified 09/11/2026) plus every live deal card opened individually 2026-09-12, and the DEALS94 trade-in lists (modified 09/10/2026) with all four attached PDFs parsed.",
-    "scope": "UPGRADE SHEET SUBSET. This mirror carries only the promos this sheet can quote: the six upgrade-only deals, the two dual-line-type Apple deals, and the Diamond smartwatch (which needs a new watch line either sheet can add). The new-line-only deals live in the 6th Gen sheet's copy.",
+    "label": "DEALS18 'Mobile deals' \u2014 refreshed 2026-09-28",
+    "refreshed": "2026-09-28",
+    "source": "Comcast Celestial Customer Deals page \u2014 DEALS18 'Mobile deals' (modified 09/25/2026) and every live deal card re-opened 2026-09-28 (CD873/CD867/CD872/CD869 modified 9/25; CD870/CD866/CD868 9/21; CD824/CD864/CD863/CD862/CD865/CD790 9/18), plus DEALS94 (modified 09/17/2026). The Apple, Google/Motorola and Samsung trade-in PDFs are unchanged since 9/9.",
+    "scope": "UPGRADE SHEET ONLY (Jeff, 2026-09-28: the Upgrade sheet is for upgrades; new-line promotions live on the 6th Gen sheet; watch and tablet promotions appear on both). This mirror carries the upgrade deals, the two Apple cards that also allow an existing-line upgrade (tips_apple_1300, and flat_apple_400 as a note), and the Diamond smartwatch.",
     "verified_deal_cards": [
       "CD824",
       "CD863",
@@ -2695,33 +2695,40 @@ const PROMO_MATRIX = {
       "CD871",
       "CD873"
     ],
-    "whats_new_since_2026_08_30": [
-      "THE APPLE STRUCTURE WAS REBUILT. All four combined Apple/Google/Motorola deals ended 9/10 and each split in two along brand lines: the up-to-$1,100 TIPs deal became tips_apple_1300 (CD871) + tips_gm_830 (CD872); the $400 no-trade deal became flat_apple_400 (CD868) + flat_gm_400 (CD869); the $200 Plus Up became plus_up_apple_400 (CD873) + plus_up_gm_200 (CD870); the $200 Anytime Upgrade became anytime_apple_400 (CD867) + anytime_gm_200 (CD866).",
-      "APPLE UPGRADE CREDITS DOUBLED: Plus Up and Anytime Upgrade both went $200 -> $400.",
-      "STRUCTURAL: tips_apple_1300 and flat_apple_400 are DUAL line-type \u2014 valid on a new line AND on an existing-line upgrade. This is the first cycle where a promo is not exclusive to one sheet, so line_type is an ARRAY on those two. A scalar line_type or a sheet-exclusive filter silently drops the two highest-value Apple offers off this sheet.",
-      "NEW DECISION: an Apple upgrade with a trade-in now has two non-combinable offers \u2014 tips_apple_1300 (tiered, up to $1,300, replaces the portal value) and plus_up_apple_400 (portal value + $400). calcSmartPromo() prices both and quotes the higher.",
-      "BOTH Diamond iPhone 17 Pro deals \u2014 the Diamond TIPs 'On Us'/$1,100 deal and the Diamond $400 no-trade deal \u2014 expired 9/1/26 and are removed from this sheet, tags and card IDs included. smartwatch_300_diamond is now the only Diamond-gated promo on the board.",
-      "All four Samsung deals extended to 10/8/26 (their card disclaimers still read 9/10/26 \u2014 stale).",
-      "Galaxy A57 confirmed on CD864, CD863 and CD862 but NOT on the Samsung TIPs list."
-    ],
     "note": "Diamond-only promos carry diamond_only:true and must be gated to Diamond membership tier. Excluded per Jeff: free_line, the two retail-only accessory offers (accessory_30_off, employee_merch_33) and CBM-specific offers.",
     "retired_this_cycle": [
+      "plus_up_apple_400 (CD873) \u2014 ends 9/28 (was 10/8). Replaced 9/29\u201310/8 by plus_up_apple_200.",
+      "anytime_apple_400 (CD867) \u2014 ends 9/28 (was 10/8). Replaced 9/29\u201310/8 by anytime_apple_200.",
+      "Pixel 11 TIPs (CD859) and $600 off Pixel 11 (CD858) \u2014 ended 9/24. New-line deals; the Pixel 11 series moved onto the $830 Google/Motorola TIPs and $400 no-trade cards (new lines only).",
       "tips_nonsam_1100 (CD856) \u2014 ended 9/10. Split into tips_apple_1300 + tips_gm_830.",
       "flat_nonsam_400 (CD825) \u2014 ended 9/10. Split into flat_apple_400 + flat_gm_400.",
       "The combined $200 Plus Up \u2014 ended 9/10. Split into plus_up_apple_400 + plus_up_gm_200.",
       "The combined $200 Anytime Upgrade \u2014 ended 9/10. Split into anytime_apple_400 + anytime_gm_200.",
       "Diamond TIPs on the iPhone 17 Pro / Pro Max \u2014 ended 9/1. Nothing replaces it; the standard Apple deals now pay more.",
-      "Diamond $400 no-trade on the iPhone 17 Pro / Pro Max \u2014 ended 9/1. anytime_apple_400 pays the same $400 with no Diamond requirement.",
-      "tips_razrfold_1700 \u2014 ended 8/25. The razr fold now sits inside tips_gm_830 at $830 (new lines only).",
-      "ipad_a16_250off \u2014 ended 8/25. No tablet device deal is live.",
-      "prepaid_mc_200 \u2014 ended 8/21. No value-add card offer is live."
+      "Diamond $400 no-trade on the iPhone 17 Pro / Pro Max \u2014 ended 9/1. anytime_apple_400 pays the same $400 with no Diamond requirement."
+    ],
+    "pending_deal_cards": [
+      "TIPs Plus Up \u2014 additional $200 off Apple (9/29\u201310/8) \u2014 announced in DEALS18's 9/25 change log, card not on Celestial as of 9/28",
+      "Upgrade anytime \u2014 $200 off Apple (9/29\u201310/8) \u2014 announced in DEALS18's 9/25 change log, card not on Celestial as of 9/28"
+    ],
+    "whats_new_since_2026_09_12": [
+      "APPLE UPGRADE CREDITS CUT SHORT AND HALVED. DEALS18's 9/25 change log ends plus_up_apple_400 (CD873) and anytime_apple_400 (CD867) on 9/28 (was 10/8) and replaces them 9/29\u201310/8 with plus_up_apple_200 and anytime_apple_200. The sheet switches from $400 to $200 on its own at midnight 9/29 (APPLE_UPGRADE_SCHEDULE).",
+      "The two new $200 Apple cards were not published on Celestial as of 9/28. Their terms are taken to match the $400 cards they replace \u2014 same nine iPhones; Plus Up = existing line + trade-in, all data plans; Anytime = Mobile Plus / Premium Unlimited, 60 days between upgrades. Confirm with the deal desk.",
+      "Jeff, 2026-09-28: from 9/29 an iPhone upgrade with no trade-in quotes the $200 Anytime credit. The $400 no-trade Apple card (CD868, which also lists existing-line upgrades) is shown on this sheet as a note only.",
+      "Google/Motorola upgrade lists shrank from 20 to 16 phones (CD870 and CD866, both modified 9/21): Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 were REMOVED. They now quote $0 on an upgrade.",
+      "plus_up_gm_200 plan question settled: CD870's overview AND eligibility block now both say All data plans \u2014 Mobile Select qualifies. The 'select unconfirmed' badge is gone.",
+      "CD873 (Apple Plus Up) now also says All data plans in its eligibility block \u2014 the plan conflict on that card is gone too.",
+      "flat_apple_400 port question settled: CD868's legal disclaimer (modified 9/21) reads 'new Mobile Plus line with number transfer, OR phone upgrade on existing Mobile Plus line'. Port is required on a new line only, never on an upgrade.",
+      "Diamond $300 smartwatch extended to 10/30 (was 9/30) \u2014 CD824 modified 9/18, watch list unchanged.",
+      "Samsung upgrade deals unchanged (8/26\u201310/8); their card disclaimers now correctly read 10/8.",
+      "tips_apple_1300 unchanged (CD871, 9/12\u201310/8, up to $1,300, valid on an existing-line upgrade)."
     ]
   },
   "sheet_routing": {
-    "mobile_6th_gen": "New-line promotions, in that sheet's own copy of this matrix: tips_apple_1300 (dual), tips_gm_830, tips_samsung_1200, tips_pixel11_1300, flat_apple_400 (dual), flat_gm_400, flat_samsung_500, flat_pixel11_600, moto_gstylus_on_us, smartwatch_300_diamond (DIAMOND), waived_activation, free_line.",
-    "upgrade": "Existing-line upgrade promotions. 9 on this sheet: tips_apple_1300 (dual line-type), flat_apple_400 (dual line-type), plus_up_apple_400, plus_up_gm_200, plus_up_samsung_450, anytime_apple_400, anytime_gm_200, anytime_samsung_450, smartwatch_300_diamond (DIAMOND, needs a new watch line).",
-    "diamond_split": "Down to one Diamond promo: the $300 smartwatch. It needs a NEW watch line, so it renders on the 6th Gen sheet AND on this one whenever a watch line is on the quote. Both Diamond iPhone 17 Pro deals expired 9/1.",
-    "no_promo_is_both": "NO LONGER TRUE as of 2026-09-12. tips_apple_1300 (CD871) and flat_apple_400 (CD868) are dual line-type and render on both sheets; their line_type is [\"new_line\", \"upgrade\"]."
+    "mobile_6th_gen": "New-line promotions, in that sheet's own copy of this matrix: tips_apple_1300, tips_gm_830 (now incl. the Pixel 11 series), tips_samsung_1200, flat_apple_400, flat_gm_400 (now incl. the Pixel 11 series), flat_samsung_500, moto_gstylus_on_us (ends 9/30), smartwatch_300_diamond (DIAMOND), waived_activation, free_line.",
+    "upgrade": "Existing-line upgrade promotions ONLY (Jeff, 2026-09-28). On the promo panel, 9 live on any given day: tips_apple_1300, plus_up_apple_400 (through 9/28) -> plus_up_apple_200 (from 9/29), plus_up_gm_200, plus_up_samsung_450, anytime_apple_400 (through 9/28) -> anytime_apple_200 (from 9/29), anytime_gm_200, anytime_samsung_450, smartwatch_300_diamond (DIAMOND, needs a new watch line). flat_apple_400 is kept in this matrix as inactive reference only.",
+    "diamond_split": "One Diamond promo: the $300 smartwatch, extended to 10/30. It needs a NEW watch line, so it renders on the 6th Gen sheet AND on this one whenever a watch line is on the quote (watch and tablet promos are on both sheets).",
+    "no_promo_is_both": "tips_apple_1300 (CD871) and flat_apple_400 (CD868) are valid on a new line AND on an upgrade. Each sheet carries its own copy written for its own line type: this copy covers the upgrade path only."
   },
   "plan_eligibility_values": {
     "plus_or_premium_unl": "Mobile Plus or Premium Unlimited (Unlimited Premium Flex / Pro on CBM). Mobile Select and NOW do NOT qualify.",
@@ -2729,19 +2736,19 @@ const PROMO_MATRIX = {
     "smartwatch_plan_diamond": "Smartwatch plan on a new watch line; Diamond members only.",
     "tablet_plan": "Tablet data plan on a new tablet line. NO tablet deal is live this cycle."
   },
-  "diamond_note": "ONE Diamond-gated promo left: smartwatch_300_diamond (NEW watch line, expires 9/30). Both Diamond iPhone 17 Pro deals expired 9/1/26 \u2014 a Diamond member upgrading to an iPhone 17 Pro now takes the standard Apple deals, which pay more. Surface the smartwatch ONLY when the membership tier is Diamond.",
+  "diamond_note": "ONE Diamond-gated promo: smartwatch_300_diamond (NEW watch line, extended to 10/30/26). Surface it ONLY when the membership tier is Diamond.",
   "routing_notes": {
-    "apple_upgrade_decision_tree": "Apple upgrade with a trade-in: run BOTH tips_apple_1300 (tier, up to $1,300, replaces the portal value) and plus_up_apple_400 (portal value + $400) and quote the higher. Plus Up beats the $450 TIPs floor at any portal value over $50, a $600 tier over $200 and a $700 tier over $300; only the $1,300 top tier is out of reach. No trade-in and 60+ days since the last upgrade: anytime_apple_400 ($400). No trade-in but upgraded inside 60 days: flat_apple_400 (same $400, no waiting period).",
-    "tips_bucket_by_new_phone": "Apple -> tips_apple_1300 (the ONLY TIPs bucket valid on an upgrade). Samsung -> tips_samsung_1200, Pixel 11 -> tips_pixel11_1300, other Google/Motorola -> tips_gm_830 \u2014 all three are NEW-LINE ONLY and cannot be quoted on this sheet.",
+    "apple_upgrade_decision_tree": "Apple upgrade with a trade-in: run BOTH tips_apple_1300 (tier, up to $1,300, replaces the portal value) and the Apple Plus Up (portal value + $400 through 9/28, + $200 from 9/29) and quote the higher. Through 9/28 Plus Up beats the $450 TIPs floor at any portal value over $50; from 9/29 only over $250 (and a $700 tier only over $500). No trade-in: the Anytime credit \u2014 $400 through 9/28, $200 from 9/29 (Jeff, 2026-09-28: quote the Anytime credit; the $400 no-trade card CD868 is a note only).",
+    "tips_bucket_by_new_phone": "Apple -> tips_apple_1300 (the ONLY TIPs bucket valid on an upgrade). Samsung -> tips_samsung_1200 and Google/Motorola (now including the Pixel 11 series) -> tips_gm_830 are NEW-LINE ONLY and are not quoted on this sheet.",
     "samsung_upgrade_path": "Samsung TIPs is new-line only. An existing-line Samsung upgrade routes to plus_up_samsung_450 (with trade) or anytime_samsung_450 (no trade) ONLY. Galaxy A57 is on both, but not on the TIPs list.",
-    "gm_upgrade_path": "Google/Motorola TIPs is new-line only. An existing-line G/M upgrade routes to plus_up_gm_200 (with trade) or anytime_gm_200 (no trade) ONLY \u2014 both carry the same 20-device list, which does include the Pixel 11 series.",
-    "select_plan_customers": "On Mobile Select only plus_up_samsung_450 (unanimous across sources) and plus_up_apple_400 (DEALS18 + card overview) survive. plus_up_gm_200 is badged 'select unconfirmed'. Every other upgrade deal requires Mobile Plus or Premium Unlimited.",
+    "gm_upgrade_path": "Google/Motorola TIPs is new-line only. An existing-line G/M upgrade routes to plus_up_gm_200 (with trade) or anytime_gm_200 (no trade) ONLY \u2014 both carry the same 16-phone list (CD870/CD866, 9/21): Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto g stylus \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold. Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 were removed and quote $0.",
+    "select_plan_customers": "On Mobile Select the Plus Up deals survive \u2014 plus_up_samsung_450, the Apple Plus Up ($400 through 9/28, $200 from 9/29) and, since the 9/21 card update, plus_up_gm_200. Every Anytime Upgrade deal requires Mobile Plus or Premium Unlimited.",
     "apple_sku_list_is_narrow": "All four Apple deals (CD871, CD873, CD867, CD868) list the SAME nine SKUs: iPhone 15, 16, 17, 17 Pro, 17 Pro Max, 17e, Air, 18 Pro, 18 Pro Max. iPhone 15 Plus / 15 Pro / 15 Pro Max / 16 Plus / 16e are absent from all four and are worth $0 this cycle. The sheet gates every Apple quote on APPLE_DEAL_MODELS."
   },
   "universal_terms": {
     "dpp": "Every device deal requires a 36-month Device Payment Plan. Pay-in-full forfeits the promotion.",
     "trade_in_deadline": "Trade-ins must reach Assurant within 21 days of the order ship date.",
-    "port_deadline": "Port-required deals need the number transferred within 30 days of purchase. On this sheet only flat_apple_400 touches a port at all, and only on its new-line paths.",
+    "port_deadline": "Port-required deals need the number transferred within 30 days of purchase. Nothing on this sheet needs a port: flat_apple_400's port applies to its new-line paths only (confirmed by CD868's legal disclaimer, 9/21).",
     "forfeiture": "Cancelling the line or accelerating device payments forfeits all remaining credits.",
     "stock": "Back-ordered devices are eligible. Out-of-stock devices are NOT.",
     "combinability": "Device offers are not combinable with each other \u2014 including Apple TIPs vs Apple Plus Up, which is why the sheet quotes the better of the two rather than the sum.",
@@ -2757,10 +2764,7 @@ const PROMO_MATRIX = {
       "additional_sheets": [
         "mobile_6th_gen"
       ],
-      "line_type": [
-        "new_line",
-        "upgrade"
-      ],
+      "line_type": "upgrade",
       "plan_eligibility": "plus_or_premium_unl",
       "trade_in": {
         "required": true,
@@ -2788,10 +2792,7 @@ const PROMO_MATRIX = {
       "active": true,
       "values_in": "xfinity-tips-promotions -> tips_apple_1300 (Table A, 139 devices, parsed 9/12)",
       "display_when": {
-        "line_type": [
-          "new_line",
-          "upgrade"
-        ],
+        "line_type": "upgrade",
         "device_type": "phone",
         "brands": [
           "Apple"
@@ -2807,18 +2808,19 @@ const PROMO_MATRIX = {
           "premium_unlimited"
         ],
         "trade_in": "required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "apple"
       },
       "summary": {
-        "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone \u2014 the biggest credit on the board, and the only trade-in deal that works on an upgrade.",
+        "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone on an upgrade \u2014 the only trade-in deal an upgrade can use.",
         "qualify": [
-          "EITHER activate a NEW Mobile Plus line, OR add a Premium Unlimited line as an existing Premium Unlimited customer, OR upgrade the phone on an existing Mobile Plus or Premium Unlimited line (NDEL). All three paths qualify.",
+          "Upgrade the phone on an EXISTING Mobile Plus or Premium Unlimited line (NDEL).",
           "Buy an eligible Apple phone on a 36-month Device Payment Plan \u2014 the nine-SKU Apple list.",
           "Trade in a qualifying device. Good, Fair AND Poor condition are all accepted.",
           "No number transfer required \u2014 this deal does NOT need a port-in."
         ],
         "steps": [
-          "Establish the line: new Mobile Plus line, or a new Premium line on an existing Premium account, or an upgrade on an existing Plus/Premium line.",
+          "Start the upgrade on the existing Mobile Plus / Premium Unlimited line.",
           "Add the iPhone to the cart on a 36-month DPP.",
           "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
         ],
@@ -2828,8 +2830,8 @@ const PROMO_MATRIX = {
           "Offer ends 10/8/26."
         ],
         "watchouts": [
-          "This is the promo the Upgrade sheet most easily loses. It is NOT upgrade-only or new-line-only \u2014 it is both. Do not filter it out by sheet.",
-          "Always price this against plus_up_apple_400 (portal fair-market value + $400). Below the $1,300 top tier Plus Up frequently pays more \u2014 it beats the $450 TIPs floor at any portal value over $50, and a $700 tier at any value over $300. The sheet computes both and quotes the winner.",
+          "This is the only TIPs deal valid on an upgrade \u2014 do not confuse it with the Samsung and Google/Motorola TIPs deals, which are new-line only.",
+          "Always price this against the Apple Plus Up (portal value + $400 through 9/28, + $200 from 9/29). Through 9/28 Plus Up beats the $450 TIPs floor at any portal value over $50; from 9/29 only over $250. The sheet computes both and quotes the winner.",
           "The card's legal disclaimer says \"$1,200\"; the title, body and DEALS94 all say $1,300. Quote $1,300.",
           "Explicitly NOT an upgrade-anytime offer \u2014 an upgrade here is an ordinary NDEL, so the 60-day rule does not apply.",
           "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
@@ -2837,7 +2839,11 @@ const PROMO_MATRIX = {
           "Out-of-stock phones are not eligible. Back-orders ARE eligible. Not combinable with any other device offer."
         ],
         "credit_amount": "Trade-in tiers: $1,300 / $700 / $600 / $500 / $450 by trade-in device and condition (139 devices, floor $450)."
-      }
+      },
+      "card_line_types": [
+        "new_line",
+        "upgrade"
+      ]
     },
     {
       "tag": "flat_apple_400",
@@ -2848,17 +2854,14 @@ const PROMO_MATRIX = {
       "additional_sheets": [
         "mobile_6th_gen"
       ],
-      "line_type": [
-        "new_line",
-        "upgrade"
-      ],
+      "line_type": "upgrade",
       "plan_eligibility": "plus_or_premium_unl",
       "trade_in": {
         "required": false
       },
       "port": {
         "required": false,
-        "note": "Port required on a NEW line only. CD868's eligibility block says \"Porting required: Yes\" but only its two new-line order-entry paths mention a port, and the legal disclaimer covers only those two \u2014 you cannot port into a line that already exists. Treated here as no port on an upgrade; confirm with the deal desk."
+        "note": "Port applies to the new-line paths only (CD868 legal disclaimer, 9/21)."
       },
       "mobile_service": [
         "XM",
@@ -2876,16 +2879,9 @@ const PROMO_MATRIX = {
         "start": "2026-09-12",
         "end": "2026-10-08"
       },
-      "active": true,
-      "badges": [
-        "no 60-day wait",
-        "port: confirm"
-      ],
+      "active": false,
       "display_when": {
-        "line_type": [
-          "new_line",
-          "upgrade"
-        ],
+        "line_type": "upgrade",
         "device_type": "phone",
         "brands": [
           "Apple"
@@ -2901,33 +2897,37 @@ const PROMO_MATRIX = {
           "premium_unlimited"
         ],
         "trade_in": "not_required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "apple"
       },
       "summary": {
-        "hook": "No trade-in? $400 off a new iPhone \u2014 and unlike the Anytime Upgrade, this one has no 60-day waiting period.",
+        "hook": "Reference: CD868 also lists a $400 no-trade credit on an iPhone upgrade of an existing Mobile Plus / Premium Unlimited line.",
         "qualify": [
-          "On an UPGRADE: upgrade the phone on an existing Mobile Plus or Premium Unlimited line. The card's order-entry step for this path does not require a port.",
-          "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
-          "No trade-in required.",
-          "New-line paths also exist (new Mobile Plus line, or an added Premium line) but those DO require a number transfer within 30 days \u2014 they belong on the 6th Gen sheet."
+          "Upgrade the phone on an EXISTING Mobile Plus or Premium Unlimited line (NDEL). No port is needed on an upgrade \u2014 CD868's legal disclaimer (9/21) ties the number transfer to its new-line paths only.",
+          "Buy an eligible Apple phone on a 36-month DPP \u2014 the nine-SKU Apple list.",
+          "No trade-in required."
         ],
         "steps": [
-          "Confirm the customer is upgrading an existing Mobile Plus / Premium Unlimited line.",
+          "Upgrade the phone on the existing Mobile Plus / Premium Unlimited line.",
           "Add the iPhone to the cart on a 36-month DPP."
         ],
         "deadlines": [
-          "Offer ends 10/8/26.",
-          "On a NEW line only: the number transfer must complete within 30 DAYS of purchase or the credits are forfeited."
+          "Offer ends 10/8/26."
         ],
         "watchouts": [
-          "THIS IS THE ANSWER FOR A MEMBER WHO UPGRADED INSIDE THE LAST 60 DAYS. anytime_apple_400 pays the same $400 but requires 60 days between upgrades; this one carries no waiting period.",
-          "Port ambiguity: the card's eligibility block says \"Porting required: Yes\" while only the new-line order-entry paths mention a port. Read as port on a new line, no port on an upgrade \u2014 badge it and confirm with the deal desk.",
-          "If the customer HAS a trade-in, both tips_apple_1300 (up to $1,300) and plus_up_apple_400 (portal value + $400) beat a flat $400.",
+          "NOTE ONLY on this sheet (Jeff, 2026-09-28): the quote uses the Apple Anytime credit \u2014 $400 through 9/28, $200 from 9/29. Confirm with the deal desk before promising this $400 on an upgrade.",
+          "Not an Upgrade Anytime offer (the card says so), so the 60-day rule does not apply to it.",
+          "If the customer HAS a trade-in, tips_apple_1300 (up to $1,300) usually pays more.",
           "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
           "Not combinable with any other device offer."
         ],
         "credit_amount": "$400 over 36 monthly bill credits."
-      }
+      },
+      "card_line_types": [
+        "new_line",
+        "upgrade"
+      ],
+      "sheet_note": "Not shown on this sheet's promo panel (Jeff, 2026-09-28): the Upgrade sheet quotes the Apple Anytime credit ($400 through 9/28, $200 from 9/29) on a no-trade iPhone upgrade. CD868 does list existing-line upgrades \u2014 kept here for reference; confirm with the deal desk before applying it to an upgrade."
     },
     {
       "tag": "plus_up_apple_400",
@@ -2958,6 +2958,87 @@ const PROMO_MATRIX = {
       },
       "dates": {
         "start": "2026-09-12",
+        "end": "2026-09-28"
+      },
+      "active": true,
+      "display_when": {
+        "line_type": "upgrade",
+        "device_type": "phone",
+        "brands": [
+          "Apple"
+        ],
+        "excludes_device_match": [
+          "15 plus",
+          "15 pro",
+          "16 plus",
+          "16e"
+        ],
+        "plans": [
+          "any"
+        ],
+        "trade_in": "required",
+        "diamond_only": false,
+        "eligible_list": "apple"
+      },
+      "summary": {
+        "hook": "Upgrading to an iPhone with a trade-in? The customer gets the phone's fair-market value PLUS an extra $400 on top \u2014 through 9/28.",
+        "qualify": [
+          "EXISTING Xfinity Mobile customer upgrading an existing line. New lines are NOT eligible.",
+          "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
+          "Trade in a qualifying device \u2014 the value is the Xfinity portal's fair-market value, not a TIPs tier.",
+          "No port required.",
+          "Plan: ALL data plans, including Mobile Select \u2014 CD873's overview and eligibility block both say so (card modified 9/25)."
+        ],
+        "steps": [
+          "Confirm the customer is an existing XM customer upgrading a line.",
+          "Look up the trade-in's fair-market value in the Xfinity portal and enter it on the line.",
+          "Add the iPhone to the cart on a 36-month DPP.",
+          "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
+        ],
+        "deadlines": [
+          "Trade-in must reach Assurant within 21 DAYS of the order ship date.",
+          "Offer ends 9/28/26 \u2014 cut short from 10/8 (DEALS18, 9/25). From 9/29 the Apple Plus Up pays $200."
+        ],
+        "watchouts": [
+          "ENDS 9/28. From 9/29 the Apple Plus Up is trade value + $200 (plus_up_apple_200); the sheet switches on its own.",
+          "ALWAYS price this against tips_apple_1300, which pays a tier up to $1,300 INSTEAD of the portal value. They are not combinable. Plus Up beats the $450 TIPs floor whenever the portal value is over $50 and beats a $700 tier whenever it is over $300; only the $1,300 top tier is out of reach. The sheet does this arithmetic on the row.",
+          "This is NOT an Upgrade Anytime deal \u2014 Plus Up needs a trade-in; anytime_apple_400 does not.",
+          "Carried forward from the prior cycle's Plus Up cards: the existing device must be paid in full. CD873 does not restate it \u2014 verify with the deal desk.",
+          "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
+          "Not combinable with any other device offer."
+        ],
+        "credit_amount": "Trade-in fair-market value + $400, both delivered over 36 monthly DPP credits."
+      }
+    },
+    {
+      "tag": "plus_up_apple_200",
+      "deal_card": "Pending (DEALS18 9/25)",
+      "marketing_name": "TIPs Plus Up \u2014 trade-in value + $200 off Apple",
+      "category": "trade_in_plus_up",
+      "sheet": "upgrade",
+      "line_type": "upgrade",
+      "plan_eligibility": "any_mobile_plan",
+      "trade_in": {
+        "required": true,
+        "bucket": "xfinity_portal_fair_market_value"
+      },
+      "port": {
+        "required": false
+      },
+      "mobile_service": [
+        "XM",
+        "CBM"
+      ],
+      "device_brands": [
+        "Apple"
+      ],
+      "device_scope": "iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max",
+      "offer": {
+        "savings": "trade-in value + $200 off",
+        "mechanism": "36-month DPP bill credits"
+      },
+      "dates": {
+        "start": "2026-09-29",
         "end": "2026-10-08"
       },
       "active": true,
@@ -2977,16 +3058,17 @@ const PROMO_MATRIX = {
           "any"
         ],
         "trade_in": "required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "apple"
       },
       "summary": {
-        "hook": "Upgrading to an iPhone with a trade-in? The customer gets the phone's fair-market value PLUS an extra $400 on top \u2014 double what this deal paid last cycle.",
+        "hook": "Upgrading to an iPhone with a trade-in? Fair-market value PLUS an extra $200 on top.",
         "qualify": [
           "EXISTING Xfinity Mobile customer upgrading an existing line. New lines are NOT eligible.",
           "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
           "Trade in a qualifying device \u2014 the value is the Xfinity portal's fair-market value, not a TIPs tier.",
           "No port required.",
-          "Plan: DEALS18 and the card's own overview both say ALL data plans, including Mobile Select. The card's eligibility block says Plus/Premium and is treated as stale boilerplate."
+          "Plan: taken to be ALL data plans, including Mobile Select, like the $400 card it replaces \u2014 its own card is not published yet."
         ],
         "steps": [
           "Confirm the customer is an existing XM customer upgrading a line.",
@@ -2996,17 +3078,17 @@ const PROMO_MATRIX = {
         ],
         "deadlines": [
           "Trade-in must reach Assurant within 21 DAYS of the order ship date.",
-          "Offer ends 10/8/26."
+          "Runs 9/29\u201310/8/26."
         ],
         "watchouts": [
-          "Was $200 before 9/12 \u2014 it is $400 now. Quoting the old number under-quotes by $200.",
-          "ALWAYS price this against tips_apple_1300, which pays a tier up to $1,300 INSTEAD of the portal value. They are not combinable. Plus Up beats the $450 TIPs floor whenever the portal value is over $50 and beats a $700 tier whenever it is over $300; only the $1,300 top tier is out of reach. The sheet does this arithmetic on the row.",
-          "This is NOT an Upgrade Anytime deal \u2014 Plus Up needs a trade-in; anytime_apple_400 does not.",
-          "Carried forward from the prior cycle's Plus Up cards: the existing device must be paid in full. CD873 does not restate it \u2014 verify with the deal desk.",
+          "NEW 9/29 \u2014 replaces the $400 Plus Up that ended 9/28. Announced in DEALS18's 9/25 change log; its deal card was not on Celestial as of 9/28, so these terms mirror the $400 card. Confirm with the deal desk.",
+          "ALWAYS price this against tips_apple_1300, which pays a tier up to $1,300 INSTEAD of the portal value. They are not combinable. At +$200, Plus Up beats the $450 TIPs floor only when the portal value is over $250, a $600 tier over $400 and a $700 tier over $500. The sheet does this arithmetic on the row.",
+          "This is NOT an Upgrade Anytime deal \u2014 Plus Up needs a trade-in; anytime_apple_200 does not.",
+          "Carried forward from the prior Plus Up cards: the existing device must be paid in full \u2014 verify with the deal desk.",
           "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
           "Not combinable with any other device offer."
         ],
-        "credit_amount": "Trade-in fair-market value + $400, both delivered over 36 monthly DPP credits."
+        "credit_amount": "Trade-in fair-market value + $200, both delivered over 36 monthly DPP credits."
       }
     },
     {
@@ -3016,7 +3098,7 @@ const PROMO_MATRIX = {
       "category": "trade_in_plus_up",
       "sheet": "upgrade",
       "line_type": "upgrade",
-      "plan_eligibility": "plus_or_premium_unl",
+      "plan_eligibility": "any_mobile_plan",
       "trade_in": {
         "required": true,
         "bucket": "xfinity_portal_fair_market_value"
@@ -3032,7 +3114,7 @@ const PROMO_MATRIX = {
         "Google",
         "Motorola"
       ],
-      "device_scope": "Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10 Pro Fold, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr \u2013 2025, moto razr \u2013 2026, moto g stylus \u2013 2025, moto g stylus \u2013 2026, moto g \u2013 2026, moto g play \u2013 2026, motorola edge, Motorola edge \u2013 2026, Motorola razr fold",
+      "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto g stylus \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
       "offer": {
         "savings": "trade-in value + $200 off",
         "mechanism": "36-month DPP bill credits"
@@ -3042,9 +3124,6 @@ const PROMO_MATRIX = {
         "end": "2026-10-08"
       },
       "active": true,
-      "badges": [
-        "select unconfirmed"
-      ],
       "display_when": {
         "line_type": "upgrade",
         "device_type": "phone",
@@ -3053,20 +3132,20 @@ const PROMO_MATRIX = {
           "Motorola"
         ],
         "plans": [
-          "mobile_plus",
-          "premium_unlimited"
+          "any"
         ],
         "trade_in": "required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "gm"
       },
       "summary": {
         "hook": "Upgrading to a Pixel or a Motorola with a trade-in? Fair-market value PLUS an extra $200.",
         "qualify": [
           "EXISTING Xfinity Mobile customer upgrading an existing line. New lines are NOT eligible.",
-          "Buy one of the 20 eligible phones on a 36-month DPP \u2014 all 11 Pixels including the full Pixel 11 series, plus nine Motorolas.",
+          "Buy one of the 16 eligible phones on a 36-month DPP \u2014 8 Pixels (Pixel 10, 10 Pro, 10 XL, 10a and the full Pixel 11 series) and 8 Motorolas.",
           "Trade in a qualifying device (Xfinity portal fair-market value).",
           "No port required.",
-          "Plan: the card says Mobile Plus / Premium Unlimited twice and DEALS18 says all plans \u2014 treated as Plus/Premium. Select eligibility is unconfirmed; verify with the deal desk before quoting it."
+          "Plan: ALL data plans, including Mobile Select \u2014 CD870's overview and eligibility block both say so since the 9/21 update."
         ],
         "steps": [
           "Confirm the customer is an existing XM customer upgrading a line.",
@@ -3079,8 +3158,8 @@ const PROMO_MATRIX = {
           "Offer ends 10/8/26."
         ],
         "watchouts": [
-          "This is the only Google/Motorola upgrade path that covers the Pixel 11 series WITH a trade-in \u2014 the $830 G/M TIPs deal excludes the Pixel 11 and is new-line only anyway.",
-          "Google/Motorola has NO upgrade TIPs path this cycle, so there is no tiered alternative to compare against \u2014 only anytime_gm_200 ($200 flat, no trade), which Plus Up beats whenever the trade has any value.",
+          "The list SHRANK on 9/21: Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 are no longer on it and quote $0 on an upgrade.",
+          "Google/Motorola has NO upgrade TIPs path (the $830 TIPs deal, which now covers the Pixel 11 series, is new-line only), so the only comparison is anytime_gm_200 ($200 flat, no trade) \u2014 Plus Up beats it whenever the trade has any value.",
           "Card text bug: CD870's \"Offer value\" line reads \"towards a new Samsung device.\" Copy-paste error \u2014 the title and device list are Google/Motorola.",
           "This is NOT an Upgrade Anytime / Elite Upgrade deal.",
           "Carried forward from last cycle: the existing device must be paid in full. Not restated on CD870 \u2014 verify.",
@@ -3132,7 +3211,8 @@ const PROMO_MATRIX = {
           "any"
         ],
         "trade_in": "required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "samsung"
       },
       "summary": {
         "hook": "Upgrading to a Galaxy with a trade-in? Fair-market value PLUS an extra $450. Works on ANY plan, including Select.",
@@ -3194,6 +3274,83 @@ const PROMO_MATRIX = {
       },
       "dates": {
         "start": "2026-09-12",
+        "end": "2026-09-28"
+      },
+      "active": true,
+      "display_when": {
+        "line_type": "upgrade",
+        "device_type": "phone",
+        "brands": [
+          "Apple"
+        ],
+        "excludes_device_match": [
+          "15 plus",
+          "15 pro",
+          "16 plus",
+          "16e"
+        ],
+        "plans": [
+          "mobile_plus",
+          "premium_unlimited"
+        ],
+        "trade_in": "not_required",
+        "diamond_only": false,
+        "eligible_list": "apple"
+      },
+      "summary": {
+        "hook": "No trade-in, no port \u2014 $400 off a new iPhone on an Anytime Upgrade of an existing line, through 9/28.",
+        "qualify": [
+          "EXISTING Mobile Plus or Premium Unlimited customer completing an Anytime Upgrade on an existing line. New line activations are NOT eligible.",
+          "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
+          "No trade-in and no port required.",
+          "Mobile Select does NOT qualify.",
+          "Minimum 60 DAYS between upgrades."
+        ],
+        "steps": [
+          "Confirm the customer is an existing Mobile Plus / Premium Unlimited line doing an Anytime Upgrade.",
+          "Add the iPhone to the cart on a 36-month DPP."
+        ],
+        "deadlines": [
+          "Activation must complete within 30 days of the purchase date.",
+          "Offer ends 9/28/26 \u2014 cut short from 10/8 (DEALS18, 9/25). From 9/29 the Apple Anytime Upgrade pays $200."
+        ],
+        "watchouts": [
+          "ENDS 9/28. From 9/29 this becomes $200 (anytime_apple_200); the sheet switches on its own.",
+          "MINIMUM 60 DAYS BETWEEN UPGRADES. Minimum $200 device credit per upgrade.",
+          "If the customer HAS a trade-in, tips_apple_1300 and the Apple Plus Up (trade value + $400 through 9/28) usually pay more \u2014 the sheet prices both.",
+          "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited."
+        ],
+        "credit_amount": "$400 over 36 monthly bill credits."
+      }
+    },
+    {
+      "tag": "anytime_apple_200",
+      "deal_card": "Pending (DEALS18 9/25)",
+      "marketing_name": "Anytime Upgrade \u2014 $200 off Apple (no trade-in)",
+      "category": "upgrade_anytime",
+      "sheet": "upgrade",
+      "line_type": "upgrade",
+      "plan_eligibility": "plus_or_premium_unl",
+      "trade_in": {
+        "required": false
+      },
+      "port": {
+        "required": false
+      },
+      "mobile_service": [
+        "XM",
+        "CBM"
+      ],
+      "device_brands": [
+        "Apple"
+      ],
+      "device_scope": "iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max",
+      "offer": {
+        "savings": "$200 off",
+        "mechanism": "36-month DPP bill credits"
+      },
+      "dates": {
+        "start": "2026-09-29",
         "end": "2026-10-08"
       },
       "active": true,
@@ -3214,10 +3371,11 @@ const PROMO_MATRIX = {
           "premium_unlimited"
         ],
         "trade_in": "not_required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "apple"
       },
       "summary": {
-        "hook": "No trade-in, no port \u2014 $400 off a new iPhone just for doing an Anytime Upgrade on an existing line. Double what it paid last cycle.",
+        "hook": "No trade-in, no port \u2014 $200 off a new iPhone on an Anytime Upgrade of an existing line.",
         "qualify": [
           "EXISTING Mobile Plus or Premium Unlimited customer completing an Anytime Upgrade on an existing line. New line activations are NOT eligible.",
           "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
@@ -3231,17 +3389,16 @@ const PROMO_MATRIX = {
         ],
         "deadlines": [
           "Activation must complete within 30 days of the purchase date.",
-          "Offer ends 10/8/26."
+          "Runs 9/29\u201310/8/26."
         ],
         "watchouts": [
-          "Was $200 before 9/12 \u2014 it is $400 now.",
-          "MINIMUM 60 DAYS BETWEEN UPGRADES. If the member upgraded inside the last 60 days they cannot use this \u2014 route them to flat_apple_400, which pays the same $400 with no waiting period.",
-          "Minimum $200 device credit per upgrade.",
-          "If the customer HAS a trade-in, both tips_apple_1300 and plus_up_apple_400 beat a flat $400.",
-          "The old Diamond-vs-$200 XM360 weighting trap is gone \u2014 both Diamond iPhone 17 Pro deals expired 9/1 and this $400 is now the standard rate for everyone, Diamond or not.",
+          "NEW 9/29 \u2014 replaces the $400 Anytime Upgrade that ended 9/28. Announced in DEALS18's 9/25 change log; its deal card was not on Celestial as of 9/28, so these terms mirror the $400 card. Confirm with the deal desk.",
+          "This is the credit the sheet quotes on a no-trade iPhone upgrade from 9/29 (Jeff, 2026-09-28). The $400 no-trade Apple card (CD868) also lists existing-line upgrades and is shown as a note \u2014 confirm with the deal desk before promising it.",
+          "Minimum 60 DAYS between upgrades. Minimum $200 device credit per upgrade.",
+          "If the customer HAS a trade-in, tips_apple_1300 and the Plus Up (trade value + $200) usually pay more \u2014 the sheet prices both.",
           "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited."
         ],
-        "credit_amount": "$400 over 36 monthly bill credits."
+        "credit_amount": "$200 over 36 monthly bill credits."
       }
     },
     {
@@ -3266,7 +3423,7 @@ const PROMO_MATRIX = {
         "Google",
         "Motorola"
       ],
-      "device_scope": "Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10 Pro Fold, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr \u2013 2025, moto razr \u2013 2026, moto g stylus \u2013 2025, moto g stylus \u2013 2026, moto g \u2013 2026, moto g play \u2013 2026, motorola edge, Motorola edge \u2013 2026, Motorola razr fold",
+      "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto g stylus \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
       "offer": {
         "savings": "$200 off",
         "mechanism": "36-month DPP bill credits"
@@ -3288,13 +3445,14 @@ const PROMO_MATRIX = {
           "premium_unlimited"
         ],
         "trade_in": "not_required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "gm"
       },
       "summary": {
         "hook": "No trade-in, no port \u2014 $200 off a new Pixel or Motorola on an Anytime Upgrade.",
         "qualify": [
           "EXISTING Mobile Plus or Premium Unlimited customer completing an Anytime Upgrade on an existing line. New line activations are NOT eligible.",
-          "Buy one of the 20 eligible phones on a 36-month DPP \u2014 same list as plus_up_gm_200, including the full Pixel 11 series, moto g stylus 2026, both motorola edges and the razr fold.",
+          "Buy one of the 16 eligible phones on a 36-month DPP \u2014 same list as plus_up_gm_200, including the full Pixel 11 series and the moto g stylus \u2013 2026.",
           "No trade-in and no port required.",
           "Mobile Select does NOT qualify.",
           "Minimum 60 DAYS between upgrades."
@@ -3310,9 +3468,9 @@ const PROMO_MATRIX = {
         "watchouts": [
           "Minimum 60 DAYS between upgrades. Minimum $200 device credit per upgrade.",
           "Previously called Anytime Upgrade / Elite Upgrade.",
-          "This deal carries the Pixel 11 series \u2014 the $830 G/M TIPs deal does not, so for a Pixel 11 upgrade this and plus_up_gm_200 are the only Google/Motorola options.",
+          "The list SHRANK on 9/21: Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 are no longer on it and quote $0 on an upgrade.",
           "If the customer HAS a trade-in, plus_up_gm_200 pays fair-market value + $200 and wins.",
-          "Apple upgrades take anytime_apple_400 ($400) and Samsung upgrades anytime_samsung_450 ($450) \u2014 do not quote $200 on either.",
+          "Apple upgrades take the Apple Anytime credit ($400 through 9/28, $200 from 9/29); Samsung upgrades take anytime_samsung_450 ($450).",
           "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited."
         ],
         "credit_amount": "$200 over 36 monthly bill credits."
@@ -3360,7 +3518,8 @@ const PROMO_MATRIX = {
           "premium_unlimited"
         ],
         "trade_in": "not_required",
-        "diamond_only": false
+        "diamond_only": false,
+        "eligible_list": "samsung"
       },
       "summary": {
         "hook": "No trade-in, no port \u2014 $450 off a new Galaxy just for doing an Anytime Upgrade on an existing line.",
@@ -3417,7 +3576,7 @@ const PROMO_MATRIX = {
       },
       "dates": {
         "start": "2026-05-11",
-        "end": "2026-09-30"
+        "end": "2026-10-30"
       },
       "active": true,
       "diamond_only": true,
@@ -3450,7 +3609,7 @@ const PROMO_MATRIX = {
         ],
         "deadlines": [
           "New watch line must be activated within 30 DAYS of the purchase date.",
-          "Offer ends 9/30/26."
+          "Offer ends 10/30/26 \u2014 extended from 9/30 (CD824, 9/18)."
         ],
         "watchouts": [
           "Order matters: if the rep starts the buy flow before the member redeems the benefit, the discount will not apply.",
@@ -3482,8 +3641,8 @@ const PROMO_MATRIX = {
 // credits this sheet actually quotes. AUTO_DISCOUNT_PHONES above is keyed to
 // these amounts and the assertion below fails loudly if the two ever drift.
 
-// $400 Apple — plus_up_apple_400 (CD873) / anytime_apple_400 (CD867), 9/12–10/8.
-// DOUBLED from $200 this cycle.
+// Apple's bucket KEY in AUTO_DISCOUNT_PHONES (brand routing only). The dollar amount an
+// Apple upgrade actually quotes comes from APPLE_UPGRADE_SCHEDULE below — it changes mid-cycle.
 const APPLE_UPGRADE_CREDIT   = 400;
 // $200 Google + Motorola — plus_up_gm_200 (CD870) / anytime_gm_200 (CD866), 9/12–10/8.
 const GM_UPGRADE_CREDIT      = 200;
@@ -3493,8 +3652,26 @@ const SAMSUNG_UPGRADE_CREDIT = 450;
 // Offer windows for the three credits. Every quote runs through
 // isOfferWindowOpen() (see getUpgradeCredit) so an expired credit drops itself
 // off the sheet instead of waiting for the next manual refresh.
-const APPLE_UPGRADE_WINDOW   = { start: '2026-09-12', end: '2026-10-08' }; // CD873 / CD867
+const APPLE_UPGRADE_WINDOW   = { start: '2026-09-12', end: '2026-10-08' }; // the Apple schedule's full span
 const GM_UPGRADE_WINDOW      = { start: '2026-09-12', end: '2026-10-08' }; // CD870 / CD866
+
+// ── APPLE UPGRADE CREDIT SCHEDULE — refreshed 2026-09-28 from DEALS18 (modified 9/25) ──
+// The Apple Plus Up and Anytime Upgrade credits were CUT SHORT and HALVED:
+//   9/12–9/28  $400  plus_up_apple_400 (CD873) / anytime_apple_400 (CD867) — was to run to 10/8
+//   9/29–10/8  $200  plus_up_apple_200 / anytime_apple_200 — DEALS18 9/25 change log (cards pending)
+// Jeff, 2026-09-28: from 9/29 a no-trade iPhone upgrade quotes the $200 Anytime credit; the
+// $400 no-trade Apple card (CD868) is a note on page 2, not quote math.
+const APPLE_UPGRADE_SCHEDULE = [
+  { start: '2026-09-12', end: '2026-09-28', amount: 400 },
+  { start: '2026-09-29', end: '2026-10-08', amount: 200 },
+];
+function appleUpgradeCreditToday() {
+  for (var i = 0; i < APPLE_UPGRADE_SCHEDULE.length; i++) {
+    var st = APPLE_UPGRADE_SCHEDULE[i];
+    if (isOfferWindowOpen(st.start, st.end)) return st.amount;
+  }
+  return 0;
+}
 const SAMSUNG_UPGRADE_WINDOW = { start: '2026-08-26', end: '2026-10-08' }; // CD864 / CD863
 
 // ══════════════════════════════════════════════════════════════════
@@ -3552,23 +3729,20 @@ const SAMSUNG_DEAL_MODELS = [
   'Galaxy Z Fold8 Ultra',
 ];
 
-// CD870 plus_up_gm_200 / CD866 anytime_gm_200 — 20 devices, confirmed
-// 2026-09-12. Much longer than the $830 G/M TIPs list (which is new-line only
-// anyway): it carries the whole Pixel 11 series, both moto g stylus years,
-// both edges and the razr fold.
+// CD870 plus_up_gm_200 / CD866 anytime_gm_200 — 16 devices, both cards
+// modified 2026-09-21 (was 20). REMOVED on 9/21: Pixel 9, Pixel 9a,
+// Pixel 10 Pro Fold and Motorola razr - 2025 — they now quote $0 on an upgrade.
+// Still carries the whole Pixel 11 series, both moto g stylus years, both
+// edges and the razr fold.
 const GM_DEAL_MODELS = [
-  'Pixel 9',
-  'Pixel 9a',
   'Pixel 10',
   'Pixel 10 Pro',
-  'Pixel 10 Pro XL',
-  'Pixel 10 Pro Fold',
+  'Pixel 10 Pro XL',         // the cards write "Pixel 10 XL"; normDealName folds it
   'Pixel 10a',
   'Pixel 11',
   'Pixel 11 Pro',
   'Pixel 11 Pro XL',
   'Pixel 11 Pro Fold',
-  'Motorola razr - 2025',
   'moto g stylus - 2025',
   'Motorola edge',           // the unyeared entry on CD870 is the 2025 edge
   'moto g - 2026',
@@ -3673,9 +3847,11 @@ function getUpgradeCredit(phoneName) {
   var amt = getAutoDiscount(phoneName);
   if (amt <= 0) return 0;
   if (isApplePurchase(phoneName)) {
-    // All four Apple deals share the same nine SKUs — everything else is $0.
+    // All Apple deals share the same nine SKUs — everything else is $0.
+    // The amount is today's step of APPLE_UPGRADE_SCHEDULE ($400 to 9/28, $200 from 9/29),
+    // not the bucket key.
     if (!isAppleDealModel(phoneName)) return 0;
-    return isOfferWindowOpen(APPLE_UPGRADE_WINDOW.start, APPLE_UPGRADE_WINDOW.end) ? amt : 0;
+    return appleUpgradeCreditToday();
   }
   if (isSamsungPurchase(phoneName)) {
     // CD864/CD863 list 11 Samsungs. The A17/A26/A27 and the 7-series folds are
@@ -3790,6 +3966,7 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan, tipsDe
   //   neither                  -> the flat $400 Anytime Upgrade
   if (isApplePurchase(phoneName)) {
     var plusUpAmt = Math.min(autoDiscount + tradeRaw, phonePrice);
+    // autoDiscount is today's Apple step: $400 through 9/28, $200 from 9/29.
     var plusUpLabel = (tradeRaw > 0)
       ? '$' + autoDiscount + ' Plus Up + $' + tradeRaw + ' trade-in (portal)'
       : '$' + autoDiscount + ' Anytime Upgrade (no trade-in)';
@@ -4375,10 +4552,7 @@ const PROMO_GUIDE = [
   "additional_sheets": [
    "mobile_6th_gen"
   ],
-  "line_type": [
-   "new_line",
-   "upgrade"
-  ],
+  "line_type": "upgrade",
   "device_brands": [
    "Apple"
   ],
@@ -4400,10 +4574,7 @@ const PROMO_GUIDE = [
    "end": "2026-10-08"
   },
   "display_when": {
-   "line_type": [
-    "new_line",
-    "upgrade"
-   ],
+   "line_type": "upgrade",
    "device_type": "phone",
    "brands": [
     "Apple"
@@ -4419,18 +4590,19 @@ const PROMO_GUIDE = [
     "premium_unlimited"
    ],
    "trade_in": "required",
-   "diamond_only": false
+   "diamond_only": false,
+   "eligible_list": "apple"
   },
   "summary": {
-   "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone \u2014 the biggest credit on the board, and the only trade-in deal that works on an upgrade.",
+   "hook": "Trade in almost any phone and get up to $1,300 off a new iPhone on an upgrade \u2014 the only trade-in deal an upgrade can use.",
    "qualify": [
-    "EITHER activate a NEW Mobile Plus line, OR add a Premium Unlimited line as an existing Premium Unlimited customer, OR upgrade the phone on an existing Mobile Plus or Premium Unlimited line (NDEL). All three paths qualify.",
+    "Upgrade the phone on an EXISTING Mobile Plus or Premium Unlimited line (NDEL).",
     "Buy an eligible Apple phone on a 36-month Device Payment Plan \u2014 the nine-SKU Apple list.",
     "Trade in a qualifying device. Good, Fair AND Poor condition are all accepted.",
     "No number transfer required \u2014 this deal does NOT need a port-in."
    ],
    "steps": [
-    "Establish the line: new Mobile Plus line, or a new Premium line on an existing Premium account, or an upgrade on an existing Plus/Premium line.",
+    "Start the upgrade on the existing Mobile Plus / Premium Unlimited line.",
     "Add the iPhone to the cart on a 36-month DPP.",
     "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
    ],
@@ -4440,8 +4612,8 @@ const PROMO_GUIDE = [
     "Offer ends 10/8/26."
    ],
    "watchouts": [
-    "This is the promo the Upgrade sheet most easily loses. It is NOT upgrade-only or new-line-only \u2014 it is both. Do not filter it out by sheet.",
-    "Always price this against plus_up_apple_400 (portal fair-market value + $400). Below the $1,300 top tier Plus Up frequently pays more \u2014 it beats the $450 TIPs floor at any portal value over $50, and a $700 tier at any value over $300. The sheet computes both and quotes the winner.",
+    "This is the only TIPs deal valid on an upgrade \u2014 do not confuse it with the Samsung and Google/Motorola TIPs deals, which are new-line only.",
+    "Always price this against the Apple Plus Up (portal value + $400 through 9/28, + $200 from 9/29). Through 9/28 Plus Up beats the $450 TIPs floor at any portal value over $50; from 9/29 only over $250. The sheet computes both and quotes the winner.",
     "The card's legal disclaimer says \"$1,200\"; the title, body and DEALS94 all say $1,300. Quote $1,300.",
     "Explicitly NOT an upgrade-anytime offer \u2014 an upgrade here is an ordinary NDEL, so the 60-day rule does not apply.",
     "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
@@ -4454,96 +4626,11 @@ const PROMO_GUIDE = [
    "XM",
    "CBM"
   ],
-  "diamond_only": false
- },
- {
-  "tag": "flat_apple_400",
-  "deal_card": "CD868",
-  "marketing_name": "$400 off Apple (no trade-in)",
-  "sheet": "upgrade",
-  "additional_sheets": [
-   "mobile_6th_gen"
-  ],
-  "line_type": [
+  "diamond_only": false,
+  "card_line_types": [
    "new_line",
    "upgrade"
-  ],
-  "device_brands": [
-   "Apple"
-  ],
-  "device_scope": "iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max",
-  "plan_eligibility": "plus_or_premium_unl",
-  "trade_in": {
-   "required": false
-  },
-  "port": {
-   "required": false,
-   "note": "Port required on a NEW line only. CD868's eligibility block says \"Porting required: Yes\" but only its two new-line order-entry paths mention a port, and the legal disclaimer covers only those two \u2014 you cannot port into a line that already exists. Treated here as no port on an upgrade; confirm with the deal desk."
-  },
-  "offer": {
-   "savings": "$400 off",
-   "mechanism": "36-month DPP bill credits"
-  },
-  "dates": {
-   "start": "2026-09-12",
-   "end": "2026-10-08"
-  },
-  "badges": [
-   "no 60-day wait",
-   "port: confirm"
-  ],
-  "display_when": {
-   "line_type": [
-    "new_line",
-    "upgrade"
-   ],
-   "device_type": "phone",
-   "brands": [
-    "Apple"
-   ],
-   "excludes_device_match": [
-    "15 plus",
-    "15 pro",
-    "16 plus",
-    "16e"
-   ],
-   "plans": [
-    "mobile_plus",
-    "premium_unlimited"
-   ],
-   "trade_in": "not_required",
-   "diamond_only": false
-  },
-  "summary": {
-   "hook": "No trade-in? $400 off a new iPhone \u2014 and unlike the Anytime Upgrade, this one has no 60-day waiting period.",
-   "qualify": [
-    "On an UPGRADE: upgrade the phone on an existing Mobile Plus or Premium Unlimited line. The card's order-entry step for this path does not require a port.",
-    "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
-    "No trade-in required.",
-    "New-line paths also exist (new Mobile Plus line, or an added Premium line) but those DO require a number transfer within 30 days \u2014 they belong on the 6th Gen sheet."
-   ],
-   "steps": [
-    "Confirm the customer is upgrading an existing Mobile Plus / Premium Unlimited line.",
-    "Add the iPhone to the cart on a 36-month DPP."
-   ],
-   "deadlines": [
-    "Offer ends 10/8/26.",
-    "On a NEW line only: the number transfer must complete within 30 DAYS of purchase or the credits are forfeited."
-   ],
-   "watchouts": [
-    "THIS IS THE ANSWER FOR A MEMBER WHO UPGRADED INSIDE THE LAST 60 DAYS. anytime_apple_400 pays the same $400 but requires 60 days between upgrades; this one carries no waiting period.",
-    "Port ambiguity: the card's eligibility block says \"Porting required: Yes\" while only the new-line order-entry paths mention a port. Read as port on a new line, no port on an upgrade \u2014 badge it and confirm with the deal desk.",
-    "If the customer HAS a trade-in, both tips_apple_1300 (up to $1,300) and plus_up_apple_400 (portal value + $400) beat a flat $400.",
-    "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
-    "Not combinable with any other device offer."
-   ],
-   "credit_amount": "$400 over 36 monthly bill credits."
-  },
-  "mobile_service": [
-   "XM",
-   "CBM"
-  ],
-  "diamond_only": false
+  ]
  },
  {
   "tag": "plus_up_apple_400",
@@ -4569,6 +4656,86 @@ const PROMO_GUIDE = [
   },
   "dates": {
    "start": "2026-09-12",
+   "end": "2026-09-28"
+  },
+  "display_when": {
+   "line_type": "upgrade",
+   "device_type": "phone",
+   "brands": [
+    "Apple"
+   ],
+   "excludes_device_match": [
+    "15 plus",
+    "15 pro",
+    "16 plus",
+    "16e"
+   ],
+   "plans": [
+    "any"
+   ],
+   "trade_in": "required",
+   "diamond_only": false,
+   "eligible_list": "apple"
+  },
+  "summary": {
+   "hook": "Upgrading to an iPhone with a trade-in? The customer gets the phone's fair-market value PLUS an extra $400 on top \u2014 through 9/28.",
+   "qualify": [
+    "EXISTING Xfinity Mobile customer upgrading an existing line. New lines are NOT eligible.",
+    "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
+    "Trade in a qualifying device \u2014 the value is the Xfinity portal's fair-market value, not a TIPs tier.",
+    "No port required.",
+    "Plan: ALL data plans, including Mobile Select \u2014 CD873's overview and eligibility block both say so (card modified 9/25)."
+   ],
+   "steps": [
+    "Confirm the customer is an existing XM customer upgrading a line.",
+    "Look up the trade-in's fair-market value in the Xfinity portal and enter it on the line.",
+    "Add the iPhone to the cart on a 36-month DPP.",
+    "Complete the trade-in through Xfinity Mobile / Assurant within 21 days of the order shipping."
+   ],
+   "deadlines": [
+    "Trade-in must reach Assurant within 21 DAYS of the order ship date.",
+    "Offer ends 9/28/26 \u2014 cut short from 10/8 (DEALS18, 9/25). From 9/29 the Apple Plus Up pays $200."
+   ],
+   "watchouts": [
+    "ENDS 9/28. From 9/29 the Apple Plus Up is trade value + $200 (plus_up_apple_200); the sheet switches on its own.",
+    "ALWAYS price this against tips_apple_1300, which pays a tier up to $1,300 INSTEAD of the portal value. They are not combinable. Plus Up beats the $450 TIPs floor whenever the portal value is over $50 and beats a $700 tier whenever it is over $300; only the $1,300 top tier is out of reach. The sheet does this arithmetic on the row.",
+    "This is NOT an Upgrade Anytime deal \u2014 Plus Up needs a trade-in; anytime_apple_400 does not.",
+    "Carried forward from the prior cycle's Plus Up cards: the existing device must be paid in full. CD873 does not restate it \u2014 verify with the deal desk.",
+    "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
+    "Not combinable with any other device offer."
+   ],
+   "credit_amount": "Trade-in fair-market value + $400, both delivered over 36 monthly DPP credits."
+  },
+  "mobile_service": [
+   "XM",
+   "CBM"
+  ],
+  "diamond_only": false
+ },
+ {
+  "tag": "plus_up_apple_200",
+  "deal_card": "Pending (DEALS18 9/25)",
+  "marketing_name": "TIPs Plus Up \u2014 trade-in value + $200 off Apple",
+  "sheet": "upgrade",
+  "line_type": "upgrade",
+  "device_brands": [
+   "Apple"
+  ],
+  "device_scope": "iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max",
+  "plan_eligibility": "any_mobile_plan",
+  "trade_in": {
+   "required": true,
+   "bucket": "xfinity_portal_fair_market_value"
+  },
+  "port": {
+   "required": false
+  },
+  "offer": {
+   "savings": "trade-in value + $200 off",
+   "mechanism": "36-month DPP bill credits"
+  },
+  "dates": {
+   "start": "2026-09-29",
    "end": "2026-10-08"
   },
   "display_when": {
@@ -4587,16 +4754,17 @@ const PROMO_GUIDE = [
     "any"
    ],
    "trade_in": "required",
-   "diamond_only": false
+   "diamond_only": false,
+   "eligible_list": "apple"
   },
   "summary": {
-   "hook": "Upgrading to an iPhone with a trade-in? The customer gets the phone's fair-market value PLUS an extra $400 on top \u2014 double what this deal paid last cycle.",
+   "hook": "Upgrading to an iPhone with a trade-in? Fair-market value PLUS an extra $200 on top.",
    "qualify": [
     "EXISTING Xfinity Mobile customer upgrading an existing line. New lines are NOT eligible.",
     "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
     "Trade in a qualifying device \u2014 the value is the Xfinity portal's fair-market value, not a TIPs tier.",
     "No port required.",
-    "Plan: DEALS18 and the card's own overview both say ALL data plans, including Mobile Select. The card's eligibility block says Plus/Premium and is treated as stale boilerplate."
+    "Plan: taken to be ALL data plans, including Mobile Select, like the $400 card it replaces \u2014 its own card is not published yet."
    ],
    "steps": [
     "Confirm the customer is an existing XM customer upgrading a line.",
@@ -4606,17 +4774,17 @@ const PROMO_GUIDE = [
    ],
    "deadlines": [
     "Trade-in must reach Assurant within 21 DAYS of the order ship date.",
-    "Offer ends 10/8/26."
+    "Runs 9/29\u201310/8/26."
    ],
    "watchouts": [
-    "Was $200 before 9/12 \u2014 it is $400 now. Quoting the old number under-quotes by $200.",
-    "ALWAYS price this against tips_apple_1300, which pays a tier up to $1,300 INSTEAD of the portal value. They are not combinable. Plus Up beats the $450 TIPs floor whenever the portal value is over $50 and beats a $700 tier whenever it is over $300; only the $1,300 top tier is out of reach. The sheet does this arithmetic on the row.",
-    "This is NOT an Upgrade Anytime deal \u2014 Plus Up needs a trade-in; anytime_apple_400 does not.",
-    "Carried forward from the prior cycle's Plus Up cards: the existing device must be paid in full. CD873 does not restate it \u2014 verify with the deal desk.",
+    "NEW 9/29 \u2014 replaces the $400 Plus Up that ended 9/28. Announced in DEALS18's 9/25 change log; its deal card was not on Celestial as of 9/28, so these terms mirror the $400 card. Confirm with the deal desk.",
+    "ALWAYS price this against tips_apple_1300, which pays a tier up to $1,300 INSTEAD of the portal value. They are not combinable. At +$200, Plus Up beats the $450 TIPs floor only when the portal value is over $250, a $600 tier over $400 and a $700 tier over $500. The sheet does this arithmetic on the row.",
+    "This is NOT an Upgrade Anytime deal \u2014 Plus Up needs a trade-in; anytime_apple_200 does not.",
+    "Carried forward from the prior Plus Up cards: the existing device must be paid in full \u2014 verify with the deal desk.",
     "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited.",
     "Not combinable with any other device offer."
    ],
-   "credit_amount": "Trade-in fair-market value + $400, both delivered over 36 monthly DPP credits."
+   "credit_amount": "Trade-in fair-market value + $200, both delivered over 36 monthly DPP credits."
   },
   "mobile_service": [
    "XM",
@@ -4634,8 +4802,8 @@ const PROMO_GUIDE = [
    "Google",
    "Motorola"
   ],
-  "device_scope": "Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10 Pro Fold, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr \u2013 2025, moto razr \u2013 2026, moto g stylus \u2013 2025, moto g stylus \u2013 2026, moto g \u2013 2026, moto g play \u2013 2026, motorola edge, Motorola edge \u2013 2026, Motorola razr fold",
-  "plan_eligibility": "plus_or_premium_unl",
+  "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto g stylus \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
+  "plan_eligibility": "any_mobile_plan",
   "trade_in": {
    "required": true,
    "bucket": "xfinity_portal_fair_market_value"
@@ -4651,9 +4819,6 @@ const PROMO_GUIDE = [
    "start": "2026-09-12",
    "end": "2026-10-08"
   },
-  "badges": [
-   "select unconfirmed"
-  ],
   "display_when": {
    "line_type": "upgrade",
    "device_type": "phone",
@@ -4662,20 +4827,20 @@ const PROMO_GUIDE = [
     "Motorola"
    ],
    "plans": [
-    "mobile_plus",
-    "premium_unlimited"
+    "any"
    ],
    "trade_in": "required",
-   "diamond_only": false
+   "diamond_only": false,
+   "eligible_list": "gm"
   },
   "summary": {
    "hook": "Upgrading to a Pixel or a Motorola with a trade-in? Fair-market value PLUS an extra $200.",
    "qualify": [
     "EXISTING Xfinity Mobile customer upgrading an existing line. New lines are NOT eligible.",
-    "Buy one of the 20 eligible phones on a 36-month DPP \u2014 all 11 Pixels including the full Pixel 11 series, plus nine Motorolas.",
+    "Buy one of the 16 eligible phones on a 36-month DPP \u2014 8 Pixels (Pixel 10, 10 Pro, 10 XL, 10a and the full Pixel 11 series) and 8 Motorolas.",
     "Trade in a qualifying device (Xfinity portal fair-market value).",
     "No port required.",
-    "Plan: the card says Mobile Plus / Premium Unlimited twice and DEALS18 says all plans \u2014 treated as Plus/Premium. Select eligibility is unconfirmed; verify with the deal desk before quoting it."
+    "Plan: ALL data plans, including Mobile Select \u2014 CD870's overview and eligibility block both say so since the 9/21 update."
    ],
    "steps": [
     "Confirm the customer is an existing XM customer upgrading a line.",
@@ -4688,8 +4853,8 @@ const PROMO_GUIDE = [
     "Offer ends 10/8/26."
    ],
    "watchouts": [
-    "This is the only Google/Motorola upgrade path that covers the Pixel 11 series WITH a trade-in \u2014 the $830 G/M TIPs deal excludes the Pixel 11 and is new-line only anyway.",
-    "Google/Motorola has NO upgrade TIPs path this cycle, so there is no tiered alternative to compare against \u2014 only anytime_gm_200 ($200 flat, no trade), which Plus Up beats whenever the trade has any value.",
+    "The list SHRANK on 9/21: Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 are no longer on it and quote $0 on an upgrade.",
+    "Google/Motorola has NO upgrade TIPs path (the $830 TIPs deal, which now covers the Pixel 11 series, is new-line only), so the only comparison is anytime_gm_200 ($200 flat, no trade) \u2014 Plus Up beats it whenever the trade has any value.",
     "Card text bug: CD870's \"Offer value\" line reads \"towards a new Samsung device.\" Copy-paste error \u2014 the title and device list are Google/Motorola.",
     "This is NOT an Upgrade Anytime / Elite Upgrade deal.",
     "Carried forward from last cycle: the existing device must be paid in full. Not restated on CD870 \u2014 verify.",
@@ -4740,7 +4905,8 @@ const PROMO_GUIDE = [
     "any"
    ],
    "trade_in": "required",
-   "diamond_only": false
+   "diamond_only": false,
+   "eligible_list": "samsung"
   },
   "summary": {
    "hook": "Upgrading to a Galaxy with a trade-in? Fair-market value PLUS an extra $450. Works on ANY plan, including Select.",
@@ -4802,6 +4968,82 @@ const PROMO_GUIDE = [
   },
   "dates": {
    "start": "2026-09-12",
+   "end": "2026-09-28"
+  },
+  "display_when": {
+   "line_type": "upgrade",
+   "device_type": "phone",
+   "brands": [
+    "Apple"
+   ],
+   "excludes_device_match": [
+    "15 plus",
+    "15 pro",
+    "16 plus",
+    "16e"
+   ],
+   "plans": [
+    "mobile_plus",
+    "premium_unlimited"
+   ],
+   "trade_in": "not_required",
+   "diamond_only": false,
+   "eligible_list": "apple"
+  },
+  "summary": {
+   "hook": "No trade-in, no port \u2014 $400 off a new iPhone on an Anytime Upgrade of an existing line, through 9/28.",
+   "qualify": [
+    "EXISTING Mobile Plus or Premium Unlimited customer completing an Anytime Upgrade on an existing line. New line activations are NOT eligible.",
+    "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
+    "No trade-in and no port required.",
+    "Mobile Select does NOT qualify.",
+    "Minimum 60 DAYS between upgrades."
+   ],
+   "steps": [
+    "Confirm the customer is an existing Mobile Plus / Premium Unlimited line doing an Anytime Upgrade.",
+    "Add the iPhone to the cart on a 36-month DPP."
+   ],
+   "deadlines": [
+    "Activation must complete within 30 days of the purchase date.",
+    "Offer ends 9/28/26 \u2014 cut short from 10/8 (DEALS18, 9/25). From 9/29 the Apple Anytime Upgrade pays $200."
+   ],
+   "watchouts": [
+    "ENDS 9/28. From 9/29 this becomes $200 (anytime_apple_200); the sheet switches on its own.",
+    "MINIMUM 60 DAYS BETWEEN UPGRADES. Minimum $200 device credit per upgrade.",
+    "If the customer HAS a trade-in, tips_apple_1300 and the Apple Plus Up (trade value + $400 through 9/28) usually pay more \u2014 the sheet prices both.",
+    "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited."
+   ],
+   "credit_amount": "$400 over 36 monthly bill credits."
+  },
+  "mobile_service": [
+   "XM",
+   "CBM"
+  ],
+  "diamond_only": false
+ },
+ {
+  "tag": "anytime_apple_200",
+  "deal_card": "Pending (DEALS18 9/25)",
+  "marketing_name": "Anytime Upgrade \u2014 $200 off Apple (no trade-in)",
+  "sheet": "upgrade",
+  "line_type": "upgrade",
+  "device_brands": [
+   "Apple"
+  ],
+  "device_scope": "iPhone 15, iPhone 16, iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone 17e, iPhone Air, iPhone 18 Pro, iPhone 18 Pro Max",
+  "plan_eligibility": "plus_or_premium_unl",
+  "trade_in": {
+   "required": false
+  },
+  "port": {
+   "required": false
+  },
+  "offer": {
+   "savings": "$200 off",
+   "mechanism": "36-month DPP bill credits"
+  },
+  "dates": {
+   "start": "2026-09-29",
    "end": "2026-10-08"
   },
   "display_when": {
@@ -4821,10 +5063,11 @@ const PROMO_GUIDE = [
     "premium_unlimited"
    ],
    "trade_in": "not_required",
-   "diamond_only": false
+   "diamond_only": false,
+   "eligible_list": "apple"
   },
   "summary": {
-   "hook": "No trade-in, no port \u2014 $400 off a new iPhone just for doing an Anytime Upgrade on an existing line. Double what it paid last cycle.",
+   "hook": "No trade-in, no port \u2014 $200 off a new iPhone on an Anytime Upgrade of an existing line.",
    "qualify": [
     "EXISTING Mobile Plus or Premium Unlimited customer completing an Anytime Upgrade on an existing line. New line activations are NOT eligible.",
     "Buy an eligible Apple phone on a 36-month DPP (the nine-SKU Apple list).",
@@ -4838,17 +5081,16 @@ const PROMO_GUIDE = [
    ],
    "deadlines": [
     "Activation must complete within 30 days of the purchase date.",
-    "Offer ends 10/8/26."
+    "Runs 9/29\u201310/8/26."
    ],
    "watchouts": [
-    "Was $200 before 9/12 \u2014 it is $400 now.",
-    "MINIMUM 60 DAYS BETWEEN UPGRADES. If the member upgraded inside the last 60 days they cannot use this \u2014 route them to flat_apple_400, which pays the same $400 with no waiting period.",
-    "Minimum $200 device credit per upgrade.",
-    "If the customer HAS a trade-in, both tips_apple_1300 and plus_up_apple_400 beat a flat $400.",
-    "The old Diamond-vs-$200 XM360 weighting trap is gone \u2014 both Diamond iPhone 17 Pro deals expired 9/1 and this $400 is now the standard rate for everyone, Diamond or not.",
+    "NEW 9/29 \u2014 replaces the $400 Anytime Upgrade that ended 9/28. Announced in DEALS18's 9/25 change log; its deal card was not on Celestial as of 9/28, so these terms mirror the $400 card. Confirm with the deal desk.",
+    "This is the credit the sheet quotes on a no-trade iPhone upgrade from 9/29 (Jeff, 2026-09-28). The $400 no-trade Apple card (CD868) also lists existing-line upgrades and is shown as a note \u2014 confirm with the deal desk before promising it.",
+    "Minimum 60 DAYS between upgrades. Minimum $200 device credit per upgrade.",
+    "If the customer HAS a trade-in, tips_apple_1300 and the Plus Up (trade value + $200) usually pay more \u2014 the sheet prices both.",
     "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited."
    ],
-   "credit_amount": "$400 over 36 monthly bill credits."
+   "credit_amount": "$200 over 36 monthly bill credits."
   },
   "mobile_service": [
    "XM",
@@ -4866,7 +5108,7 @@ const PROMO_GUIDE = [
    "Google",
    "Motorola"
   ],
-  "device_scope": "Pixel 9, Pixel 9a, Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10 Pro Fold, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto razr \u2013 2025, moto razr \u2013 2026, moto g stylus \u2013 2025, moto g stylus \u2013 2026, moto g \u2013 2026, moto g play \u2013 2026, motorola edge, Motorola edge \u2013 2026, Motorola razr fold",
+  "device_scope": "Pixel 10, Pixel 10 Pro, Pixel 10 (Pro) XL, Pixel 10a, Pixel 11, Pixel 11 Pro, Pixel 11 Pro XL, Pixel 11 Pro Fold, moto g stylus \u2013 2025, motorola edge \u2013 2025, moto g \u2013 2026, moto g play \u2013 2026, moto g stylus \u2013 2026, moto razr \u2013 2026, Motorola edge \u2013 2026, Motorola razr fold",
   "plan_eligibility": "plus_or_premium_unl",
   "trade_in": {
    "required": false
@@ -4894,13 +5136,14 @@ const PROMO_GUIDE = [
     "premium_unlimited"
    ],
    "trade_in": "not_required",
-   "diamond_only": false
+   "diamond_only": false,
+   "eligible_list": "gm"
   },
   "summary": {
    "hook": "No trade-in, no port \u2014 $200 off a new Pixel or Motorola on an Anytime Upgrade.",
    "qualify": [
     "EXISTING Mobile Plus or Premium Unlimited customer completing an Anytime Upgrade on an existing line. New line activations are NOT eligible.",
-    "Buy one of the 20 eligible phones on a 36-month DPP \u2014 same list as plus_up_gm_200, including the full Pixel 11 series, moto g stylus 2026, both motorola edges and the razr fold.",
+    "Buy one of the 16 eligible phones on a 36-month DPP \u2014 same list as plus_up_gm_200, including the full Pixel 11 series and the moto g stylus \u2013 2026.",
     "No trade-in and no port required.",
     "Mobile Select does NOT qualify.",
     "Minimum 60 DAYS between upgrades."
@@ -4916,9 +5159,9 @@ const PROMO_GUIDE = [
    "watchouts": [
     "Minimum 60 DAYS between upgrades. Minimum $200 device credit per upgrade.",
     "Previously called Anytime Upgrade / Elite Upgrade.",
-    "This deal carries the Pixel 11 series \u2014 the $830 G/M TIPs deal does not, so for a Pixel 11 upgrade this and plus_up_gm_200 are the only Google/Motorola options.",
+    "The list SHRANK on 9/21: Pixel 9, Pixel 9a, Pixel 10 Pro Fold and moto razr \u2013 2025 are no longer on it and quote $0 on an upgrade.",
     "If the customer HAS a trade-in, plus_up_gm_200 pays fair-market value + $200 and wins.",
-    "Apple upgrades take anytime_apple_400 ($400) and Samsung upgrades anytime_samsung_450 ($450) \u2014 do not quote $200 on either.",
+    "Apple upgrades take the Apple Anytime credit ($400 through 9/28, $200 from 9/29); Samsung upgrades take anytime_samsung_450 ($450).",
     "Credit is spread over 36 monthly bill credits \u2014 cancel the line or accelerate the device payments and the remaining credits are forfeited."
    ],
    "credit_amount": "$200 over 36 monthly bill credits."
@@ -4965,7 +5208,8 @@ const PROMO_GUIDE = [
     "premium_unlimited"
    ],
    "trade_in": "not_required",
-   "diamond_only": false
+   "diamond_only": false,
+   "eligible_list": "samsung"
   },
   "summary": {
    "hook": "No trade-in, no port \u2014 $450 off a new Galaxy just for doing an Anytime Upgrade on an existing line.",
@@ -5024,7 +5268,7 @@ const PROMO_GUIDE = [
   },
   "dates": {
    "start": "2026-05-11",
-   "end": "2026-09-30"
+   "end": "2026-10-30"
   },
   "display_when": {
    "line_type": "new_line",
@@ -5055,7 +5299,7 @@ const PROMO_GUIDE = [
    ],
    "deadlines": [
     "New watch line must be activated within 30 DAYS of the purchase date.",
-    "Offer ends 9/30/26."
+    "Offer ends 10/30/26 \u2014 extended from 9/30 (CD824, 9/18)."
    ],
    "watchouts": [
     "Order matters: if the rep starts the buy flow before the member redeems the benefit, the discount will not apply.",
@@ -5136,6 +5380,12 @@ function pgMatches(p, ctx) {
     const matching = names.filter(n => w.brands.indexOf(pgBrandOf(n)) !== -1);
     if (!matching.length) return false;
 
+    // 2026-09-28: gate on the same card lists the quote math uses, so a chip can
+    // never promise a credit the row quotes at $0 (e.g. a Pixel 9 upgrade after
+    // the 9/21 Google/Motorola list cut).
+    if (w.eligible_list === 'apple'   && !matching.some(n => isAppleDealModel(n)))   return false;
+    if (w.eligible_list === 'gm'      && !matching.some(n => isGmDealModel(n)))      return false;
+    if (w.eligible_list === 'samsung' && !matching.some(n => isSamsungDealModel(n))) return false;
     if (w.device_match) {
       if (!matching.some(n => n.includes(w.device_match))) return false;
     }
@@ -5327,12 +5577,13 @@ function selectReward(btn) {
   document.getElementById('selectedTier').value = state.tier;
 
   // $300 smartwatch discount eligibility (per the xfinity-mobile-promotions skill matrix):
-  //   • smartwatch_300_diamond — Diamond members ONLY, 2026-05-11 – 2026-09-30.
+  //   • smartwatch_300_diamond — Diamond members ONLY, 2026-05-11 – 2026-10-30
+  //     (extended from 9/30 — CD824 modified 2026-09-18).
   // Redeem the Membership benefit BEFORE the XM buy flow; offer code in ALL
   // CAPS; max two transactions per code. Platinum does NOT qualify (the brief
   // Jun 3–6 smartwatch_300_platinum window was retired 2026-06-06).
   const eligibleForWatchDiscount = state.tier === 'diamond'
-    && isOfferWindowOpen('2026-05-11', '2026-09-30');
+    && isOfferWindowOpen('2026-05-11', '2026-10-30');
   state.membershipDiscount = eligibleForWatchDiscount ? 300 : 0;
   document.getElementById('selectedMembershipDiscount').value = state.membershipDiscount;
 
