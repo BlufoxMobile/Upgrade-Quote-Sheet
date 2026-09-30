@@ -9080,6 +9080,10 @@ var SubTracker = (function () {
 
   var ENABLED       = true;
   var COUNTS_URL    = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/tsheet-counts.json';
+  // 2026-09-29: FALLBACK ONLY, when raw.githubusercontent does not answer. The Pages copy can be
+  // hours behind (see above), and the panel says so: its generated_at drives "Stale" / "may be
+  // behind" / "no data for today yet". A number marked old beats "Offline" and zeros.
+  var COUNTS_URL_PAGES = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/tsheet-counts.json';
   var LIVE_FALLBACK = true;   // manual Refresh only; see note above
   var LIVE_URL      = (typeof APPS_SCRIPT_URL === 'string' && APPS_SCRIPT_URL) ? APPS_SCRIPT_URL : '';
 
@@ -9112,19 +9116,30 @@ var SubTracker = (function () {
      If the file is missing or has no goal for the store, the panel looks
      exactly as it did before. */
   var GOALS_URL = 'https://raw.githubusercontent.com/BlufoxMobile/Daily-Sales-Report/main/data/target-summary.json';
-  var goals = null, goalsInFlight = null, goalsTried = false;
+  /* 2026-09-29: the Pages copy of the same file is the fallback. When raw.githubusercontent
+     was slow or unreachable from a store iPad the goal lines simply never appeared ("parts
+     missing"). Goals change once a month, so a Pages copy that is a few hours behind is
+     the same numbers. A failed read is tried again after GOALS_RETRY_MS (on the next
+     render or timer tick) instead of waiting for a Refresh tap. */
+  var GOALS_URL_PAGES = 'https://blufoxmobile.github.io/Daily-Sales-Report/data/target-summary.json';
+  var GOALS_RETRY_MS = 60000;
+  var goals = null, goalsInFlight = null, goalsTried = false, goalsFailedAt = 0;
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function loadGoals(force) {
     if (goalsInFlight) return goalsInFlight;
-    if (goalsTried && !force) return Promise.resolve(goals);
+    if (goalsTried && !force && !(goals === null && goalsFailedAt && Date.now() - goalsFailedAt > GOALS_RETRY_MS)) return Promise.resolve(goals);
     goalsTried = true;
-    goalsInFlight = fetchJson(GOALS_URL, COUNTS_TIMEOUT).then(function (j) {
-      goals = (j && j.stores && typeof j.stores === 'object') ? j : goals;
-      goalsInFlight = null; return goals;
-    }, function (e) {
-      console.warn('[SubTracker] goals unavailable:', e && e.message);
-      goalsInFlight = null; return goals;
-    });
+    var okGoals = function (j) { if (!j || !j.stores || typeof j.stores !== 'object') throw new Error('goals file malformed'); return j; };
+    goalsInFlight = fetchJson(GOALS_URL, COUNTS_TIMEOUT).then(okGoals)
+      .catch(function () { return fetchJson(GOALS_URL_PAGES, COUNTS_TIMEOUT).then(okGoals); })
+      .then(function (j) {
+        goals = j; goalsFailedAt = 0;
+        goalsInFlight = null; return goals;
+      }, function (e) {
+        console.warn('[SubTracker] goals unavailable:', e && e.message);
+        goalsFailedAt = Date.now();
+        goalsInFlight = null; return goals;
+      });
     return goalsInFlight;
   }
   function goalFor(store) {
@@ -9293,10 +9308,14 @@ var SubTracker = (function () {
 
     setStatus('loading', 'Loading…');
 
-    inFlight = fetchJson(COUNTS_URL, COUNTS_TIMEOUT)
-      .then(function (json) {
-        if (!json || !json.stores) throw new Error('counts file malformed');
-        return json;
+    var okCounts = function (json) {
+      if (!json || !json.stores) throw new Error('counts file malformed');
+      return json;
+    };
+    inFlight = fetchJson(COUNTS_URL, COUNTS_TIMEOUT).then(okCounts)
+      .catch(function (err) {
+        console.warn('[SubTracker] counts file (raw) unavailable, trying the Pages copy:', err && err.message);
+        return fetchJson(COUNTS_URL_PAGES, COUNTS_TIMEOUT).then(okCounts);
       })
       .catch(function (err) {
         // The counts file is the only automatic source. Falling back to the heavy
@@ -9512,6 +9531,10 @@ var SubTracker = (function () {
     refreshTimer = setInterval(function () {
       if (document.hidden || !selectedStore()) return;
       load(true, false).then(function () { paint(selectedStore()); }).catch(function () {});
+      // Goals that failed to arrive are tried again here (at most once a minute, see loadGoals).
+      if (!goals) loadGoals(false).then(function () {
+        if (goals && data && selectedStore()) { try { paint(selectedStore()); } catch (e) {} }
+      });
     }, REFRESH_MS);
   }
 
