@@ -2428,7 +2428,7 @@ var XF_PDF_CAPTURE_CSS = [
   '  #previewPage .cmp-total-sub{margin-top:3px}',
   '  #previewPage #prevBillSection,#previewPage #previewPromoBlock{padding-top:18px}',
   '  #previewPage .xf-sec-head{margin-bottom:8px}',
-  '  #previewPage #previewPromoList{gap:8px}',
+  '  #previewPage #previewPromoList{gap:8px;grid-template-columns:repeat(3,minmax(0,1fr))}',   /* 2026-09-30: 3 across on paper (two pages) */
   '  #previewPage .pg-chip{padding:9px 12px 9px 16px;gap:5px}',
   '  #previewPage .xf-ribbon{margin-top:18px}',
   '  #previewPage .xf-hero-art{margin:-1.3cqw 0 -2.4cqw}',
@@ -8105,17 +8105,24 @@ async function _buildUpgradePdf({ openInNewTab = false, returnBlob = false } = {
     // text lines) instead of slicing every 792pt through whatever is there.
     // The one embedded image is re-placed per page; white bands mask the rest.
     const XF_TOP = 24, XF_BOTTOM = 14;          // pt — page 1's hero bleeds to the top edge
-    const ptPerCss = xfBreaks && xfBreaks.width ? imgWidth / xfBreaks.width : 0;
-    let cuts = null;
+    const ptFull = xfBreaks && xfBreaks.width ? imgWidth / xfBreaks.width : 0;
+    // 2026-09-30 (Jeff: "one page, front and back"): when the quote runs past two pages at full width,
+    // the pages are drawn a little smaller (centred, white side margins) until it fits on two.
+    let cuts = null, zoom = 1;
     try {
-      if (ptPerCss) cuts = xfPdfPageCuts(xfBreaks, (pageHeight - XF_BOTTOM) / ptPerCss,
-                                         (pageHeight - XF_TOP - XF_BOTTOM) / ptPerCss).map(c => c * ptPerCss);
-    } catch (e) { cuts = null; }
+      if (ptFull) {
+        const cutsAt = (z) => xfPdfPageCuts(xfBreaks, (pageHeight - XF_BOTTOM) * z / ptFull, (pageHeight - XF_TOP - XF_BOTTOM) * z / ptFull);
+        let cssCuts = cutsAt(1);
+        while (cssCuts.length > 3 && zoom < 2.4) { zoom = Math.round((zoom + 0.02) * 100) / 100; cssCuts = cutsAt(zoom); }
+        cuts = cssCuts.map(c => c * ptFull / zoom);
+      }
+    } catch (e) { cuts = null; zoom = 1; }
+    const drawW = imgWidth / zoom, drawH = imgHeight / zoom, drawX = (pageWidth - drawW) / 2;
     if (cuts && cuts.length > 1) {
       for (let i = 0; i < cuts.length - 1; i++) {
         if (i > 0) pdf.addPage();
         const top = i === 0 ? 0 : XF_TOP;
-        pdf.addImage(imgData, 'JPEG', 0, top - cuts[i], imgWidth, imgHeight, 'xf-quote');
+        pdf.addImage(imgData, 'JPEG', drawX, top - cuts[i], drawW, drawH, 'xf-quote');
         pdf.setFillColor(255, 255, 255);
         if (top > 0) pdf.rect(0, 0, pageWidth, top, 'F');
         const end = top + (cuts[i + 1] - cuts[i]);
