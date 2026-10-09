@@ -2783,7 +2783,7 @@ const PROMO_MATRIX = {
     ],
     "catalog_gaps": [
       "\"iPhone Duo\" is on CD888 and CD886 but not in this sheet\u2019s PHONES catalog \u2014 the deal lists already carry it.",
-      "Galaxy Tab S12+ (256GB) is not in this sheet\u2019s tablet catalog \u2014 getTabletDiscount() applies CD877 to any tablet named \"Galaxy Tab S12+\" (256GB or no storage in the name) once one is added."
+      "Galaxy Tab S12+ 5G 256GB is in the tablet catalog at $1,349.99 (xfinity.com, 2026-10-09; 256GB is the only size sold); getTabletDiscount() applies CD877 to it."
     ]
   },
   "sheet_routing": {
@@ -5989,7 +5989,12 @@ function updateTradeVisibility(num) {
   if (inp) inp.disabled = !tag || !!d.noTrade;
   if (label && tag) {
     const b = UPG_TIPS_BUCKETS[tag];
-    label.textContent = `TIPs Trade-In — pays $${b.floor}–$${b.max} on this phone instead of the $${credit} no-trade credit`;
+    const cap = d.price > 0 ? d.price : Infinity;   // a credit never exceeds the phone's price
+    const money = v => (Math.round(v * 100) % 100 ? v.toFixed(2) : String(Math.round(v)));
+    const lo = Math.min(b.floor, cap), hi = Math.min(b.max, cap);
+    label.textContent = (lo === hi)
+      ? `TIPs Trade-In — pays $${money(hi)} (the phone price) instead of the $${credit} no-trade credit`
+      : `TIPs Trade-In — pays $${money(lo)}–$${money(hi)} on this phone instead of the $${credit} no-trade credit`;
   }
   if (off) {
     off.textContent = (!tag && credit > 0)
@@ -7080,6 +7085,9 @@ function rederiveQuoteForToday() {
     recalcPhoneRow();
     refreshWatchDiamondNotes();
   }
+  // 2026-10-09: tablet rows cache their credit too (the Tab S12+ $300 ends 10/20),
+  // so always re-price them for today.
+  if (tabletCounts > 0) { try { recalcTabletRow(); } catch (e) {} }
   return stale;
 }
 
