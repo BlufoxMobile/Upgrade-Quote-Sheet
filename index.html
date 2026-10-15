@@ -2563,6 +2563,7 @@ function xfCanvasToGray(canvas) {
 // ══════════════════════════════════════════════════
 const PHONES = [
   // Apple
+  { name: "Apple iPhone Duo", price: 1999.99, storage: [ { gb: "256GB", price: 1999.99 }, { gb: "512GB", price: 2199.99 }, { gb: "1TB", price: 2599.99 }, { gb: "2TB", price: 3199.99 } ] },  // NEW 2026-10-15 — pre-order 10/16, available 10/23
   { name: "Apple iPhone 18 Pro Max", price: 1299.99, storage: [ { gb: "256GB", price: 1299.99 }, { gb: "512GB", price: 1499.99 }, { gb: "1TB", price: 1899.99 }, { gb: "2TB", price: 2499.99 } ] },  // pre-order, ships 9/18
   { name: "Apple iPhone 18 Pro", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 }, { gb: "1TB", price: 1799.99 }, { gb: "2TB", price: 2399.99 } ] },  // pre-order, ships 9/18
   { name: "Apple iPhone 17 Pro Max", price: 1199.99, storage: [ { gb: "256GB", price: 1199.99 }, { gb: "512GB", price: 1399.99 }, { gb: "1TB", price: 1599.99 }, { gb: "2TB", price: 1999.99 } ] },
@@ -2781,24 +2782,29 @@ const PROMO_MATRIX = {
       "CD882 and CD883 Order Entry steps are copy-pasted new-line text; eligibility block, overview, legal and DEALS18 all say existing-line upgrade only.",
       "CD877 (Tab S12+) card says 10/8\u201310/20; DEALS18 says 10/7\u201310/20 \u2014 the card date (10/8) is used."
     ],
+    "added_2026_10_15": [
+      "Apple iPhone Duo added to PHONES (256GB 1999.99 / 512GB 2199.99 / 1TB 2599.99 / 2TB 3199.99; XMC $19). Pre-order 10/16, available 10/23. \"Apple iPhone Duo\" matches the \"iPhone Duo\" entry on CD888 / CD886 ($200 no-trade).",
+      "tips_duo_1000_diamond_upg \u2014 provisional \u2014 Celestial trade-in list not yet posted 10/15; values per Jeff = $930 list with $1,000 top tier.",
+      "visa_gc_200_2lines \u2014 $200 Virtual Visa gift card for 2+ new lines (10/16 \u2013 11/2): a pitch chip only on this sheet."
+    ],
     "catalog_gaps": [
-      "\"iPhone Duo\" is on CD888 and CD886 but not in this sheet\u2019s PHONES catalog \u2014 the deal lists already carry it.",
+      "\"iPhone Duo\" (CD888 / CD886) is in the PHONES catalog since 2026-10-15 as \"Apple iPhone Duo\".",
       "Galaxy Tab S12+ 5G 256GB is in the tablet catalog at $1,349.99 (xfinity.com, 2026-10-09; 256GB is the only size sold); getTabletDiscount() applies CD877 to it."
     ]
   },
   "sheet_routing": {
     "mobile_6th_gen": "New-line promotions, in that sheet\u2019s own copy of this matrix: tips_agm_930, tips_samsung_1200, flat_agm_400, flat_samsung_500, smartwatch_300_diamond, tablet_tab_s12plus_300, waived_activation, free_line.",
-    "upgrade": "Existing-line upgrade promotions: tips_agm_500_upg, tips_samsung_700_upg, flat_agm_200_upg, anytime_agm_200, flat_samsung_300_upg, anytime_samsung_300; plus smartwatch_300_diamond (DIAMOND, new watch line) and tablet_tab_s12plus_300 (new tablet line).",
-    "diamond_split": "One Diamond promo: the $299.99 smartwatch credit through 10/30. It needs a NEW watch line, so it renders on both sheets whenever a watch line is on the quote."
+    "upgrade": "Existing-line upgrade promotions: tips_agm_500_upg, tips_samsung_700_upg, flat_agm_200_upg, anytime_agm_200, flat_samsung_300_upg, anytime_samsung_300, tips_duo_1000_diamond_upg (DIAMOND, iPhone Duo, from 10/16, provisional); plus smartwatch_300_diamond (DIAMOND, new watch line), tablet_tab_s12plus_300 (new tablet line) and the visa_gc_200_2lines pitch (10/16 – 11/2, no credit).",
+    "diamond_split": "Two Diamond promos: the $299.99 smartwatch credit through 10/30 (needs a NEW watch line, so it renders on both sheets whenever a watch line is on the quote), and tips_duo_1000_diamond_upg on this sheet (10/16 – 11/10)."
   },
   "plan_eligibility_values": {
     "plus_or_premium_unl": "Mobile Plus or Premium Unlimited (Unlimited Premium Flex / Pro on CBM). Mobile Select and NOW do NOT qualify.",
     "smartwatch_plan_diamond": "Smartwatch plan on a new watch line; Diamond members only.",
     "tablet_plan_unlimited": "Unlimited tablet plan on a new tablet line."
   },
-  "diamond_note": "ONE Diamond-gated promo: smartwatch_300_diamond (NEW watch line, through 10/30/26). Surface it ONLY when the membership tier is Diamond.",
+  "diamond_note": "TWO Diamond-gated promos: smartwatch_300_diamond (NEW watch line, through 10/30/26) and tips_duo_1000_diamond_upg (iPhone Duo upgrade with a trade-in, 10/16 – 11/10/26, provisional). Surface them ONLY when the membership tier is Diamond.",
   "routing_notes": {
-    "tips_bucket_by_new_phone": "The PHONE BEING BOUGHT picks the table: an Apple/Google/Motorola phone on CD882 -> tips_agm_500_upg (500/450/400/350/300); a Samsung on CD883 (10 phones, no A57) -> tips_samsung_700_upg (700/600/550/500/450). The trade-in\u2019s own brand never matters. Phones with no upgrade TIPs bucket (Galaxy A57, Pixel 10a, moto g stylus / moto g / moto g play, both motorola edges, iPhone Duo) hide the trade-in picker and quote the no-trade credit.",
+    "tips_bucket_by_new_phone": "The PHONE BEING BOUGHT picks the table: an Apple/Google/Motorola phone on CD882 -> tips_agm_500_upg (500/450/400/350/300); a Samsung on CD883 (10 phones, no A57) -> tips_samsung_700_upg (700/600/550/500/450). The trade-in\u2019s own brand never matters. The iPhone Duo bought by a DIAMOND member (10/16 \u2013 11/10) -> tips_duo_1000_diamond_upg (1000/700/600/500/450 on the tips_agm_930 tiers; provisional). Phones with no upgrade TIPs bucket (Galaxy A57, Pixel 10a, moto g stylus / moto g / moto g play, both motorola edges, a non-Diamond iPhone Duo) hide the trade-in picker and quote the no-trade credit.",
     "tips_vs_no_trade": "Not combinable. The TIPs floors ($300 A/G/M, $450 Samsung) beat the no-trade credits ($200 / $300), so a qualifying trade-in always wins and the sheet quotes TIPs whenever one is picked.",
     "ndel_vs_anytime": "Same dollars. The NDEL deals (flat_agm_200_upg CD888, flat_samsung_300_upg CD880) need the current phone paid off and have NO 60-day rule. Upgrade Anytime (anytime_agm_200 CD886, anytime_samsung_300 CD887) needs 60 days since the last upgrade OR 50% of the current DPP paid. Pixel 10a is on CD886 only.",
     "select_plan_customers": "No device deal this cycle is valid on Mobile Select or NOW Mobile."
@@ -3423,6 +3429,66 @@ const PROMO_MATRIX = {
       }
     },
     {
+      "tag": "tips_duo_1000_diamond_upg",
+      "deal_card": "none yet",
+      "marketing_name": "TIPs — Diamond members: up to $1,000 off iPhone Duo (upgrades)",
+      "category": "trade_in_tips",
+      "sheet": "upgrade",
+      "line_type": "upgrade",
+      "plan_eligibility": "plus_or_premium_unl",
+      "trade_in": {
+        "required": true,
+        "bucket": "tips_duo_1000_diamond_upg"
+      },
+      "port": {
+        "required": false
+      },
+      "device_brands": [
+        "Apple"
+      ],
+      "device_scope": "Apple iPhone Duo (256GB, 512GB, 1TB, 2TB)",
+      "offer": {
+        "savings": "up to $1,000 off",
+        "mechanism": "36-month trade-in DPP bill credits"
+      },
+      "dates": {
+        "start": "2026-10-16",
+        "end": "2026-11-10"
+      },
+      "active": true,
+      "diamond_only": true,
+      "provisional": "provisional — Celestial trade-in list not yet posted 10/15; values per Jeff = $930 list with $1,000 top tier",
+      "added": "2026-10-15",
+      "source": "Jeff's Xfinity iPhone Duo promo slide (10/15). Celestial had NOT posted a card or a Duo trade-in list (DEALS18 / DEALS94 / CD889–CD902 checked 10/15).",
+      "rules": "DIAMOND members only (the sheet's Diamond tier toggle). Existing-line upgrade, current phone paid off (NDEL), Mobile Plus or Premium Unlimited, trade-in + 36-month DPP required, no port, 21-day Assurant clock, credit capped at retail, not combinable with other device offers. Non-Diamond Duo upgrade, or a Diamond Duo upgrade with no trade-in: the $200 no-trade credit (CD888 / CD886).",
+      "values_in": "UPG_TIPS_TABLE column 4 — the tips_agm_930 tier strings (DEALS94-100926-01.pdf, 139 devices) priced on the ladder 1000/700/600/500/450, floor $450"
+    },
+    {
+      "tag": "visa_gc_200_2lines",
+      "deal_card": "none yet",
+      "marketing_name": "Add 2+ new lines today and the customer gets a $200 Visa gift card",
+      "category": "value_add",
+      "sheet": "mobile_6th_gen",
+      "additional_sheets": [
+        "upgrade"
+      ],
+      "line_type": "new_line",
+      "plan_eligibility": "any_mobile_plan",
+      "offer": {
+        "savings": "$200 Visa gift card",
+        "mechanism": "Virtual Visa gift card, fulfilled automatically — NOT a bill credit"
+      },
+      "dates": {
+        "start": "2026-10-16",
+        "end": "2026-11-02"
+      },
+      "active": true,
+      "pitch_only_on_this_sheet": true,
+      "added": "2026-10-15",
+      "source": "Regional email “SET for Success – October 2026” (10/15): $200 Virtual Visa gift card when a customer adds 2+ new mobile lines on the same day in a retail store (10/16 – 11/2); at least one line on a Device Payment Plan; fulfilled automatically; stacks with First Line Free.",
+      "rules": "Per Jeff: watches and tablets never count; NOW Mobile excluded (plan eligibility not yet on Celestial). On THIS sheet upgrades never qualify: it is a pitch chip only — no credit, no effect on any price or total."
+    },
+    {
       "tag": "tips_apple_1300",
       "deal_card": "CD871",
       "marketing_name": "TIPs \u2014 Up to $1,300 off Apple",
@@ -3688,7 +3754,8 @@ const AGM_TIPS_UPG_MODELS = APPLE_DEAL_MODELS.concat([
   'moto razr - 2026', 'razr fold',
 ]);
 // CD888 flat_agm_200_upg ($200, paid-off phone, no 60-day rule) = the CD881
-// list plus "iPhone Duo" (not in the catalog yet).
+// list plus "iPhone Duo" (in the catalog since 2026-10-15 as "Apple iPhone Duo",
+// which normDealName() matches to this entry).
 const AGM_NDEL_MODELS = APPLE_DEAL_MODELS.concat([
   'iPhone Duo',
   'Pixel 10', 'Pixel 10 Pro', 'Pixel 10 Pro XL',
@@ -3707,6 +3774,12 @@ const SAMSUNG_TIPS_UPG_MODELS = [
 ];
 // CD880 flat_samsung_300_upg / CD887 anytime_samsung_300 — the same 11 incl. A57.
 const SAMSUNG_NO_TRADE_MODELS = SAMSUNG_TIPS_UPG_MODELS.concat(['Galaxy A57']);
+// tips_duo_1000_diamond_upg (added 2026-10-15, PROVISIONAL — no Celestial card
+// or trade-in list yet): the iPhone Duo only, DIAMOND members only, trade-in
+// required, 2026-10-16 -> 2026-11-10. Not on CD882, so a non-Diamond Duo upgrade
+// has no TIPs path and quotes its $200 no-trade credit (CD888 / CD886).
+const DUO_TIPS_UPG_MODELS = ['iPhone Duo'];
+function isDuoModel(phoneName) { return isOnDealList(phoneName, DUO_TIPS_UPG_MODELS); }
 
 // One source of truth check: AUTO_DISCOUNT_PHONES is declared above this block
 // (it has to be — it is read by the intake UI), so its keys stay literal and
@@ -3819,18 +3892,29 @@ function getUpgradeCredit(phoneName) {
 //  ────────────────────────────────────────────────────────────────
 //  Buying an Apple/Google/Motorola phone on CD882 -> tips_agm_500_upg
 //  Buying a Samsung on CD883 (no A57)            -> tips_samsung_700_upg
-//  Anything else (Galaxy A57, Pixel 10a, moto g family, edges, iPhone Duo…)
-//  has NO upgrade TIPs bucket: the row hides its trade-in picker and quotes
-//  the no-trade credit. The trade-in's own brand never picks the table.
+//  Buying the iPhone Duo as a DIAMOND member     -> tips_duo_1000_diamond_upg
+//    (2026-10-15, provisional; the tier is read from state.tier, the same
+//    Diamond toggle the smartwatch credit uses — see isDiamondTierSelected)
+//  Anything else (Galaxy A57, Pixel 10a, moto g family, edges, a non-Diamond
+//  iPhone Duo…) has NO upgrade TIPs bucket: the row hides its trade-in picker
+//  and quotes the no-trade credit. The trade-in's own brand never picks the table.
 //  Tables: UPG_TIPS_BUCKETS / UPG_TIPS_TABLE (generated, further down).
 // ══════════════════════════════════════════════════════════════════
 const UPG_TIPS_CONDITIONS = ['Good', 'Fair', 'Poor'];
+
+// True when the rep has picked the Diamond membership tier. Shared by the
+// Diamond smartwatch credit and the Diamond iPhone Duo TIPs deal. Guarded so a
+// call made before `state` is initialised answers false instead of throwing.
+function isDiamondTierSelected() {
+  try { return String((state && state.tier) || '').toLowerCase() === 'diamond'; } catch (e) { return false; }
+}
 
 function getUpgradeTipsBucket(phoneName) {
   if (!phoneName) return '';
   var tag = '';
   if (isSamsungPurchase(phoneName)) { if (isSamsungTipsUpgModel(phoneName)) tag = 'tips_samsung_700_upg'; }
   else if (isAgmTipsUpgModel(phoneName)) tag = 'tips_agm_500_upg';
+  else if (isDuoModel(phoneName) && isDiamondTierSelected()) tag = 'tips_duo_1000_diamond_upg';
   if (!tag) return '';
   var b = UPG_TIPS_BUCKETS[tag];
   return isOfferWindowOpen(b.window.start, b.window.end) ? tag : '';
@@ -3844,7 +3928,7 @@ function upgTipsValueInBucket(tradeDevice, cond, tag) {
   if (!b || !r) return 0;
   var i = UPG_TIPS_CONDITIONS.indexOf(cond);
   if (i === -1) return 0;
-  var digit = (tag === 'tips_samsung_700_upg' ? r[2] : r[1]).charAt(i);
+  var digit = String(r[b.col] || '').charAt(i);
   var tier = parseInt(digit, 10);
   return (tier >= 1 && tier <= b.ladder.length) ? b.ladder[tier - 1] : 0;
 }
@@ -3907,10 +3991,12 @@ function calcSmartPromo(phoneName, phonePrice, tradeValue, noTrade, plan, tipsDe
   if (tipsRaw > 0) {
     var tipsAmt  = Math.min(tipsRaw, phonePrice);
     var tipsCond = tipsCondition || bestTipsCondition(tipsDevice, phoneName);
+    // 2026-10-15: the Diamond iPhone Duo deal says so on its label.
+    var tipsDia  = getUpgradeTipsBucket(phoneName) === 'tips_duo_1000_diamond_upg' ? ', Diamond' : '';
     return {
       promoAmt: tipsAmt,
       promoLabel: 'TIPs trade-in -$' + _promoMoneyText(tipsRaw) +
-                  ' (' + (tipsCond ? tipsCond + ' condition' : 'trade-in') + ')' +
+                  ' (' + (tipsCond ? tipsCond + ' condition' : 'trade-in') + tipsDia + ')' +
                   (tipsAmt < tipsRaw ? ' — capped at phone price' : '')
     };
   }
@@ -3990,154 +4076,162 @@ function getTabletNetPrice(name, price) {
 // BOUGHT (getUpgradeTipsBucket), never by the trade-in's own brand.
 // Tier strings are Good/Fair/Poor; '-' = condition not accepted (Motorola RAZR
 // is Poor only, Galaxy S8 is Good only). Dollar value = bucket.ladder[tier - 1].
+// 2026-10-15: a THIRD tier column for tips_duo_1000_diamond_upg (iPhone Duo,
+// Diamond only), GENERATED from the tips_agm_930 table in
+// tips-tables-2026-10-09.json (the $930 new-line list, CD885) priced on Jeff's
+// ladder 1000/700/600/500/450 — the $930 list with its top tier raised to
+// $1,000. PROVISIONAL: Celestial had not posted a Duo trade-in list on 10/15.
+// `col` = which column of UPG_TIPS_TABLE holds the bucket's tier string.
 // ═════════════════════════════════════════════════════════════════
 const UPG_TIPS_BUCKETS = {
-  tips_agm_500_upg:     { card: 'CD882', pdf: 'DEALS94-100926-02.pdf', ladder: [500, 450, 400, 350, 300], floor: 300, max: 500,
+  tips_agm_500_upg:     { card: 'CD882', pdf: 'DEALS94-100926-02.pdf', ladder: [500, 450, 400, 350, 300], floor: 300, max: 500, col: 1,
                           window: { start: '2026-10-09', end: '2026-11-10' } },
-  tips_samsung_700_upg: { card: 'CD883', pdf: 'DEALS94-100926-03.pdf', ladder: [700, 600, 550, 500, 450], floor: 450, max: 700,
+  tips_samsung_700_upg: { card: 'CD883', pdf: 'DEALS94-100926-03.pdf', ladder: [700, 600, 550, 500, 450], floor: 450, max: 700, col: 2,
                           window: { start: '2026-10-09', end: '2026-11-10' } },
+  tips_duo_1000_diamond_upg: { card: 'provisional (no card 10/15)', pdf: 'tips_agm_930 table (DEALS94-100926-01.pdf)', ladder: [1000, 700, 600, 500, 450], floor: 450, max: 1000, col: 3,
+                          diamond_only: true, window: { start: '2026-10-16', end: '2026-11-10' } },
 };
-// [trade-in device, tips_agm_500_upg tiers G/F/P, tips_samsung_700_upg tiers G/F/P]
+// [trade-in device, tips_agm_500_upg tiers G/F/P, tips_samsung_700_upg tiers G/F/P, tips_duo_1000_diamond_upg tiers G/F/P (= tips_agm_930)]
 const UPG_TIPS_TABLE = [
-  ["Apple iPhone 11",                        "455", "555"],
-  ["Apple iPhone 11 Pro",                    "455", "555"],
-  ["Apple iPhone 11 Pro Max",                "455", "455"],
-  ["Apple iPhone 12",                        "455", "555"],
-  ["Apple iPhone 12 Mini",                   "455", "555"],
-  ["Apple iPhone 12 Pro",                    "455", "455"],
-  ["Apple iPhone 12 Pro Max",                "345", "455"],
-  ["Apple iPhone 13",                        "345", "455"],
-  ["Apple iPhone 13 Mini",                   "455", "455"],
-  ["Apple iPhone 13 Pro",                    "345", "455"],
-  ["Apple iPhone 13 Pro Max",                "245", "355"],
-  ["Apple iPhone 14",                        "345", "455"],
-  ["Apple iPhone 14 Plus",                   "245", "455"],
-  ["Apple iPhone 14 Pro",                    "245", "355"],
-  ["Apple iPhone 14 Pro Max",                "245", "345"],
-  ["Apple iPhone 15",                        "245", "345"],
-  ["Apple iPhone 15 Plus",                   "135", "345"],
-  ["Apple iPhone 15 Pro",                    "135", "245"],
-  ["Apple iPhone 15 Pro Max",                "135", "145"],
-  ["Apple iPhone 16",                        "135", "245"],
-  ["Apple iPhone 16 Plus",                   "135", "245"],
-  ["Apple iPhone 16 Pro",                    "125", "135"],
-  ["Apple iPhone 16 Pro Max",                "125", "135"],
-  ["Apple iPhone 16e",                       "245", "345"],
-  ["Apple iPhone 17",                        "125", "135"],
-  ["Apple iPhone 17 Pro",                    "125", "135"],
-  ["Apple iPhone 17 Pro Max",                "115", "125"],
-  ["Apple iPhone 17e",                       "135", "345"],
-  ["Apple iPhone 8",                         "555", "555"],
-  ["Apple iPhone 8 PLUS",                    "555", "555"],
-  ["Apple iPhone Air",                       "125", "135"],
-  ["Apple iPhone SE 2",                      "555", "555"],
-  ["Apple iPhone SE 3",                      "555", "555"],
-  ["Apple iPhone X",                         "555", "555"],
-  ["Apple iPhone XR",                        "555", "555"],
-  ["Apple iPhone XS",                        "555", "555"],
-  ["Apple iPhone XS Max",                    "555", "555"],
-  ["Google Pixel 10 5G",                     "245", "355"],
-  ["Google Pixel 10 Pro 5G",                 "245", "345"],
-  ["Google Pixel 10 Pro Fold",               "125", "125"],
-  ["Google Pixel 10 Pro XL 5G",              "135", "245"],
-  ["Google Pixel 10a 5G",                    "245", "345"],
-  ["Google Pixel 5 5G",                      "555", "555"],
-  ["Google Pixel 5A 5G",                     "555", "555"],
-  ["Google Pixel 6",                         "555", "555"],
-  ["Google Pixel 6 Pro",                     "555", "555"],
-  ["Google Pixel 6A",                        "555", "555"],
-  ["Google Pixel 7 5G",                      "555", "555"],
-  ["Google Pixel 7 Pro 5G",                  "455", "555"],
-  ["Google Pixel 7A 5G",                     "555", "555"],
-  ["Google Pixel 8 5G",                      "345", "455"],
-  ["Google Pixel 8 Pro 5G",                  "345", "455"],
-  ["Google Pixel 8A 5G",                     "455", "555"],
-  ["Google Pixel 9 5G",                      "345", "455"],
-  ["Google Pixel 9 Pro 5G",                  "245", "345"],
-  ["Google Pixel 9 Pro Fold 5G",             "235", "345"],
-  ["Google Pixel 9 Pro XL 5G",               "245", "345"],
-  ["Google Pixel 9A 5G",                     "345", "455"],
-  ["Motorola Edge 5G 2025",                  "555", "555"],
-  ["Motorola Edge 70 5G",                    "455", "555"],
-  ["Motorola Moto G 5G 2026",                "555", "555"],
-  ["Motorola Moto G Play 5G 2026",           "555", "555"],
-  ["Motorola RAZR",                          "--5", "--5"],
-  ["Motorola RAZR Ultra 5G 2025",            "455", "555"],
-  ["Motorola Razr 5G 2024",                  "555", "555"],
-  ["Motorola Razr 5G 2025",                  "555", "555"],
-  ["Motorola Razr Plus 5G 2023",             "555", "555"],
-  ["ONEPLUS 8 PRO 5G",                       "555", "555"],
-  ["ONEPLUS 8T",                             "555", "555"],
-  ["ONEPLUS 8T PLUS 5G",                     "555", "555"],
-  ["ONEPLUS 9 5G",                           "555", "555"],
-  ["ONEPLUS 9 PRO 5G",                       "555", "555"],
-  ["Samsung Galaxy A16 5G",                  "555", "555"],
-  ["Samsung Galaxy A17 5G",                  "555", "555"],
-  ["Samsung Galaxy A25 5G",                  "555", "555"],
-  ["Samsung Galaxy A26 5G",                  "555", "555"],
-  ["Samsung Galaxy A35 5G",                  "555", "555"],
-  ["Samsung Galaxy A36 5G",                  "555", "555"],
-  ["Samsung Galaxy A37 5G",                  "555", "555"],
-  ["Samsung Galaxy Note 10",                 "555", "555"],
-  ["Samsung Galaxy Note 10 Lite (6GB)",      "555", "555"],
-  ["Samsung Galaxy Note 20 4G",              "555", "555"],
-  ["Samsung Galaxy Note 20 5G",              "555", "555"],
-  ["Samsung Galaxy Note 20 Ultra 4G",        "555", "555"],
-  ["Samsung Galaxy Note 20 Ultra 5G",        "555", "555"],
-  ["Samsung Galaxy Note 9",                  "555", "555"],
-  ["Samsung Galaxy S10",                     "555", "555"],
-  ["Samsung Galaxy S10 Lite",                "555", "555"],
-  ["Samsung Galaxy S10 Plus",                "555", "555"],
-  ["Samsung Galaxy S10E",                    "555", "555"],
-  ["Samsung Galaxy S20 5G",                  "555", "555"],
-  ["Samsung Galaxy S20 5G UW",               "555", "555"],
-  ["Samsung Galaxy S20 Fan Edition 5G",      "555", "555"],
-  ["Samsung Galaxy S20 Plus",                "555", "555"],
-  ["Samsung Galaxy S20 Plus 5G",             "555", "555"],
-  ["Samsung Galaxy S20 Ultra 5G",            "555", "555"],
-  ["Samsung Galaxy S21 5G",                  "555", "555"],
-  ["Samsung Galaxy S21 Fan Edition 5G",      "555", "555"],
-  ["Samsung Galaxy S21 Plus 5G",             "555", "555"],
-  ["Samsung Galaxy S21 Ultra 5G",            "455", "555"],
-  ["Samsung Galaxy S22 5G",                  "455", "555"],
-  ["Samsung Galaxy S22 Plus 5G",             "455", "555"],
-  ["Samsung Galaxy S22 Ultra 5G",            "345", "455"],
-  ["Samsung Galaxy S23 5G",                  "345", "455"],
-  ["Samsung Galaxy S23 Fan Edition 5G",      "455", "455"],
-  ["Samsung Galaxy S23 Plus 5G",             "245", "355"],
-  ["Samsung Galaxy S23 Ultra 5G",            "245", "345"],
-  ["Samsung Galaxy S24 5G",                  "245", "345"],
-  ["Samsung Galaxy S24 FE 5G",               "345", "455"],
-  ["Samsung Galaxy S24 Plus 5G",             "135", "245"],
-  ["Samsung Galaxy S24 Ultra 5G",            "125", "135"],
-  ["Samsung Galaxy S25 5G",                  "235", "345"],
-  ["Samsung Galaxy S25 Edge 5G",             "135", "245"],
-  ["Samsung Galaxy S25 Fan Edition 5G",      "245", "355"],
-  ["Samsung Galaxy S25 Plus 5G",             "135", "245"],
-  ["Samsung Galaxy S25 Ultra 5G",            "125", "135"],
-  ["Samsung Galaxy S26 5G",                  "125", "135"],
-  ["Samsung Galaxy S26 Plus 5G",             "125", "135"],
-  ["Samsung Galaxy S26 Ultra 5G",            "115", "125"],
-  ["Samsung Galaxy S8",                      "5--", "5--"],
-  ["Samsung Galaxy Z Flip",                  "555", "555"],
-  ["Samsung Galaxy Z Flip 3 5G",             "555", "555"],
-  ["Samsung Galaxy Z Flip 3 5G Thom Browne", "555", "555"],
-  ["Samsung Galaxy Z Flip 3 Bespoke",        "555", "555"],
-  ["Samsung Galaxy Z Flip 4 5G",             "555", "555"],
-  ["Samsung Galaxy Z Flip 4 Bespoke",        "555", "555"],
-  ["Samsung Galaxy Z Flip 5 5G",             "555", "555"],
-  ["Samsung Galaxy Z Flip 5G",               "555", "555"],
-  ["Samsung Galaxy Z Flip 6 5G",             "455", "555"],
-  ["Samsung Galaxy Z Flip 7 5G",             "235", "345"],
-  ["Samsung Galaxy Z Flip 7 FE 5G",          "345", "455"],
-  ["Samsung Galaxy Z Fold 3 5G",             "455", "555"],
-  ["Samsung Galaxy Z Fold 4 5G",             "455", "555"],
-  ["Samsung Galaxy Z Fold 5 5G",             "345", "455"],
-  ["Samsung Galaxy Z Fold 6 5G",             "235", "345"],
-  ["Samsung Galaxy Z Fold 7 5G",             "125", "135"],
-  ["Samsung Galaxy Z Fold2 5G",              "555", "555"],
-  ["Samsung Note 10 Plus",                   "555", "555"],
-  ["Samsung Note 10 Plus 5G",                "555", "555"],
+  ["Apple iPhone 11",                        "455", "555", "455"],
+  ["Apple iPhone 11 Pro",                    "455", "555", "455"],
+  ["Apple iPhone 11 Pro Max",                "455", "455", "455"],
+  ["Apple iPhone 12",                        "455", "555", "455"],
+  ["Apple iPhone 12 Mini",                   "455", "555", "455"],
+  ["Apple iPhone 12 Pro",                    "455", "455", "455"],
+  ["Apple iPhone 12 Pro Max",                "345", "455", "345"],
+  ["Apple iPhone 13",                        "345", "455", "345"],
+  ["Apple iPhone 13 Mini",                   "455", "455", "355"],
+  ["Apple iPhone 13 Pro",                    "345", "455", "345"],
+  ["Apple iPhone 13 Pro Max",                "245", "355", "245"],
+  ["Apple iPhone 14",                        "345", "455", "345"],
+  ["Apple iPhone 14 Plus",                   "245", "455", "245"],
+  ["Apple iPhone 14 Pro",                    "245", "355", "235"],
+  ["Apple iPhone 14 Pro Max",                "245", "345", "235"],
+  ["Apple iPhone 15",                        "245", "345", "235"],
+  ["Apple iPhone 15 Plus",                   "135", "345", "235"],
+  ["Apple iPhone 15 Pro",                    "135", "245", "135"],
+  ["Apple iPhone 15 Pro Max",                "135", "145", "125"],
+  ["Apple iPhone 16",                        "135", "245", "125"],
+  ["Apple iPhone 16 Plus",                   "135", "245", "125"],
+  ["Apple iPhone 16 Pro",                    "125", "135", "125"],
+  ["Apple iPhone 16 Pro Max",                "125", "135", "125"],
+  ["Apple iPhone 16e",                       "245", "345", "235"],
+  ["Apple iPhone 17",                        "125", "135", "125"],
+  ["Apple iPhone 17 Pro",                    "125", "135", "125"],
+  ["Apple iPhone 17 Pro Max",                "115", "125", "115"],
+  ["Apple iPhone 17e",                       "135", "345", "235"],
+  ["Apple iPhone 8",                         "555", "555", "555"],
+  ["Apple iPhone 8 PLUS",                    "555", "555", "555"],
+  ["Apple iPhone Air",                       "125", "135", "125"],
+  ["Apple iPhone SE 2",                      "555", "555", "555"],
+  ["Apple iPhone SE 3",                      "555", "555", "555"],
+  ["Apple iPhone X",                         "555", "555", "555"],
+  ["Apple iPhone XR",                        "555", "555", "555"],
+  ["Apple iPhone XS",                        "555", "555", "555"],
+  ["Apple iPhone XS Max",                    "555", "555", "555"],
+  ["Google Pixel 10 5G",                     "245", "355", "235"],
+  ["Google Pixel 10 Pro 5G",                 "245", "345", "235"],
+  ["Google Pixel 10 Pro Fold",               "125", "125", "125"],
+  ["Google Pixel 10 Pro XL 5G",              "135", "245", "125"],
+  ["Google Pixel 10a 5G",                    "245", "345", "245"],
+  ["Google Pixel 5 5G",                      "555", "555", "555"],
+  ["Google Pixel 5A 5G",                     "555", "555", "555"],
+  ["Google Pixel 6",                         "555", "555", "555"],
+  ["Google Pixel 6 Pro",                     "555", "555", "555"],
+  ["Google Pixel 6A",                        "555", "555", "555"],
+  ["Google Pixel 7 5G",                      "555", "555", "555"],
+  ["Google Pixel 7 Pro 5G",                  "455", "555", "455"],
+  ["Google Pixel 7A 5G",                     "555", "555", "555"],
+  ["Google Pixel 8 5G",                      "345", "455", "345"],
+  ["Google Pixel 8 Pro 5G",                  "345", "455", "355"],
+  ["Google Pixel 8A 5G",                     "455", "555", "455"],
+  ["Google Pixel 9 5G",                      "345", "455", "255"],
+  ["Google Pixel 9 Pro 5G",                  "245", "345", "235"],
+  ["Google Pixel 9 Pro Fold 5G",             "235", "345", "235"],
+  ["Google Pixel 9 Pro XL 5G",               "245", "345", "235"],
+  ["Google Pixel 9A 5G",                     "345", "455", "355"],
+  ["Motorola Edge 5G 2025",                  "555", "555", "555"],
+  ["Motorola Edge 70 5G",                    "455", "555", "555"],
+  ["Motorola Moto G 5G 2026",                "555", "555", "555"],
+  ["Motorola Moto G Play 5G 2026",           "555", "555", "555"],
+  ["Motorola RAZR",                          "--5", "--5", "--5"],
+  ["Motorola RAZR Ultra 5G 2025",            "455", "555", "555"],
+  ["Motorola Razr 5G 2024",                  "555", "555", "555"],
+  ["Motorola Razr 5G 2025",                  "555", "555", "555"],
+  ["Motorola Razr Plus 5G 2023",             "555", "555", "555"],
+  ["ONEPLUS 8 PRO 5G",                       "555", "555", "555"],
+  ["ONEPLUS 8T",                             "555", "555", "555"],
+  ["ONEPLUS 8T PLUS 5G",                     "555", "555", "555"],
+  ["ONEPLUS 9 5G",                           "555", "555", "555"],
+  ["ONEPLUS 9 PRO 5G",                       "555", "555", "555"],
+  ["Samsung Galaxy A16 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy A17 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy A25 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy A26 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy A35 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy A36 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy A37 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy Note 10",                 "555", "555", "555"],
+  ["Samsung Galaxy Note 10 Lite (6GB)",      "555", "555", "555"],
+  ["Samsung Galaxy Note 20 4G",              "555", "555", "555"],
+  ["Samsung Galaxy Note 20 5G",              "555", "555", "555"],
+  ["Samsung Galaxy Note 20 Ultra 4G",        "555", "555", "555"],
+  ["Samsung Galaxy Note 20 Ultra 5G",        "555", "555", "555"],
+  ["Samsung Galaxy Note 9",                  "555", "555", "555"],
+  ["Samsung Galaxy S10",                     "555", "555", "555"],
+  ["Samsung Galaxy S10 Lite",                "555", "555", "555"],
+  ["Samsung Galaxy S10 Plus",                "555", "555", "555"],
+  ["Samsung Galaxy S10E",                    "555", "555", "555"],
+  ["Samsung Galaxy S20 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy S20 5G UW",               "555", "555", "555"],
+  ["Samsung Galaxy S20 Fan Edition 5G",      "555", "555", "555"],
+  ["Samsung Galaxy S20 Plus",                "555", "555", "555"],
+  ["Samsung Galaxy S20 Plus 5G",             "555", "555", "555"],
+  ["Samsung Galaxy S20 Ultra 5G",            "555", "555", "555"],
+  ["Samsung Galaxy S21 5G",                  "555", "555", "555"],
+  ["Samsung Galaxy S21 Fan Edition 5G",      "555", "555", "555"],
+  ["Samsung Galaxy S21 Plus 5G",             "555", "555", "555"],
+  ["Samsung Galaxy S21 Ultra 5G",            "455", "555", "455"],
+  ["Samsung Galaxy S22 5G",                  "455", "555", "555"],
+  ["Samsung Galaxy S22 Plus 5G",             "455", "555", "555"],
+  ["Samsung Galaxy S22 Ultra 5G",            "345", "455", "345"],
+  ["Samsung Galaxy S23 5G",                  "345", "455", "345"],
+  ["Samsung Galaxy S23 Fan Edition 5G",      "455", "455", "455"],
+  ["Samsung Galaxy S23 Plus 5G",             "245", "355", "245"],
+  ["Samsung Galaxy S23 Ultra 5G",            "245", "345", "235"],
+  ["Samsung Galaxy S24 5G",                  "245", "345", "245"],
+  ["Samsung Galaxy S24 FE 5G",               "345", "455", "355"],
+  ["Samsung Galaxy S24 Plus 5G",             "135", "245", "235"],
+  ["Samsung Galaxy S24 Ultra 5G",            "125", "135", "125"],
+  ["Samsung Galaxy S25 5G",                  "235", "345", "235"],
+  ["Samsung Galaxy S25 Edge 5G",             "135", "245", "135"],
+  ["Samsung Galaxy S25 Fan Edition 5G",      "245", "355", "355"],
+  ["Samsung Galaxy S25 Plus 5G",             "135", "245", "135"],
+  ["Samsung Galaxy S25 Ultra 5G",            "125", "135", "125"],
+  ["Samsung Galaxy S26 5G",                  "125", "135", "125"],
+  ["Samsung Galaxy S26 Plus 5G",             "125", "135", "125"],
+  ["Samsung Galaxy S26 Ultra 5G",            "115", "125", "125"],
+  ["Samsung Galaxy S8",                      "5--", "5--", "5--"],
+  ["Samsung Galaxy Z Flip",                  "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 3 5G",             "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 3 5G Thom Browne", "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 3 Bespoke",        "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 4 5G",             "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 4 Bespoke",        "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 5 5G",             "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 5G",               "555", "555", "555"],
+  ["Samsung Galaxy Z Flip 6 5G",             "455", "555", "455"],
+  ["Samsung Galaxy Z Flip 7 5G",             "235", "345", "235"],
+  ["Samsung Galaxy Z Flip 7 FE 5G",          "345", "455", "355"],
+  ["Samsung Galaxy Z Fold 3 5G",             "455", "555", "455"],
+  ["Samsung Galaxy Z Fold 4 5G",             "455", "555", "455"],
+  ["Samsung Galaxy Z Fold 5 5G",             "345", "455", "355"],
+  ["Samsung Galaxy Z Fold 6 5G",             "235", "345", "235"],
+  ["Samsung Galaxy Z Fold 7 5G",             "125", "135", "125"],
+  ["Samsung Galaxy Z Fold2 5G",              "555", "555", "555"],
+  ["Samsung Note 10 Plus",                   "555", "555", "555"],
+  ["Samsung Note 10 Plus 5G",                "555", "555", "555"],
 ];
 // name (lower-case) -> row, for the value lookups.
 const UPG_TIPS_INDEX = (function () {
@@ -4151,7 +4245,7 @@ const UPG_TIPS_INDEX = (function () {
   try {
     if (UPG_TIPS_TABLE.length !== 139) console.error('[tips] expected 139 trade-in devices, found ' + UPG_TIPS_TABLE.length);
     UPG_TIPS_TABLE.forEach(function (r) {
-      if (!/^[1-5-]{3}$/.test(r[1]) || !/^[1-5-]{3}$/.test(r[2])) console.error('[tips] bad tier string for ' + r[0]);
+      if (!/^[1-5-]{3}$/.test(r[1]) || !/^[1-5-]{3}$/.test(r[2]) || !/^[1-5-]{3}$/.test(r[3])) console.error('[tips] bad tier string for ' + r[0]);
     });
   } catch (e) { console.warn('[tips] table check skipped:', e); }
 })();
@@ -4810,6 +4904,149 @@ const PROMO_GUIDE = [
    "credit_amount": "$300 over 36 monthly bill credits, the first at purchase."
   },
   "diamond_only": false
+ },
+ {
+  "tag": "tips_duo_1000_diamond_upg",
+  "deal_card": "Provisional — no card yet (checked 10/15)",
+  "marketing_name": "TIPs — Diamond members: up to $1,000 off iPhone Duo (upgrades)",
+  "sheet": "upgrade",
+  "line_type": "upgrade",
+  "device_brands": [
+   "Apple"
+  ],
+  "device_scope": "Apple iPhone Duo (256GB, 512GB, 1TB, 2TB)",
+  "plan_eligibility": "plus_or_premium_unl",
+  "trade_in": {
+   "required": true,
+   "bucket": "tips_duo_1000_diamond_upg"
+  },
+  "port": {
+   "required": false
+  },
+  "offer": {
+   "savings": "up to $1,000 off",
+   "mechanism": "36-month trade-in DPP bill credits"
+  },
+  "dates": {
+   "start": "2026-10-16",
+   "end": "2026-11-10"
+  },
+  "display_when": {
+   "line_type": "upgrade",
+   "device_type": "phone",
+   "brands": [
+    "Apple"
+   ],
+   "plans": [
+    "mobile_plus",
+    "premium_unlimited"
+   ],
+   "trade_in": "required",
+   "diamond_only": true,
+   "eligible_list": "tips_duo_diamond"
+  },
+  "summary": {
+   "hook": "Diamond members upgrading to the iPhone Duo: trade in almost any phone and get up to $1,000 off.",
+   "qualify": [
+    "Customer must be a DIAMOND tier Xfinity member.",
+    "Upgrade the phone on an EXISTING Mobile Plus or Premium Unlimited line whose current phone is paid off (no remaining device balance). New lines are NOT eligible.",
+    "Buy the iPhone Duo on a 36-month Device Payment Plan.",
+    "Trade in a qualifying device — 139 Apple, Google, Motorola, OnePlus and Samsung models. Good, Fair and Poor are accepted for most models (a Motorola RAZR is accepted in Poor condition only, a Galaxy S8 in Good condition only).",
+    "No number transfer required.",
+    "Mobile Select and NOW Mobile do NOT qualify."
+   ],
+   "steps": [
+    "Confirm the customer is a Diamond member.",
+    "Start the upgrade on the existing Mobile Plus / Premium Unlimited line.",
+    "Add the iPhone Duo to the cart on a 36-month DPP.",
+    "Send the trade-in to Assurant within 21 days of the order shipping."
+   ],
+   "deadlines": [
+    "The trade-in must reach Assurant within 21 DAYS of the order ship date or the credits are lost.",
+    "Offer runs 10/16/26 – 11/10/26. iPhone Duo pre-orders open 10/16; available 10/23."
+   ],
+   "watchouts": [
+    "The trade-in pays $1,000 / $700 / $600 / $500 / $450 by tier, whatever brand the trade-in is.",
+    "Even the $450 floor beats the $200 no-trade credit, so any qualifying trade-in wins. The two are not combinable — the line gets one or the other.",
+    "Not a Diamond member? An iPhone Duo upgrade gets the $200 no-trade credit only — there is no trade-in deal on it.",
+    "Credit is spread over 36 monthly bill credits — cancel the line or pay the phone off early and the remaining credits are forfeited.",
+    "The credit can never exceed the retail price of the phone being bought.",
+    "Not combinable with any other device offer.",
+    "PROVISIONAL — Celestial has not posted this deal card or the Duo trade-in list yet (checked DEALS18 / DEALS94 on 10/15). Values per Jeff: the $930 new-line trade-in list (CD885) with its top tier raised to $1,000."
+   ],
+   "credit_amount": "Trade-in tiers: $1,000 / $700 / $600 / $500 / $450 by trade-in device and condition (floor $450)."
+  },
+  "mobile_service": [
+   "XM",
+   "CBM"
+  ],
+  "diamond_only": true
+ },
+ {
+  "tag": "visa_gc_200_2lines",
+  "deal_card": "Pending (regional email 10/15)",
+  "marketing_name": "Add 2+ new lines today and the customer gets a $200 Visa gift card",
+  "sheet": "mobile_6th_gen",
+  "additional_sheets": [
+   "upgrade"
+  ],
+  "line_type": "new_line",
+  "line_type_label": "2+ NEW mobile lines added the same day (an upgrade alone does not qualify)",
+  "device_brands": [],
+  "device_scope": "Any phone on a new Xfinity Mobile line — smartwatch and tablet lines do not count.",
+  "plan_eligibility": "any_mobile_plan",
+  "trade_in": {
+   "required": false
+  },
+  "port": {
+   "required": false
+  },
+  "offer": {
+   "savings": "$200 Visa gift card",
+   "mechanism": "Virtual Visa gift card, fulfilled automatically — not a bill credit"
+  },
+  "dates": {
+   "start": "2026-10-16",
+   "end": "2026-11-02"
+  },
+  "display_when": {
+   "line_type": "new_line",
+   "device_type": "any",
+   "plans": [
+    "any"
+   ],
+   "trade_in": "not_required",
+   "diamond_only": false
+  },
+  "pitch_only": true,
+  "badges": [
+   "2+ new lines"
+  ],
+  "summary": {
+   "hook": "Add 2 or more new mobile lines today and get a $200 Virtual Visa gift card.",
+   "qualify": [
+    "Add 2 or more NEW mobile lines on the same day, in a retail store.",
+    "At least one of the new lines must be on a Device Payment Plan.",
+    "Phone lines only — smartwatch and tablet lines do not count toward the 2 lines.",
+    "Lines on an Xfinity Mobile plan (Mobile Select, Mobile Plus or Premium Unlimited). NOW Mobile lines do not count.",
+    "Upgrading a phone on an existing line does not count — the lines must be new."
+   ],
+   "steps": [
+    "Add the 2+ new phone lines in the same store visit.",
+    "Put at least one of the new phones on a Device Payment Plan.",
+    "The $200 Virtual Visa gift card is fulfilled automatically — there is nothing to redeem."
+   ],
+   "deadlines": [
+    "The new lines must be added between 10/16/26 and 11/2/26."
+   ],
+   "watchouts": [
+    "This is a $200 Virtual Visa gift card, not a bill credit — the monthly prices on this quote do not change.",
+    "Stacks with First Line Free and with the device offers on the new lines.",
+    "Rep note (Jeff, 10/15): on an upgrade quote this is a pitch only — upgrades never qualify, nothing on this quote changes, and the new lines are quoted on the 6th Gen sheet. Source: regional email “SET for Success – October 2026”. No Celestial card yet and plan eligibility is not yet on Celestial; NOW Mobile, watches and tablets are excluded."
+   ],
+   "credit_amount": "$200 Virtual Visa gift card, fulfilled automatically. Not a bill credit."
+  },
+  "diamond_only": false
  }
 ];
 
@@ -4881,6 +5118,9 @@ function pgMatches(p, ctx) {
     const _gate = {
       tips_agm:     n => !!getUpgradeTipsBucket(n) && isAgmTipsUpgModel(n),
       tips_samsung: n => !!getUpgradeTipsBucket(n) && isSamsungTipsUpgModel(n),
+      // 2026-10-15: Diamond iPhone Duo TIPs — the bucket itself checks the
+      // Duo, the Diamond tier and the 10/16 – 11/10 window.
+      tips_duo_diamond: n => getUpgradeTipsBucket(n) === 'tips_duo_1000_diamond_upg',
       agm_flat:     n => isAgmNdelModel(n),
       agm_anytime:  n => isAgmAnytimeModel(n),
       samsung_flat: n => isSamsungDealModel(n),
@@ -5000,6 +5240,9 @@ const PG_REP_NOTE = /\b(?:Jeff|deal desk|DEALS\d*|Celestial)\b|\b[a-z]+(?:_[a-z0
 const PG_CARD_NOTE = /\b(?:CD\d{3}|cards?|DEALS\d*|Celestial|Jeff|deal desk)\b|\bthe sheet\b/i;
 function pgCustomerText(x) {
   let t = String(x == null ? '' : x);
+  // 2026-10-15: "gift card" (the $200 Visa gift card pitch) is customer copy, not
+  // deal-card bookkeeping — mask it so the "card" filters below leave it alone.
+  t = t.replace(/\b(gift) (cards?)\b/gi, '$1$2');
   // "(DEALS18, 9/25)", "(CD824, 9/18)", "(card modified 9/25)" asides
   t = t.replace(/\s*\([^()]*\b(?:DEALS\d*|Celestial|Jeff|CD\d{3}|card)\b[^()]*\)/gi, '');
   // Sentence by sentence (". " + capital; "$299.99" is never split): a trailing
@@ -5018,7 +5261,7 @@ function pgCustomerText(x) {
     const q = PROMO_GUIDE.find(z => z.tag === tg);
     return q ? '“' + q.marketing_name + '”' : tg;
   });
-  return t;
+  return t.replace(/\b(gift)(cards?)\b/gi, '$1 $2');   // undo the 2026-10-15 mask
 }
 // 2026-09-30 (UQ-08, round 2): a "Watch out" line that states a customer condition
 // and then adds a rep caveat ("Carried forward from the prior Plus Up cards: the
@@ -5188,7 +5431,7 @@ function watchDiamondDisc(d, i) {
 }
 // Today's Diamond watch credit for the selected tier (the selectReward rule).
 function diamondWatchCreditToday() {
-  return (state.tier === 'diamond' && isOfferWindowOpen('2026-05-11', '2026-10-30'))
+  return (isDiamondTierSelected() && isOfferWindowOpen('2026-05-11', '2026-10-30'))
     ? DIAMOND_WATCH_DISCOUNT : 0;
 }
 
@@ -5257,8 +5500,44 @@ function selectReward(btn) {
 
   // Re-run watch row with new discount (diamond note is inside the row)
   recalcWatchRow();
+  // 2026-10-15: the iPhone Duo's TIPs deal is Diamond-only, so a tier change
+  // re-prices every Duo row (picker shown/hidden, trade kept aside/restored).
+  syncDuoRowsForTier();
   renderActivePromos();
   updatePreview();
+}
+
+// ── Diamond iPhone Duo rows (tips_duo_1000_diamond_upg, 2026-10-15) ──
+// The Duo has a TIPs bucket only for a Diamond member (getUpgradeTipsBucket).
+// When the tier leaves Diamond, a Duo row's trade-in is set aside (the picker is
+// hidden, so the row, the chips and the submitted quote must not carry a trade
+// the line is not using) and the row falls back to its $200 no-trade credit.
+// When Diamond is picked again the same trade-in and condition come back.
+// Rows that are not a Duo are not touched.
+function syncDuoRowsForTier() {
+  for (let i = 1; i <= phoneCounts; i++) {
+    const d = getRowData('phone', i);
+    if (!d.name || !isDuoModel(d.name)) continue;
+    const tag = getUpgradeTipsBucket(d.name);
+    if (!tag && d.tipsDevice) {
+      d._duoTipsStash = { device: d.tipsDevice, condition: d.tipsCondition };
+      resetTipsPicker(i);
+    } else if (tag && !d.tipsDevice && d._duoTipsStash && !d.noTrade) {
+      const s = d._duoTipsStash;
+      d.tipsDevice = s.device;
+      d.tipsCondition = (s.condition && upgTipsValueInBucket(s.device, s.condition, tag) > 0)
+        ? s.condition : bestTipsCondition(s.device, d.name);
+      d.tradeName = d.tipsDevice;
+      d.tradeCondition = d.tipsCondition;
+      d.tradeValue = getUpgradeTipsValue(d.tipsDevice, d.tipsCondition, d.name);
+      const inp = document.getElementById(`phone-row-${i}-tips-device`);
+      if (inp) inp.value = d.tipsCondition ? `${d.tipsDevice} — ${d.tipsCondition}` : d.tipsDevice;
+    }
+    if (tag) d._duoTipsStash = null;
+    setTipsRoster(i);
+    if (d.tipsDevice) renderTipsConditions(i); else updateTradeVisibility(i);
+    recalcRow('phone', i);
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -5744,6 +6023,7 @@ function wireRowAutocomplete(type, num) {
     d.tipsDevice = '';
     d.tipsCondition = '';
     d.noTrade = false;
+    d._duoTipsStash = null;   // 2026-10-15: a set-aside Duo trade belongs to the old phone
     // Clear the No trade-in checkbox and re-enable the TIPs search.
     const noTradeEl  = document.getElementById(`${type}-row-${num}-notrade`);
     if (noTradeEl)  { noTradeEl.checked = false; }
@@ -5862,6 +6142,7 @@ function wireRowAutocomplete(type, num) {
           // "No trade-in" means no trade at all — drop the TIPs pick, or the row
           // would keep quoting a trade-in credit.
           resetTipsPicker(num);
+          d._duoTipsStash = null;
           if (tipsInp) { tipsInp.disabled = true; tipsInp.style.opacity = '0.4'; }
         } else {
           if (tipsInp) { tipsInp.disabled = false; tipsInp.style.opacity = '1'; }
@@ -5971,7 +6252,11 @@ function setTipsRoster(num) {
                                            that bucket's cap, plus "No trade-in".
      - Phone has NO upgrade TIPs bucket -> picker hidden; a short note says the
        (Galaxy A57, Pixel 10a, moto g     line gets its no-trade credit.
-       family, edges, iPhone Duo)
+       family, edges, iPhone Duo for a
+       non-Diamond member or before 10/16)
+     - iPhone Duo + Diamond (2026-10-16 – 11/10) -> the picker, priced from
+       tips_duo_1000_diamond_upg; selectReward() re-runs this via
+       syncDuoRowsForTier() when the tier changes.
    Nothing else may set display on #<row>-tips-wrap.                          */
 function updateTradeVisibility(num) {
   const rowId  = `phone-row-${num}`;
@@ -5992,13 +6277,19 @@ function updateTradeVisibility(num) {
     const cap = d.price > 0 ? d.price : Infinity;   // a credit never exceeds the phone's price
     const money = v => (Math.round(v * 100) % 100 ? v.toFixed(2) : String(Math.round(v)));
     const lo = Math.min(b.floor, cap), hi = Math.min(b.max, cap);
+    const dia = b.diamond_only ? '💎 Diamond ' : '';   // 2026-10-15: iPhone Duo
     label.textContent = (lo === hi)
-      ? `TIPs Trade-In — pays $${money(hi)} (the phone price) instead of the $${credit} no-trade credit`
-      : `TIPs Trade-In — pays $${money(lo)}–$${money(hi)} on this phone instead of the $${credit} no-trade credit`;
+      ? `${dia}TIPs Trade-In — pays $${money(hi)} (the phone price) instead of the $${credit} no-trade credit`
+      : `${dia}TIPs Trade-In — pays $${money(lo)}–$${money(hi)} on this phone instead of the $${credit} no-trade credit`;
   }
   if (off) {
+    // 2026-10-15: the iPhone Duo's trade-in deal is Diamond-only and starts 10/16.
+    const duoB = UPG_TIPS_BUCKETS.tips_duo_1000_diamond_upg;
+    const duoOpen = isOfferWindowOpen(duoB.window.start, duoB.window.end);
+    const duoNote = !isDuoModel(d.name) || !duoOpen ? ''
+      : `Trade-in deal on the iPhone Duo is for Diamond members only — pick Diamond above if the customer is one; otherwise the line gets the $${credit} no-trade credit.`;
     off.textContent = (!tag && credit > 0)
-      ? `No trade-in deal on this phone this cycle — the line gets the $${credit} no-trade credit.`
+      ? (duoNote || `No trade-in deal on this phone this cycle — the line gets the $${credit} no-trade credit.`)
       : '';
     off.style.display = off.textContent ? 'block' : 'none';
   }
@@ -7075,6 +7366,8 @@ function rederiveQuoteForToday() {
     if (h) h.value = md;
     stale = true;
   }
+  // calcSmartPromo covers the Diamond iPhone Duo deal too (2026-10-15): its
+  // bucket is gated on the Diamond tier AND its own 10/16 – 11/10 window.
   for (let i = 1; i <= phoneCounts && !stale; i++) {
     const d = getRowData('phone', i);
     if (!(d.price > 0)) continue;
